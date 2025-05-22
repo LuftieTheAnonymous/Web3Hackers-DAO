@@ -29,7 +29,7 @@ for (const folder of commandFolders) {
 }
 
 // Construct and prepare an instance of the REST module
-const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN || token);
+export const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN || token);
 
 
 // and deploy your commands!

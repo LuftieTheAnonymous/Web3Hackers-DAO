@@ -61,10 +61,9 @@ module.exports={
           if(timestamps.has(interaction.user.id)) {
               const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
     
-              console.log('Expiration time', expirationTime);
+         
     
               if(now < expirationTime) {
-                  console.log('Expiration time', expirationTime);
                   const timeLeft = Math.round((expirationTime - now) / 1000);
                   return interaction.reply({content:`You have to wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${interaction.commandName}\` command.`, flags:MessageFlags.Ephemeral});
               }

@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection, Message, Partials } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, Message, Partials, GuildMember } from 'discord.js';
 
 // Require the necessary discord.js classes
 const dotenv = require('dotenv');
@@ -17,15 +17,15 @@ export const client = new Client({ intents: [
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessageReactions,
-    GatewayIntentBits.GuildMessageTyping
+    GatewayIntentBits.GuildMessageTyping,
+    GatewayIntentBits.GuildExpressions,
+    GatewayIntentBits.GuildModeration
 ],
 partials:[Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction, Partials.User]
 
 });
 client.commands = new Collection();
 client.cooldowns= new Collection();
-
-
 
 
 
@@ -51,8 +51,6 @@ for (const file of commandFiles) {
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter((file:any) => file.endsWith('.ts'));
 
-console.log(eventFiles);
-
 for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
     const event = require(filePath);
@@ -63,8 +61,6 @@ for (const file of eventFiles) {
     }
     else {
         client.on(event.name, (...args:any) => {
-            console.log(event.name);
-            console.log(args);
             event.execute(...args);
         });
     }
