@@ -90,4 +90,37 @@ const { memberDiscordId } = req.params;
     }
 }
 
-export { upsertActivity }
+const insertVoiceChatActivity=async(req:Request, res:Response)=>{
+    try{
+        const {memberDiscordId}=req.params;
+        const activityData = req.body;
+
+        const {data,error}= await supabaseConfig.from('voice_chat_participation').insert([activityData]);
+
+        if(!data || error){
+            res.status(500).json({
+                message: "error",
+                data: null,
+                error: error instanceof Error ? error.message : JSON.stringify(error),
+                status: 500
+            })
+        }
+
+        res.status(200).json({
+            message: "success",
+            data,
+            error: null,
+            status: 200
+        })
+
+    }catch(err){
+        res.status(500).json({
+            message: "error",
+            data: null,
+            error: err instanceof Error ? err.message : JSON.stringify(err),
+            status: 500
+        })
+    }
+}
+
+export { upsertActivity, insertVoiceChatActivity }

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upsertActivity } from "../controllers/ActivityController";
+import { insertVoiceChatActivity, upsertActivity } from "../controllers/ActivityController";
 
 const activityRouter = Router();
 
@@ -7,5 +7,6 @@ activityRouter.post('/update/:memberDiscordId', upsertActivity);
 
 activityRouter.delete('/update/:memberDiscordId', upsertActivity);
 
+activityRouter.post('/insert/voice-activity/:memberDiscordId', insertVoiceChatActivity);
 
 export default activityRouter;
