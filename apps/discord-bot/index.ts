@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection, Message, Partials, GuildMember } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, Message, Partials, GuildMember, VoiceState, AnyThreadChannel, ButtonBuilder, ActionRow, VoiceChannelEffect, GuildAuditLogsEntry } from 'discord.js';
 
 // Require the necessary discord.js classes
 const dotenv = require('dotenv');
@@ -19,13 +19,29 @@ export const client = new Client({ intents: [
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildMessageTyping,
     GatewayIntentBits.GuildExpressions,
-    GatewayIntentBits.GuildModeration
+    GatewayIntentBits.GuildModeration,
 ],
-partials:[Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction, Partials.User]
+partials:[
+    Partials.Channel,
+    Partials.GuildMember,
+    Partials.Message,
+    Partials.Reaction,
+    Partials.User,
+    Partials.ThreadMember,
+    Partials.GuildScheduledEvent
+],
+
 
 });
 client.commands = new Collection();
 client.cooldowns= new Collection();
+
+
+
+
+client.on('error', (error:Error)=>{
+    console.log(error.message);
+});
 
 
 

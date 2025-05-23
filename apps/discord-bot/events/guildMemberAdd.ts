@@ -3,15 +3,18 @@ import { client } from "..";
 import { Canvas, GlobalFonts, loadImage, } from "@napi-rs/canvas";
 import { request } from "undici";
 import path from 'path'
-module.exports={
-    name:'guildMemberAdd',
-    async execute(member:GuildMember){
-try{
+
 GlobalFonts.registerFromPath(path.join(__dirname,'../fonts/Poppins/Poppins-Regular.ttf'), 'Poppins-Regular');
 
 GlobalFonts.registerFromPath(path.join(__dirname,'../fonts/Poppins/Poppins-Bold.ttf'), 'Poppins-Bold');
 
-    const channel =  client.channels.cache.get('1375025437218046054');
+module.exports={
+    name:'guildMemberAdd',
+    async execute(member:GuildMember){
+try{
+
+
+    const channel =  client.channels.cache.get('1367036582321979423');
 
     console.log(member);
 

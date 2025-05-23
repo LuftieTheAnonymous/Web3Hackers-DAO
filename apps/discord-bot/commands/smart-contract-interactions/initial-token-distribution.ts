@@ -165,12 +165,14 @@ const message = await interaction.reply({
         });
 
         const collector = message.resource?.message?.createMessageComponentCollector({
+                 filter: (i:any) => i.user.id === interaction.user.id,
             componentType:ComponentType.StringSelect,
             time: 3600000
         });
 
 
         const buttonCollector = message.resource?.message?.createMessageComponentCollector({
+            filter: (i:any) => i.user.id === interaction.user.id,
             componentType:ComponentType.Button,
             time: 3600000
         });

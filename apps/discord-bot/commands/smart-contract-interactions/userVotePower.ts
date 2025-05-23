@@ -19,8 +19,8 @@ try{
         await interaction.reply({content:`No user found with the nickname given.`, flags:MessageFlags.Ephemeral });
         return;
     }
-
-   const request = await fetch(`http://localhost:2137/gov_token/influence/${member.id}`);
+    
+    const request = await fetch(`http://localhost:2137/gov_token/influence/${member.id}`);
 
    const response = await request.json();
    

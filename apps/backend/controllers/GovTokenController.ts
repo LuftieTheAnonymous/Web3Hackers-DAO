@@ -89,7 +89,7 @@ try {
 
     console.log(dicordMemberId);
 
-    const userDBObject= await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', dicordMemberId).single();
+    const userDBObject= await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(dicordMemberId)).single();
 
     console.log(userDBObject.data);
 
@@ -98,12 +98,12 @@ try {
     }
 
     if(userDBObject.error){
-         res.status(500).json({message:"error", data:null, error:userDBObject.error,discord_member_id:dicordMemberId, status:500 });
+         res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,discord_member_id:dicordMemberId, status:500 });
     }
 
     const userTokens = await governorTokenContract.getVotes(userDBObject.data.userWalletAddress);
 
-    res.status(200).json({userDBObject, message:`${userDBObject.data.nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
+    res.status(200).json({userDBObject, tokenAmount:(Number(userTokens)/1e18), message:`${userDBObject.data.nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     
 } catch (error) {
     console.log(error);
@@ -116,6 +116,10 @@ try {
 // Multiple users actions
 const monthlyTokenDistribution = async (req: Request, res: Response) => {
     try {
+
+        const monthActivities= await supabaseConfig.from('')
+
+
 // [].map(async (userAddress) => {
 
 //     const tx = await governorTokenContract.rewardMonthlyTokenDistribution(BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1), userAddress);
@@ -133,10 +137,22 @@ const monthlyTokenDistribution = async (req: Request, res: Response) => {
     }
 }
 
+const updateMonthlyStats= async (req:Request, res:Response)=>{
+    const {discordMemberId} = req.params;
+    const  {}=req.body;
+    try{
+
+    }
+    catch(err){
+
+    }
+}
+
 export {
     intialTokenDistribution,
     punishMember,
     rewardMember,
     getUserTokenBalance,
-    monthlyTokenDistribution
+    monthlyTokenDistribution,
+    updateMonthlyStats
 }

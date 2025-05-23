@@ -3,8 +3,8 @@ import {  executeGovenorTokenEvents } from "./event-listeners/GovTokenEventListe
 import { executeGovenorContractEvents } from "./event-listeners/GovenorEventListener";
 import govTokenRouter from "./routes/GovTokenRouter";
 import governanceRouter from "./routes/GovernanceRouter";
-import { Request, Response } from "express";
 import membersRouter from "./routes/MembersRouter";
+import activityRouter from "./routes/ActivityRouter";
 const express = require('express');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -34,6 +34,7 @@ app.use(express.json());
 app.use('/governance',governanceRouter);
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);
+app.use('/activity', activityRouter);
 const server = http.createServer(app);
 
 

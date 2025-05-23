@@ -1,5 +1,5 @@
 
-import { Collection, Events, MessageFlags} from 'discord.js';
+import {  Collection, Events, inlineCode, MessageFlags} from 'discord.js';
 
 module.exports={
     name: Events.InteractionCreate,
@@ -21,7 +21,7 @@ module.exports={
                     walletAddress, 
                     discordId: Number(interaction.user.id),
                     nickname: interaction.user.globalName, 
-                    isAdmin:member.roles.cache.some((role:any) => role.name === 'Co-founder' || role.name === 'CTO')
+                    isAdmin:member.roles.cache.some((role:any) => role.name.includes('Co-Founder') || role.name.includes('CTO'))
                 }),
             });
 
@@ -31,7 +31,7 @@ module.exports={
                 return await interaction.reply({content:response.error, flags:MessageFlags.Ephemeral});
             }
             await interaction.reply({content:'Check your DM for more info 😅', flags:MessageFlags.Ephemeral});
-            await interaction.user.send({content:`Congratulations! You have setup your wallet correctly in the DAO-members register ! Now go back to the server run command /initial-token-distribution. Do it and also write now: Luftiemu śmierdzą stopy !`, flags:MessageFlags.Ephemeral});
+            await interaction.user.send({content:`Congratulations! You have setup your wallet correctly in the DAO-members register ! Now go back to the server run command ${inlineCode('/initial-token-distribution')} `, flags:MessageFlags.Ephemeral});
         
         return;
         }

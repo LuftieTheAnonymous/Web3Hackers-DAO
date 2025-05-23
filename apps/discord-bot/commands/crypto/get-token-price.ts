@@ -23,6 +23,8 @@ module.exports = {
 ) {
 try{
 
+    
+
     const priceOf = interaction.options.getString('price-of');
     const priceInTickers= interaction.options.getString('price-in-tickers');
 
