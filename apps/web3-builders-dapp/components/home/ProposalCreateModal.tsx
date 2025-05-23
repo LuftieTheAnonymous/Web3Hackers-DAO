@@ -20,6 +20,7 @@ function ProposalCard({}: Props) {
 
   const {writeContract}=useWriteContract();
 
+
   return (
     <>
     <div className="max-w-2xl my-6  drop-shadow-green-500 hover:-translate-y-1 transition-all duration-500 drop-shadow-sm mx-auto rounded-lg flex flex-col gap-2  w-full h-80 bg-zinc-800">
@@ -50,8 +51,8 @@ function ProposalCard({}: Props) {
         writeContract({
           abi: tokenContractAbi,
           address: TOKEN_CONTRACT_ADDRESS,
-          functionName:'handInUserInitialTokens',
-          args:[2,2,2,2,2, true],
+          functionName:'rewardUser',
+          args:[address,BigInt(2000e18)],
         })
       }} className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 mr-4'>Propose</Button>
     </div>

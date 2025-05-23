@@ -7,6 +7,8 @@ export default function Home() {
     <div className="w-full h-full">
       <div className="w-full h-full p-2">
             <ProposalCreationCard/>
+
+            
             
       </div>
             <ProposalList/>
