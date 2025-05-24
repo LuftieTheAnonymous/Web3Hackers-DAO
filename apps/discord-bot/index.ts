@@ -46,7 +46,6 @@ client.on('error', (error:Error)=>{
 
 
 
-
 const folderPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(folderPath);
 

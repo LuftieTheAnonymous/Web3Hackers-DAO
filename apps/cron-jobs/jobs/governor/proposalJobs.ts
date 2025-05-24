@@ -2,7 +2,7 @@
 import { CronJob } from "cron";
 
 
-export const activateProposalsJob = new CronJob("* * * * *", async () => {
+export const activateProposalsJob = new CronJob("* */15 * * *", async () => {
 try{
       console.log('activateProposalJob is running');
     const response =  await fetch('http://localhost:2137/governance/activate_proposals');
@@ -19,7 +19,7 @@ try{
   console.log('activateProposalJob is completed');
 });
 
-export const queueProposalsJob= new CronJob("* * * * *", async () => {
+export const queueProposalsJob= new CronJob("* */15 * * *", async () => {
   try{
     console.log('queueProposalJob is running');
   const response =  await fetch('http://localhost:2137/governance/queue_proposals');
@@ -36,7 +36,7 @@ export const queueProposalsJob= new CronJob("* * * * *", async () => {
 });
 
 
-export const executeProposalsJob= new CronJob("* * * * *", async () => {
+export const executeProposalsJob= new CronJob("* */15 * * *", async () => {
 try{
       console.log('executeProposalJob is running');
     const response =  await fetch('http://localhost:2137/governance/execute_proposals');
@@ -53,7 +53,7 @@ try{
 });
   
 
-export const finishProposalsJob= new CronJob("* * * * *", async () => {
+export const finishProposalsJob= new CronJob("* */15 * * *", async () => {
 try{
       console.log('finishProposalJob is running');
     const response =  await fetch('http://localhost:2137/governance/finish_proposals');

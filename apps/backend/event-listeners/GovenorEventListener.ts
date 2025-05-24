@@ -1,7 +1,7 @@
 import { daoContract } from "../config/ethers.config";
 import dotenv from "dotenv";
-import { getMember } from '../controllers/MembersController';
 import { supabaseConfig } from "../config/supabase";
+import {format, formatDistanceStrict} from "date-fns";
 
 dotenv.config();
 
@@ -20,15 +20,36 @@ export const executeGovenorContractEvents=()=>{
         }
         console.log("Proposal details", proposal, "Proposal", proposalId);
 
-    await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}`, {
+
+
+
+
+  await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                content: `A new proposal has been created by ${memberData.nickname}, proposalId: ${proposalId} ! Now there is a bit of time to activate the proposal ${((new Date((Number(proposal[3]) * 1000)).getTime() - new Date().getTime()) / 1000 * 60 * 60 * 24).toFixed(2)} day(s) left to start!`,
-            }),
+           content: `# New Proposal Announcement 📣 !\n A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
+  "components": [
+      {
+          "type": 1,
+          "components": [
+            {
+              "type": 2,
+              "label": "View Proposal",
+              "style": 5,
+              url:`http://localhost:3000/proposal/${proposalId}`,
+            }
+          ]
+        },
+
+        
+ 
+  ]
+}),
         });
+     
 
 
     // Trigger the web-push notification
