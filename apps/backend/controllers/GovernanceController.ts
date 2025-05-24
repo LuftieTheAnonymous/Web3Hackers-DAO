@@ -13,39 +13,50 @@ export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
 
 dotenv.config();
 
+import pLimit from 'p-limit';
+
 const activateProposals = async (req: Request, res: Response) => {
-    try{
-        
-     const lastBlock = await provider.getBlockNumber();
-     const filters = daoContract.filters.ProposalCreated();
+  try {
+    const { data } = await supabaseConfig.from('dao_proposals').select('*');
 
-     const events = await daoContract.queryFilter(filters, -499);
-
-const receipts = events.map(async (event, index) => {
-   try{
-     const proposal= await daoContract.getProposal((event as ProposalEventArgs).args[0]);
-
-    if(new Date(Number(Number(proposal[3]) * 1000) + Number(proposal[17])).getTime() <= new Date().getTime() && proposal.state === 5){
-        const tx = await daoContract.activateProposal((event as ProposalEventArgs).args[0]);
-        console.log(tx);
-
-        const txReceipt = await tx.wait();
-        return txReceipt;
+    if (!data || data.length === 0) {
+ res.status(404).json({ data: null, error: "No proposals found", message: "error", status: 404 });
     }
-   }catch(err){
-       console.log(err);
-       res.status(500).json({data:null, error:err, message:"error", status:500});
-   }
 
-});
+    const limit = pLimit(5); // Run max 5 activations at a time
 
-     res.send({message:"success", status:200, data:receipts, error:null});
-    }
-    catch(error){
-        console.log(error);
-          res.send({message:"error", status:500, data:null, error});
-    }
-}
+    const tasks = (data as any[]).map((event) => limit(async () => {
+      try {
+        const proposal = await daoContract.getProposal(event.proposal_id);
+
+        const deadline = Number(proposal[3]) * 1000 + Number(proposal[17]);
+
+        if (Date.now() >= deadline && proposal.state === 5) {
+          const tx = await daoContract.activateProposal(proposal[0]);
+          const receipt = await tx.wait();
+          return { success: true, proposalId: proposal[0], receipt };
+        } else {
+          return { success: false, proposalId: proposal[0], reason: 'Not eligible yet or already active' };
+        }
+      } catch (err) {
+        console.error(`Error activating proposal ${event.proposal_id}:`, err);
+        return { success: false, proposalId: event.proposal_id, error: err };
+      }
+    }));
+
+    const results = await Promise.allSettled(tasks);
+
+    const summary = results.map((result) =>
+      result.status === 'fulfilled' ? result.value : { success: false, error: result.reason }
+    );
+
+     res.status(200).json({ message: "Done", data: summary, status: 200 });
+  } catch (error) {
+    console.error(error);
+     res.status(500).json({ message: "Internal error", error, status: 500 });
+  }
+};
+
 
 const finishProposals= async (req: Request, res: Response) => {
     try{

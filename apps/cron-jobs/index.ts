@@ -16,7 +16,7 @@ server.listen(2138, () => {
 
     console.log('Server is running on port 2138');
 
-    // activateProposalsJob.start();
+    activateProposalsJob.start();
     // finishProposalsJob.start();
     // queueProposalsJob.start();
     // executeProposalsJob.start();

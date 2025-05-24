@@ -2,7 +2,7 @@
 import { CronJob } from "cron";
 
 
-export const activateProposalsJob = new CronJob("* */15 * * *", async () => {
+export const activateProposalsJob = new CronJob("* * * * *", async () => {
 try{
       console.log('activateProposalJob is running');
     const response =  await fetch('http://localhost:2137/governance/activate_proposals');

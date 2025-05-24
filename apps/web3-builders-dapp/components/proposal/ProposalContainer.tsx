@@ -66,8 +66,8 @@ const {writeContract}=useWriteContract({
     </div>
     
     </div>
-    
-    <div className="flex flex-col gap-3 p-2">
+    {(proposalObj as any).calldata_objects.length > 0 &&
+  (  <div className="flex flex-col gap-3 p-2">
       <p className='text-white text-2xl gap-2'><span className='text-(--hacker-green-4)'>@username's </span> Proposal Includes</p>
       <div className={`grid  grid-cols-1 ${state === 'expanded' ? 'sm:grid-cols-2': 'lg:grid-cols-3'}   bg-zinc-800 rounded-lg p-4 gap-4 w-full max-h-48 h-full overflow-y-auto overflow-x-hidden`}>
    {(proposalObj as any).calldata_objects.map((item:any, index:number)=>(<ProposalCallbackItem key={index} callbackText={item.functionDisplayName} />))}
@@ -75,7 +75,9 @@ const {writeContract}=useWriteContract({
       </div>
     
     
-    </div>
+    </div>)  
+  }
+  
     
     <div onClick={()=>console.log(proposalOnchainData)} className={`max-w-2xl mx-auto self-center w-full bg-zinc-800 h-12 rounded-lg flex items-center gap-5 overflow-y-hidden ${proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? 'justify-center' : 'justify-between'} overflow-x-auto p-7`}>
       {proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? <>
