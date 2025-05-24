@@ -18,8 +18,6 @@ import { channelMention, Message } from "discord.js";
 module.exports={
     name: 'messageCreate',
     async execute(message:Message) {
- 
-
         try{
             const member = message.member;
             const checkRoles= message.guild?.members.cache.get(message.author.id)?.roles;

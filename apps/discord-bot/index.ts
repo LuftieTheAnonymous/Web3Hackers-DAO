@@ -10,9 +10,9 @@ dotenv.config();
 
 
 export const client = new Client({ intents: [
-    GatewayIntentBits.Guilds, 
-    GatewayIntentBits.GuildMessages, 
-    GatewayIntentBits.MessageContent, 
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildPresences,
@@ -37,13 +37,9 @@ client.commands = new Collection();
 client.cooldowns= new Collection();
 
 
-
-
 client.on('error', (error:Error)=>{
     console.log(error.message);
 });
-
-
 
 
 const folderPath = path.join(__dirname, 'commands');

@@ -22,12 +22,13 @@ export const addMember= async (req:Request, res:Response) => {
         discordId,
         walletAddress,
         nickname,
-        isAdmin
+        isAdmin,
+        photoURL
     }=req.body;
 
     console.log(req.body);
     try{
-        const {data, error} = await supabaseConfig.from('dao_members').insert([{discord_member_id:discordId,isAdmin:isAdmin, userWalletAddress:walletAddress, nickname:nickname}]);
+        const {data, error} = await supabaseConfig.from('dao_members').insert([{discord_member_id:discordId,isAdmin:isAdmin, photoURL:photoURL, userWalletAddress:walletAddress, nickname:nickname}]);
 
 
         if(error){

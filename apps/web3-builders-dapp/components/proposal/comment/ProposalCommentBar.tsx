@@ -16,11 +16,11 @@ import { toast } from 'sonner';
 
 type Props = {
   state: 'expanded' | 'collapsed',
-  data: any[],
+  proposalData: any[],
   proposalId: string
 }
 
-function ProposalCommentBar({state, data, proposalId}: Props) {
+function ProposalCommentBar({state, proposalData, proposalId}: Props) {
   const {address}=useAccount();
 
   const zodMessageObject=z.object({
@@ -60,7 +60,8 @@ function ProposalCommentBar({state, data, proposalId}: Props) {
   <p className='text-xl'>Comments</p>
 </div>
 
-  <CommentList state={state} commentsData={data ?? []} />
+
+  <CommentList state={state} commentsData={proposalData ?? []} />
 
 </div>
 <Form {...methods}>

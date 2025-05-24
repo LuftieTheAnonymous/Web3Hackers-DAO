@@ -13,6 +13,7 @@ module.exports = {
 ) {
 try{
 
+   
     const member = interaction.options.getUser('member');
 
     if(!member){

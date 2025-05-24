@@ -21,6 +21,7 @@ module.exports={
                     walletAddress, 
                     discordId: Number(interaction.user.id),
                     nickname: interaction.user.globalName, 
+                    photoURL: interaction.user.displayAvatarURL(),
                     isAdmin:member.roles.cache.some((role:any) => role.name.includes('Co-Founder') || role.name.includes('CTO'))
                 }),
             });
