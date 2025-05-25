@@ -15,6 +15,7 @@ import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog';
 import { ethers } from 'ethers';
 import Image from 'next/image';
+import { DialogTitle } from '@radix-ui/react-dialog';
 
 type Props<T, U> = {
     proposalData: T,
@@ -82,18 +83,22 @@ const {writeContract}=useWriteContract({
     <div onClick={()=>console.log(proposalOnchainData)} className={`max-w-2xl mx-auto self-center w-full bg-zinc-800 h-12 rounded-lg flex items-center gap-5 overflow-y-hidden ${proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? 'justify-center' : 'justify-between'} overflow-x-auto p-7`}>
       {proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? <>
      <Dialog>
+
+
        <DialogTrigger>
       <Button className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>See the options</Button>
       </DialogTrigger>
       <DialogContent className='bg-zinc-800 border-2 border-(--hacker-green-4) shadow-lg shadow-green-500'>
         <DialogHeader>
-<DialogHeader className='text-white text-lg'>
+<DialogTitle className='text-white text-lg'>
   Available Vote Options
-</DialogHeader>
+</DialogTitle>
         </DialogHeader>
 
 <div className="flex flex-col gap-4">
-  {(proposalObj as any).dao_vote_options.map((item:any, index:number)=>(<Button className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>
+  {(proposalObj as any).dao_vote_options.map((item:any, index:number)=>(<Button
+  key={item.id}
+  className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>
     {item.voting_option_text}
   </Button>))}
 </div>

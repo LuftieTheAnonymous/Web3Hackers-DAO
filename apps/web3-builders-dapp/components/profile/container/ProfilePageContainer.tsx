@@ -8,12 +8,16 @@ import { Button } from '@/components/ui/button'
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
 
 type Props<T> = {
-    profileData:T
+    profileData:T,
+
 }
 
-function ProfilePageContainer<T>({profileData}: Props<T>) {
+function ProfilePageContainer<T>({profileData, 
+
+}: Props<T>) {
 
     const {objectData}=useRealtimeDocument({initialObj:profileData,tableName:'dao_members'});
+    
 
 
   return (
@@ -21,7 +25,8 @@ function ProfilePageContainer<T>({profileData}: Props<T>) {
           <div className=" max-w-6xl w-full mx-auto flex-col lg:flex-row gap-6 flex justify-between items-center py-6 px-4
            ">
     <MemberTile objectData={objectData}/>
-   <MemberDetails objectData={objectData}/>
+   <MemberDetails objectData={objectData}
+   />
            </div>
           
           <div className="flex flex-col gap-2 w-full mx-auto">

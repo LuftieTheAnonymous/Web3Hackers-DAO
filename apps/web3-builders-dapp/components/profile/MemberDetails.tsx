@@ -2,13 +2,18 @@
 
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
+import useRealtimeDocuments from '@/hooks/useRealtimeDocuments';
+import { config } from '@/lib/config';
 import { CloudLightningIcon, CoinsIcon, FilePlus2Icon, LucideVote, SmartphoneChargingIcon } from 'lucide-react'
 import React from 'react'
-import { useAccount, useBlockNumber, useReadContract, useReadContracts } from 'wagmi';
+import { readContract } from 'viem/actions';
+import { useAccount, useReadContracts } from 'wagmi';
 
-type Props = {objectData:any}
+type Props
+ = {objectData:any}
 
 function MemberDetails({objectData}: Props) {
+
 
     const {address}=useAccount();
 const tokenContractData =   {
@@ -31,11 +36,19 @@ const governorContractData= {
               {
                 ...tokenContractData,
                 functionName:'totalSupply',
-            
-              }
+              }, 
+                {
+                    ...governorContractData,
+                    functionName:'userVotedCount',
+                    args:[address]
+                }
+             
         ]
-    })
-    
+    });
+
+
+
+
 
   return (
     <div
@@ -53,7 +66,7 @@ flex items-center gap-2 self-center
 
     '/>
     <span className='text-white text-xl'>
-     {Number(Number(data?.[0].result) / 10 ** 18).toFixed(1)} <span className='text-(--hacker-green-4) font-semibold'>BUILD</span>
+     {isNaN(Number(data?.[0].result)) ? 0 : (Number(data?.[0].result) / 10**18).toFixed(2)}<span className='text-(--hacker-green-4) font-semibold'> BUILD</span>
     </span>
 </div>
 
@@ -72,7 +85,7 @@ text-(--hacker-green-4)
 text-3xl
 font-bold
 '>
-9
+{isNaN(Number(data?.[2].result)) ? 0 : Number(data?.[2].result)}
 </span>
 
 <span
@@ -103,7 +116,7 @@ text-(--hacker-green-4)
 text-3xl
 font-bold
 '>
-  {(Number(data?.[0].result) / Number(data?.[1].result) * 100).toFixed(2)}%
+  {isNaN((Number(data?.[0].result) / Number(data?.[1].result) * 100)) ? 0 : (Number(data?.[0].result) / Number(data?.[1].result) * 100).toFixed(2)}%
 </span>
 
 <span className=''>

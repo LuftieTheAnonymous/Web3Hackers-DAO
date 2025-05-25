@@ -7,6 +7,7 @@ import { FormProvider, useForm
 } from 'react-hook-form'
 import { StepContainer } from './steps/Steps';
 import {readContract} from "@wagmi/core";
+import {config} from '@/lib/config';
 
 
 type Props = {children: React.ReactNode}
@@ -29,6 +30,7 @@ message: 'Title must be at least 1 character',
 longDescription: z.string().min(1, {
 message:'Description must be at least 1 character',
 }),
+
 
 functionsCalldatas:z.array(z.object({
 target: z.string().startsWith('0x').length(42,{message:'Invalid address'}),
@@ -58,13 +60,12 @@ calldataIndicies: z.array(z.number()).optional(),
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from '../ui/form';
-import { useAccount, usePublicClient, useTransaction, useWaitForTransactionReceipt, useWatchContractEvent, useWriteContract } from 'wagmi';
+import { useAccount, useBlock, useBlockNumber, usePublicClient, useReadContract, useTransaction, useWaitForTransactionReceipt, useWatchContractEvent, useWriteContract } from 'wagmi';
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
 import { decodeEventLog, encodeFunctionData, prepareEncodeFunctionData } from 'viem';
 import { toast } from 'sonner';
 import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
-import { config } from '@/lib/config';
 import supabase from '@/lib/db/dbConfig';
 
 
@@ -87,6 +88,7 @@ const methods = useForm<z.infer<typeof proposalObject>>({
   defaultValues: {
     title: "",
     longDescription: "",
+    shortDescripton: "",
     isCustom: '',
     functionsCalldatas: [],
     urgencyLevel: BigInt(0),
@@ -258,6 +260,21 @@ function onSubmit(values: z.infer<typeof proposalObject>) {
 
 }
 
+const {data:blockNumber}=useBlockNumber();
+
+const {
+  data: delegateData,
+}=useReadContract({
+  abi: tokenContractAbi,
+  address: TOKEN_CONTRACT_ADDRESS,
+  functionName: 'getPastVotes',
+  query:{
+    enabled:  typeof blockNumber === 'bigint',
+  },
+
+  args: [address, blockNumber], 
+});
+
 
 
 return (
@@ -272,24 +289,36 @@ return (
         Make a proposal to the DAO, and vote for it to be implemented in the future. 
       </DialogDescription>
 
-      <Button onClick={()=>{
-        writeContract({
-          abi: tokenContractAbi,
-          address: TOKEN_CONTRACT_ADDRESS,
-          type:'eip1559',
-          functionName:'delegate',
-          args:[address],
-        },{
-      onError: (error) => {
-            console.log(error);
-            toast('Tokens Delegation Transaction Failed 🤬 ! Try again later 😉');
-          },
-          'onSettled': (data) => {
-            console.log(data);
-            toast('Tokens Delegation Transaction Created successfully 🎉 !');
-          }
-        });
-      }} className='hover:bg-(--hacker-green-4) hover:text-zinc-800 hover:scale-95 transition-all cursor-pointer'>Delegate Tokens !</Button>
+{
+  (delegateData as unknown as bigint)
+   && Number(delegateData) === 0 && (
+    <>
+<Button onClick={()=>{
+  writeContract({
+    abi: tokenContractAbi,
+    address: TOKEN_CONTRACT_ADDRESS,
+    type:'eip1559',
+    functionName:'delegate',
+    args:[address],
+  },{
+onError: (error) => {
+      console.log(error);
+      toast('Tokens Delegation Transaction Failed 🤬 ! Try again later 😉');
+    },
+    'onSettled': (data) => {
+      console.log(data);
+      toast('Tokens Delegation Transaction Created successfully 🎉 !');
+    }
+  });
+}} className='hover:bg-(--hacker-green-4) hover:text-zinc-800 hover:scale-95 transition-all cursor-pointer'>
+  Delegate Tokens !</Button>
+</>
+  )
+
+}
+
+
+
     </DialogHeader>
 
     <FormProvider {...methods}>

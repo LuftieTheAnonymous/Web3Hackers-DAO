@@ -4,13 +4,11 @@ import React from 'react'
 import { Textarea } from '../ui/textarea'
 import { Button } from '../ui/button'
 import { Calendar, EllipsisIcon } from 'lucide-react'
-import { toast } from 'sonner';
 import { useAccount, useWriteContract } from 'wagmi';
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
 import {useLottie} from "lottie-react";
 import cryptoLottieAnimation from "@/public/gifs/Crypto-Lottie-Animation.json";
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 type Props = {}
@@ -28,7 +26,8 @@ function ProposalCard({}: Props) {
   const { View } = useLottie(options);
   const {writeContract}=useWriteContract();
 
-  const router =useRouter();
+
+
 
 
   return (
@@ -58,8 +57,6 @@ function ProposalCard({}: Props) {
 </button>
       </div>
       <Button onClick={()=>{
-    
-
         writeContract({
           abi: tokenContractAbi,
           address: TOKEN_CONTRACT_ADDRESS,

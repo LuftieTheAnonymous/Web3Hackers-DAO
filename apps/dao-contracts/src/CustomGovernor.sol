@@ -171,6 +171,7 @@ mapping(bytes32 => Proposal) public proposals; // proposalId to proposal
 mapping(bytes32 => mapping(address => Vote)) public proposalVotes; // proposalId to user address to vote
 mapping(bytes32 => address[]) public proposalVoters;
 mapping(address => Vote[]) public userVotes; // user address to proposalId to vote
+mapping(address => uint256) public userVotedCount;
 
 modifier isVotingActive(bytes32 proposalId){
 
@@ -337,6 +338,7 @@ function getProposalQuorumNeeded(bytes32 proposalId) public view returns (uint25
         proposalVoters[proposalId].push(msg.sender);
         userVotes[msg.sender].push(vote);
 
+userVotedCount[msg.sender]++;
         emit ProposalVoted(proposalId, msg.sender, voteOption);
 
     }

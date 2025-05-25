@@ -322,7 +322,7 @@ const goForward=useCallback(() => {
   </Button>
   </div>}
 
-  {customVotesFields.map((field, customVoteIdx) => (
+  {customVotesFields.map((optionField, customVoteIdx) => (
   customVoteIdx === optionId && (
     <div className='flex flex-col gap-4' key={customVoteIdx}>
       <FormField
@@ -332,7 +332,7 @@ const goForward=useCallback(() => {
           <FormItem>
             <FormLabel className='text-white text-base font-light'>Option Description</FormLabel>
             <FormControl>
-              <Input {...field} placeholder='Enter the user title' className='text-white border border-(--hacker-green-4) outline-none' />
+              <Input  {...field}  placeholder='Enter the user title' className='text-white border border-(--hacker-green-4) outline-none' />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -348,7 +348,8 @@ const goForward=useCallback(() => {
               <FormItem >
                 <FormControl>
                   <OptionToCall
-                  checkedStatus={watch(`customVotesOptions.${optionId}.calldataIndicies`)?.includes(calldataIdx)}
+                  {...formField}
+                  checkedStatus={watch(`customVotesOptions.${optionId}.calldataIndicies`).includes(calldataIdx)}
                   optionArrayIndices={watch(`customVotesOptions.${optionId}.calldataIndicies`)}
                     keyIndex={optionId}
                     data={field}
@@ -369,7 +370,7 @@ const goForward=useCallback(() => {
   )
 ))}
 
-<p onClick={()=>console.log(watch('customVotesOptions'))}>gjosdhjg uisdhgsd</p>
+
    </div>
     }
     
@@ -403,7 +404,7 @@ const goForward=useCallback(() => {
                         "max-w-64 w-full pl-3 text-left hover:bg-zinc-800 font-normal text-white bg-zinc-700 border-(--hacker-green-4) ",
                       )}
                     >
-                    {field.value ? new Date(Number(field.value)).toLocaleString() : 'Select Date'}
+                    {field.value ? new Date(field.value).toLocaleString() : 'Select Date'}
                       <CalendarIcon className="ml-auto text-(--hacker-green-4) h-4 w-4 opacity-50" />
                     </Button>
           
@@ -449,7 +450,10 @@ const goForward=useCallback(() => {
               <FormControl>
 
        <div className="flex w-full gap-3 items-center">
-    <Input {...field} id='customOptionName' value={Number(field.value)} onChange={(e) => setValue('proposalDelay', Number(e.target.value))} placeholder='Amount of time units' type='number'
+    <Input {...field} id='customOptionName' value={
+      field.value ?
+      Number(field.value) : 0
+    } onChange={(e) => setValue('proposalDelay', Number(e.target.value))} placeholder='Amount of time units' type='number'
     className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none '/>
       
     </div>
@@ -508,7 +512,12 @@ const goForward=useCallback(() => {
               <FormControl>
 
        <div className="flex w-full gap-3 items-center">
-    <Input {...field} id='customOptionName' value={Number(field.value)} onChange={(e) => setValue('timelockPeriod', Number(e.target.value))} placeholder='Amount of time units' type='number'
+    <Input {...field} id='customOptionName' 
+     value={
+      field.value ?
+      Number(field.value) : 0
+    }
+    onChange={(e) => setValue('timelockPeriod', Number(e.target.value))} placeholder='Amount of time units' type='number'
     className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none '/>
       
     </div>

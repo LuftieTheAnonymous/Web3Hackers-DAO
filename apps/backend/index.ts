@@ -5,6 +5,7 @@ import govTokenRouter from "./routes/GovTokenRouter";
 import governanceRouter from "./routes/GovernanceRouter";
 import membersRouter from "./routes/MembersRouter";
 import activityRouter from "./routes/ActivityRouter";
+import router from "./routes/NotificationsRouter";
 const express = require('express');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -35,6 +36,7 @@ app.use('/governance',governanceRouter);
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
+app.use('/notifications', router);
 const server = http.createServer(app);
 
 

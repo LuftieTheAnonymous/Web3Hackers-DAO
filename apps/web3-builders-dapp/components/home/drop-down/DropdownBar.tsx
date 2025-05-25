@@ -29,11 +29,17 @@ function DropdownBar({}: Props) {
   bg-zinc-800 text-white border border-green-400
   '
   >
+           <DropdownMenuItem className='cursor-pointer'>
+        Pending Voting
+    </DropdownMenuItem>
     <DropdownMenuItem className='cursor-pointer'>
         Live Voting
     </DropdownMenuItem>
-    <DropdownMenuItem className='cursor-pointer'>
+        <DropdownMenuItem className='cursor-pointer'>
         Voting Closed
+    </DropdownMenuItem>
+        <DropdownMenuItem className='cursor-pointer'>
+     Executed Voting 
     </DropdownMenuItem>
  
   </DropdownMenuContent>

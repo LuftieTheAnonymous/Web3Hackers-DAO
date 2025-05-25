@@ -77,8 +77,8 @@ const {address}=useAccount();
       <div className="w-full border-b border-(--hacker-green-4)">
       <div className="flex justify-between items-center px-3 py-2">
       <div onClick={()=>console.log(proposalObj)} className="flex items-center gap-1 text-white">
-       {proposalObj && proposalObj.dao_members.photoURL ? <Image width={32} height={32} className='w-full h-full ' src={proposalObj.dao_members.photoURL} alt="" /> : <div className='w-8 h-8 rounded-full bg-zinc-600'></div>}
-        <p className='text-sm'>@{proposalObj.dao_members.nickname}</p>
+       {proposalObj && proposalObj.dao_members && proposalObj.dao_members.photoURL ? <Image width={32} height={32} className='w-full h-full ' src={proposalObj.dao_members.photoURL} alt="" /> : <div className='w-8 h-8 rounded-full bg-zinc-600'></div>}
+        <p className='text-sm'>@{proposalObj && proposalObj.dao_members &&  proposalObj.dao_members.nickname}</p>
       </div>
 
 <div className="flex items-center gap-2">
@@ -92,7 +92,9 @@ const {address}=useAccount();
    
 {proposalObj && <p>{proposalObj.proposal_description}</p>}
      <div className="w-full flex flex-wrap gap-4 items-center">
-     {proposalObj && proposalObj.calldata_objects.map((item:T, index:number)=>(
+     {proposalObj
+     && proposalObj.calldata_objects
+     && proposalObj.calldata_objects.map((item:T, index:number)=>(
        <ProposalCallbackItem key={index} callbackText={(item as any).functionDisplayName} />
      ))}
         
