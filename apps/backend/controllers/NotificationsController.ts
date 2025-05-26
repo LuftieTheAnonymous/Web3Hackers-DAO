@@ -17,7 +17,7 @@ export async function notifyEveryDAOMember(req:Request, res:Response){
     const {message, notificationReceivePropertyName} = req.body;
 
     try{
-        const {data, error} = await supabaseConfig.from('notification_settings').select('endpoint, auth_key, p256h_key, user_address').filter(notificationReceivePropertyName, 'eq', true);
+        const {data, error} = await supabaseConfig.from('notification_settings').select('endpoint, auth_key, p256h_key, userAddress').eq(notificationReceivePropertyName as string, true);
 
         if(error){
             res.status(500).json({message:"error", data:null, error:error.message, status:500});
@@ -34,13 +34,13 @@ export async function notifyEveryDAOMember(req:Request, res:Response){
             })).catch(err => err));
         });
 
-
       const result =  await Promise.all(promisesArray);
 
-
-        res.status(200).json({message:"success", data: (await result[0]), error:null, status:200});
+        res.status(200).json({message:"success", data: result, error:null, status:200});
     }catch(err){
         console.log(err);
         res.status(500).json({message:"error", data:null, error:err, status:500});
     }
 }
+
+

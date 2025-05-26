@@ -60,20 +60,18 @@ calldataIndicies: z.array(z.number()).optional(),
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from '../ui/form';
-import { useAccount, useBlock, useBlockNumber, usePublicClient, useReadContract, useTransaction, useWaitForTransactionReceipt, useWatchContractEvent, useWriteContract } from 'wagmi';
+import { useAccount, useBlockNumber, usePublicClient, useReadContract, useWaitForTransactionReceipt, useWatchContractEvent, useWriteContract } from 'wagmi';
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
-import { decodeEventLog, encodeFunctionData, prepareEncodeFunctionData } from 'viem';
+import { decodeEventLog, encodeFunctionData } from 'viem';
 import { toast } from 'sonner';
 import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
 import supabase from '@/lib/db/dbConfig';
 import { notifyEveryDAOMember } from '@/lib/web-push/db/actions';
-import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 
 
 function ProposalModal({children}: Props) {
 const {address}=useAccount();
-const {currentUser}=useGetLoggedInUser();
 const [currentStep, setCurrentStep] = useState<number>(0);
 const {writeContractAsync,writeContract, data, isError: writeContractIsError, error: writeContractError, isPending: writeContractIsPending, isIdle, isPaused, isSuccess: writeContractIsSuccess}=useWriteContract();
 const client = usePublicClient();
@@ -81,11 +79,20 @@ const {data:receipt, isError, error, isLoading, isSuccess, isPending}=useWaitFor
   hash:data as `0x${string}`,
   'onReplaced': async (replaceData) => {
 
-    await notifyEveryDAOMember(`A new proposal has been created by ${currentUser.nickname}. Please check the DAO proposals page for more details. (proposalId: ${replaceData.transaction.hash})`, 'notifyOnNewProposals');
-    console.log(replaceData);
+
+    console.log(replaceData, 'replaced transaction data');
   },
   
   });
+
+  useWatchContractEvent({
+    'abi': governorContractAbi,
+    'address': GOVERNOR_CONTRACT_ADDRESS,
+    'eventName': 'ProposalCreated',
+    'onLogs': async (logs) => {
+      console.log(logs, 'proposal created logs');
+    }
+  })
 
 
 const methods = useForm<z.infer<typeof proposalObject>>({

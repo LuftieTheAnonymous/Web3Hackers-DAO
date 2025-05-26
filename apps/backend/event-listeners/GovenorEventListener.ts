@@ -2,6 +2,7 @@ import { daoContract } from "../config/ethers.config";
 import dotenv from "dotenv";
 import { supabaseConfig } from "../config/supabase";
 import {format, formatDistanceStrict} from "date-fns";
+import { notifyOnProposalCreated } from "./actions/governor/governor-actions";
 
 dotenv.config();
 
@@ -19,9 +20,6 @@ export const executeGovenorContractEvents=()=>{
             throw new Error("Member not found");
         }
         console.log("Proposal details", proposal, "Proposal", proposalId);
-
-
-
 
 
   await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
@@ -50,6 +48,7 @@ export const executeGovenorContractEvents=()=>{
 }),
         });
      
+        await notifyOnProposalCreated(`A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`);
 
 
     // Trigger the web-push notification
