@@ -21,12 +21,9 @@ event.waitUntil(self.registration.showNotification(data.title, options));
 self.addEventListener('notificationclick', (event)=>{
     event.notification.close();
     event.waitUntil(clients.openWindow(event.notification.data.url));
-})
+});
 
-self.addEventListener('fetch', (event)=>{
-console.log('Fetch event fired');
-console.log(event);
-})
+
 
 self.addEventListener('notificationclose', (event)=>{
     console.log('Notification closed');

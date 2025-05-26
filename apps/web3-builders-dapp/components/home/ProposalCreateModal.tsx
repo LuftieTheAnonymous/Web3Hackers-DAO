@@ -10,6 +10,7 @@ import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/conf
 import {useLottie} from "lottie-react";
 import cryptoLottieAnimation from "@/public/gifs/Crypto-Lottie-Animation.json";
 import Image from 'next/image';
+import { notifyEveryDAOMember } from '@/lib/web-push/db/actions';
 
 type Props = {}
 
@@ -28,7 +29,14 @@ function ProposalCard({}: Props) {
 
 
 
+const handlePropose=async()=>{
+  try{
 
+    await notifyEveryDAOMember('A new proposal has been created', 'notifyOnNewProposals');
+  }catch(err){
+    console.error('Error notifying DAO members:', err);
+  }
+}
 
   return (
     <div className={`w-full h-full  ${(address && !currentUser) ? 'flex flex-col gap-6 justify-center items-center h-screen' : 'h-full'}`}>
@@ -56,14 +64,7 @@ function ProposalCard({}: Props) {
   <Calendar className='text-(--hacker-green-4)'/>
 </button>
       </div>
-      <Button onClick={()=>{
-        writeContract({
-          abi: tokenContractAbi,
-          address: TOKEN_CONTRACT_ADDRESS,
-          functionName:'rewardUser',
-          args:[address,BigInt(2000e18)],
-        })
-      }} className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 mr-4'>Propose</Button>
+      <Button className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 mr-4'>Propose</Button>
     </div>
     </div> }
 

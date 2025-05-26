@@ -4,7 +4,7 @@ import React from 'react'
 
 type Props = {}
 
-import { Calendar, Home, Inbox, Search, Settings, User, UserCog2Icon, UserRoundCheckIcon, UserRoundPenIcon } from "lucide-react"
+import { Home, User, UserCog2Icon, UserRoundPenIcon } from "lucide-react"
  
 import {
   Sidebar,
@@ -40,7 +40,7 @@ const items = [
     },
     {
       title: "Settings",
-      url: "/settings",
+      url: `/settings/${address}`,
       icon: UserCog2Icon,
     },
     {

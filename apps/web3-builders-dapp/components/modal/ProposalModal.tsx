@@ -67,10 +67,13 @@ import { decodeEventLog, encodeFunctionData, prepareEncodeFunctionData } from 'v
 import { toast } from 'sonner';
 import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
 import supabase from '@/lib/db/dbConfig';
+import { notifyEveryDAOMember } from '@/lib/web-push/db/actions';
+import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 
 
 function ProposalModal({children}: Props) {
 const {address}=useAccount();
+const {currentUser}=useGetLoggedInUser();
 const [currentStep, setCurrentStep] = useState<number>(0);
 const {writeContractAsync,writeContract, data, isError: writeContractIsError, error: writeContractError, isPending: writeContractIsPending, isIdle, isPaused, isSuccess: writeContractIsSuccess}=useWriteContract();
 const client = usePublicClient();
@@ -78,8 +81,10 @@ const {data:receipt, isError, error, isLoading, isSuccess, isPending}=useWaitFor
   hash:data as `0x${string}`,
   'onReplaced': async (replaceData) => {
 
-       console.log(replaceData);
+    await notifyEveryDAOMember(`A new proposal has been created by ${currentUser.nickname}. Please check the DAO proposals page for more details. (proposalId: ${replaceData.transaction.hash})`, 'notifyOnNewProposals');
+    console.log(replaceData);
   },
+  
   });
 
 
@@ -117,11 +122,9 @@ const methods = useForm<z.infer<typeof proposalObject>>({
   }
 });
 
-function onSubmit(values: z.infer<typeof proposalObject>) {
+async function onSubmit(values: z.infer<typeof proposalObject>) {
  try{
   console.log(values);
-
-
 
   const targets= values['functionsCalldatas'].map((item) => item['target']);
   const calldataValues = values['functionsCalldatas'].map((item) => BigInt(item['value']));
@@ -197,7 +200,6 @@ function onSubmit(values: z.infer<typeof proposalObject>) {
             isCustom: values['isCustom'] === 'custom' ? true : false,
             proposal_delay: Math.floor(Number(values['proposalDelay']) * Number(values['proposalDelayUnit'])).toFixed(0),
             expires_at: new Date(Number(values['proposalEndTime'])),
-            
           }]);
 
           if(proposalObj.error) {
@@ -253,6 +255,10 @@ function onSubmit(values: z.infer<typeof proposalObject>) {
       },
     });
 
+
+    
+
+    
  }catch(err){
   console.log(err);
  }
@@ -269,7 +275,7 @@ const {
   address: TOKEN_CONTRACT_ADDRESS,
   functionName: 'getPastVotes',
   query:{
-    enabled:  typeof blockNumber === 'bigint',
+    enabled:typeof blockNumber === 'bigint',
   },
 
   args: [address, blockNumber], 
@@ -289,11 +295,8 @@ return (
         Make a proposal to the DAO, and vote for it to be implemented in the future. 
       </DialogDescription>
 
-{
-  (delegateData as unknown as bigint)
-   && Number(delegateData) === 0 && (
-    <>
-<Button onClick={()=>{
+
+<Button  onClick={()=>{
   writeContract({
     abi: tokenContractAbi,
     address: TOKEN_CONTRACT_ADDRESS,
@@ -310,12 +313,11 @@ onError: (error) => {
       toast('Tokens Delegation Transaction Created successfully 🎉 !');
     }
   });
-}} className='hover:bg-(--hacker-green-4) hover:text-zinc-800 hover:scale-95 transition-all cursor-pointer'>
+}} className={`hover:bg-(--hacker-green-4) ${(delegateData as unknown as any)
+   && Number(delegateData) === Number(0) && 'hidden'} hover:text-zinc-800 hover:scale-95 transition-all cursor-pointer`}>
   Delegate Tokens !</Button>
-</>
-  )
 
-}
+
 
 
 

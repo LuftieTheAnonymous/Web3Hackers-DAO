@@ -2,30 +2,24 @@
 
 import usePushNotifications from '@/hooks/usePushNotifications';
 import React from 'react';
-
-
-
+import { Button } from '../ui/button';
 
 export default function WebPushNotificationComponent() {
 
-  const {subscription, message, setMessage, subscribeToPush, unsubscribeFromPush, sendTestNotification,isSupported}=usePushNotifications();
+  const {subscription, subscribeToPush, unsubscribeFromPush,isSupported}=usePushNotifications();
 
 
   if(!isSupported) return null;
 
 
     return(
-        <div className='text-white p-2'>
-            <p>Push Notifications</p>
-            {subscription ? (<div className='flex flex-col gap-4'>
-                <p>Subscribed to push notifications</p>
-                <button onClick={unsubscribeFromPush}>Unsubscribe</button>
-                <input type="text" name="message" onChange={(e)=>setMessage(e.target.value)} value={message} placeholder="Enter a message" id="notification" />
-                <button onClick={sendTestNotification}>Send Notification</button>
-            </div>) : (<div>
-                <p>Not subscribed to push notifications</p>
-                <button onClick={subscribeToPush} className='bg-white text-black cursor-pointer'>Subscribe</button>
-            </div>)}
+        <div className='text-white flex flex-col gap-2 p-2'>
+            <p className='text-lg font-bold'>Push Notifications Subscription</p>
+            {subscription ? (
+                <Button className='cursor-pointer hover:scale-95 bg-red-500 hover:bg-red-700' onClick={unsubscribeFromPush}>Unsubscribe</Button>
+          ) : (
+                <Button onClick={subscribeToPush} className='cursor-pointer hover:scale-95 bg-(--hacker-green-4) hover:bg-(--hacker-green-5)'>Subscribe</Button>
+         )}
         </div>
     )
 

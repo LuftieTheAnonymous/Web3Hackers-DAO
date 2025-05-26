@@ -4,6 +4,6 @@ import { notifyEveryDAOMember } from "../controllers/NotificationsController";
 const router=express.Router();
 
 
-router.get('/notify-dao-members', notifyEveryDAOMember);
+router.post('/notify-dao-members', notifyEveryDAOMember);
 
 export default router;

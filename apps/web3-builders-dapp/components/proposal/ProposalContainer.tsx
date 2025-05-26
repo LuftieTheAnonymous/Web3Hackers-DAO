@@ -8,7 +8,7 @@ import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/gove
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import useRealtimeDocuments from '@/hooks/useRealtimeDocuments';
 import { formatDistanceToNow } from 'date-fns';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FaCheck, FaFlag, FaPaperPlane } from 'react-icons/fa'
 import { MdCancel } from 'react-icons/md'
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog
 import { ethers } from 'ethers';
 import Image from 'next/image';
 import { DialogTitle } from '@radix-ui/react-dialog';
+import { toast } from 'sonner';
 
 type Props<T, U> = {
     proposalData: T,
@@ -28,12 +29,17 @@ proposalData, commentsData, proposalId
 }: Props<T, U>) {
 
     const {objectData:proposalObj}=useRealtimeDocument({'tableName':'dao_proposals', initialObj: proposalData});
-
+const [timeToStart, setTimeToStart] = React.useState<{seconds: number, minutes: number, hours: number, days: number}>({
+  seconds: 0,
+  minutes: 0,
+  hours: 0,
+  days: 0
+});
     const {serverData}=useRealtimeDocuments({initialData:commentsData,tableName:'dao_voting_comments',parameterOnChanges:'proposal_id'});
 const {address}=useAccount();
 const {writeContract}=useWriteContract({
   
-})
+});
 
     const {data:proposalOnchainData, error}=useReadContract({
       abi: governorContractAbi,
@@ -41,6 +47,21 @@ const {writeContract}=useWriteContract({
       functionName: "getProposal",
       args:[proposalId],
     });
+
+
+    const handleStandardProposalVote =  (proposalNumber: number) => {
+      if(proposalOnchainData && (proposalOnchainData as any).state !== 1){
+        toast.error("Proposal has not started yet, please wait until it starts to vote.");
+        return;
+      } 
+   writeContract({
+          abi: governorContractAbi,
+          address: GOVERNOR_CONTRACT_ADDRESS,
+          functionName: "castVote",
+          args:[(proposalObj as any).proposal_id, "", address, proposalNumber, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, true, false, []],
+        })
+    }
+
 
     const {state, isMobile}=useSidebar();
   return (
@@ -58,11 +79,13 @@ const {writeContract}=useWriteContract({
     </div>
     
     <div className="flex items-center gap-2">
-      <p className='text-white text-sm'>{formatDistanceToNow((proposalObj as any).created_at)}</p>
+     <p className='text-white text-sm'>{proposalOnchainData as any && (proposalOnchainData as any).state !== 1 && 
+     new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000).getTime() - new Date().getTime() > 0 
+     && <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))}</span>} to start</p>
     </div>
     </div>
     
-    <div className="w-full  h-full flex flex-col   justify-between gap-2 py-2 px-2">
+    <div className="w-full  h-full flex flex-col  justify-between gap-2 py-2 px-2">
       <p className='text-white text-sm'>{(proposalObj as any).proposal_description}</p>
     </div>
     
@@ -107,30 +130,9 @@ const {writeContract}=useWriteContract({
      </Dialog>
       
       </> : <>
-      <Button onClick={()=>{
-        writeContract({
-          abi: governorContractAbi,
-          address: GOVERNOR_CONTRACT_ADDRESS,
-          functionName: "castVote",
-          args:[(proposalObj as any).proposal_id, "", address, 0, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, true, false, []],
-        })
-      }} className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>Vote For <FaCheck /></Button>
-      <Button onClick={()=>{
-        writeContract({
-          abi: governorContractAbi,
-          address: GOVERNOR_CONTRACT_ADDRESS,
-          functionName: "castVote",
-          args:[(proposalObj as any).proposal_id, "", address, 1, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, true, false, []],
-        })
-      }} className='cursor-pointer transition-all hover:scale-95 bg-blue-500 hover:bg-blue-400 hover:text-zinc-800'>Abstain <FaFlag /></Button>
-      <Button onClick={()=>{
-        writeContract({
-          abi: governorContractAbi,
-          address: GOVERNOR_CONTRACT_ADDRESS,
-          functionName: "castVote",
-          args:[(proposalObj as any).proposal_id, "", address, 2, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, true, false, []],
-        })
-      }} className='cursor-pointer transition-all hover:scale-95 hover:bg-red-400 hover:text-zinc-800 bg-red-500'>Vote Against <MdCancel /></Button>
+      <Button onClick={()=>handleStandardProposalVote(0)} className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>Vote For <FaCheck /></Button>
+      <Button onClick={()=>handleStandardProposalVote(1)} className='cursor-pointer transition-all hover:scale-95 bg-blue-500 hover:bg-blue-400 hover:text-zinc-800'>Abstain <FaFlag /></Button>
+      <Button onClick={()=>handleStandardProposalVote(2)} className='cursor-pointer transition-all hover:scale-95 hover:bg-red-400 hover:text-zinc-800 bg-red-500'>Vote Against <MdCancel /></Button>
       </> }
     </div>
     </div>

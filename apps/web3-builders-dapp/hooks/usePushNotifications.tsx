@@ -15,7 +15,6 @@ function usePushNotifications() {
     const [isSupported, setIsSupported]=useState<boolean>(false);
     const [subscription, setSubscription]=useState<PushSubscription|null>(null);
 
-    const [message, setMessage]=useState<string>('');
 
 
       const urlBase64ToUint8Array=(base64String: string) => {
@@ -81,8 +80,11 @@ function usePushNotifications() {
         setSubscription(sub);
         const serializeSub = JSON.parse(JSON.stringify(sub));
         console.log(serializeSub);
-        if(address) await subscribeUser(serializeSub, address);
-        // await upsertWebPushSubscription(address, {})
+        if(address) {
+          await subscribeUser(serializeSub, address);
+        await upsertWebPushSubscription(address, {notifyOnNewProposals:true, notifyOnExecution:true, notifyOnRewarding:true, notifyOnPunishing:true, notifyOnVote:true, notifyOnUnvoted:true, endpoint:sub.endpoint, p256h_key: sub.getKey('p256dh'), auth_key: sub.getKey('auth')});
+              toast.success('Subscribed from push notifications !');
+      }
      }catch(err){
       console.log(err);
       toast.error(`Something went wrong ! ${err}`);
@@ -93,33 +95,20 @@ function usePushNotifications() {
    try{
          await subscription?.unsubscribe();
         setSubscription(null);
-        await unsubscribeUser();
+        await unsubscribeUser(address as `0x${string}`);
+        toast.success('Unsubscribed from push notifications !');
    }catch(err){
     console.log(err);
    }
     }
 
-    const sendTestNotification=async()=>{
-      try{
-          if(subscription){
-         const {success} =   await sendNotification(message);
-         console.log(success);
-            setMessage('');
-        }
-      }catch(err){
-        console.log(err);
-      }
-      
-    }
+    
 
     return {
         isSupported,
         subscription,
         subscribeToPush,
-        unsubscribeFromPush,
-        message,
-        setMessage,
-        sendTestNotification
+        unsubscribeFromPush
     }
 }
 

@@ -10,6 +10,7 @@ import { formatDistanceStrict } from 'date-fns';
 
 import { ethers } from 'ethers';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 type Props = {proposalId:`0x${string}`, proposalObj:any}
 
@@ -71,19 +72,45 @@ const {address}=useAccount();
     }
 
 
+    const handleVoteClick = (voteOption: number) => {
+
+   if(fullProposalObject && (fullProposalObject as any).state === 1 && new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime() <= new Date().getTime()) {
+     castVote(voteOption);
+return;
+    }
+        toast.error('You can only vote when the proposal is open for voting.');
+    
+    
+    }
+
+
   return (
 <>
-{fullProposalObject && proposalObj && <div  className='bg-zinc-800 border shadow-sm shadow-green-400 flex flex-col border-(--hacker-green-4) max-w-3xl w-full rounded-lg h-96'>
-      <div className="w-full border-b border-(--hacker-green-4)">
+{fullProposalObject && proposalObj && <div className={`bg-zinc-800 border shadow-sm ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'shadow-green-400' : 'shadow-gray-500'} flex flex-col ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} max-w-3xl  transition-all duration-700 hover:scale-95 hover:-translate-y-1 w-full rounded-lg h-96`}>
+      <div className={`w-full border-b ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} `}>
       <div className="flex justify-between items-center px-3 py-2">
       <div onClick={()=>console.log(proposalObj)} className="flex items-center gap-1 text-white">
-       {proposalObj && proposalObj.dao_members && proposalObj.dao_members.photoURL ? <Image width={32} height={32} className='w-full h-full ' src={proposalObj.dao_members.photoURL} alt="" /> : <div className='w-8 h-8 rounded-full bg-zinc-600'></div>}
+       {proposalObj && proposalObj.dao_members && proposalObj.dao_members.photoURL ? <Image width={32} height={32} className='w-full h-full rounded-full' src={proposalObj.dao_members.photoURL} alt="" /> : <div className='w-8 h-8 rounded-full bg-zinc-600'></div>}
         <p className='text-sm'>@{proposalObj && proposalObj.dao_members &&  proposalObj.dao_members.nickname}</p>
       </div>
 
 <div className="flex items-center gap-2">
-<p  className=' text-xs  text-white'>{fullProposalObject as any && (fullProposalObject as any) && new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? '🔓 Open' :  "🔒 Closed"}</p>
-      <p onClick={()=>console.log(new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000))} className={`${new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-red-500'}   text-xs`}>{fullProposalObject as any && `${formatDistanceStrict(new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000), new Date())}`}</p>
+<p  className=' text-xs  text-white'>
+  
+  {fullProposalObject as any && (fullProposalObject as any).state === 1 && (fullProposalObject as any) && new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() && '🔓 Open'}
+  {fullProposalObject as any && (fullProposalObject as any).state === 2 && '❌ Cancelled'}
+  {fullProposalObject as any && (fullProposalObject as any).state === 6 && '🔒 Queued'}
+  {fullProposalObject as any && (fullProposalObject as any).state === 4 && '✅ Succeeded'}
+</p>
+
+{fullProposalObject && (fullProposalObject as any).state === 0 && fullProposalObject && <p className='text-sm text-white'>
+<span className={`${fullProposalObject && new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-red-700'}   text-xs}`}>  {fullProposalObject as any && `${formatDistanceStrict(new Date(), new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000))}`}</span> 
+{new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? ' until voting starts' : ' since voting started'}
+  </p>}
+
+{fullProposalObject && (fullProposalObject as any).state === 1 &&
+      <p className={`${new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-gray-700'}   text-xs`}>{fullProposalObject as any && `${formatDistanceStrict(new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000), new Date())}`}</p>
+}
 </div>
     </div>
       </div>
@@ -109,9 +136,7 @@ const {address}=useAccount();
   <span className='text-xs text-zinc-800'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Number((proposalVotes as BigInt[])[0]))}%</span>
 </div>
 
-<button onClick={()=>{
-  castVote(0);
-}} className='flex items-center cursor-pointer gap-1  hover:scale-95 transition-all  text-(--hacker-green-4)'>
+<button onClick={()=>handleVoteClick(0)} className='flex items-center cursor-pointer gap-1  hover:scale-95 transition-all  text-(--hacker-green-4)'>
     <Check />
     <span className='text-sm'>
     For
@@ -127,11 +152,7 @@ const {address}=useAccount();
 
 
 
-  <button onClick={()=>{
-    console.log(proposalVotes);
-    console.log(fullProposalObject);
-    castVote(1);
-  }} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-red-500'>
+  <button onClick={()=>handleVoteClick(1)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-red-500'>
   <X/>
   <span className='text-sm'>
     Against
@@ -146,7 +167,7 @@ const {address}=useAccount();
 
 
 
-  <button onClick={()=>castVote(2)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-blue-500'>
+  <button onClick={()=>handleVoteClick(2)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-blue-500'>
     <InfoIcon/>
     <span className='text-sm'>
       Abstain
