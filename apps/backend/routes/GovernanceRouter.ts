@@ -1,18 +1,18 @@
 import { Router } from "express";
 import { activateProposals, cancelProposal, executeProposals, finishProposals, getProposalDetails, getProposalQuorum, getProposalState, getProposalVotes, queueProposals } from "../controllers/GovernanceController";
-import { DAO_elligibilityMiddleware } from "../middlewares/internalEligibility";
+import { DAO_CronJobs_elligibilityMiddleware } from "../middlewares/internalEligibility";
 
 const governanceRouter = Router();
 
 governanceRouter.post('/cancel_proposal/:proposalId', cancelProposal);
 
-governanceRouter.get('/activate_proposals',DAO_elligibilityMiddleware, activateProposals);
+governanceRouter.get('/activate_proposals',DAO_CronJobs_elligibilityMiddleware, activateProposals);
 
-governanceRouter.post('/finish_proposals',DAO_elligibilityMiddleware, finishProposals);
+governanceRouter.post('/finish_proposals',DAO_CronJobs_elligibilityMiddleware, finishProposals);
 
-governanceRouter.get('/queue_proposals',DAO_elligibilityMiddleware, queueProposals);
+governanceRouter.get('/queue_proposals',DAO_CronJobs_elligibilityMiddleware, queueProposals);
 
-governanceRouter.get('/execute_proposals',DAO_elligibilityMiddleware, executeProposals);
+governanceRouter.get('/execute_proposals',DAO_CronJobs_elligibilityMiddleware, executeProposals);
 
 governanceRouter.get('/get_proposal_votes/:proposalId', getProposalVotes);
 

@@ -19,7 +19,6 @@
     "@discordjs/util": "^1.1.1",
     "@discordjs/voice": "^0.18.0",
     "@discordjs/ws": "^1.2.2",
-    "@web3-builders/supabase": "*",
     "cors": "^2.8.5",
     "cron": "^4.3.0",
     "date-fns": "^4.1.0",
@@ -37,6 +36,7 @@
     "viem": "^2.29.2",
     "web-push": "^3.6.7",
     "winston": "^3.17.0",
+    "xss-clean": "^0.1.4",
     "zod": "^3.24.3"
   },
   "devDependencies": {

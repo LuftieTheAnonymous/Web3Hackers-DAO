@@ -89,9 +89,7 @@ try {
 
     console.log(dicordMemberId);
 
-    const userDBObject= await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(dicordMemberId)).single();
-
-    console.log(userDBObject.data);
+    const userDBObject= await supabaseConfig.from('dao_members').select('userWalletAddress, nickname').eq('discord_member_id', Number(dicordMemberId)).single();
 
     if(!userDBObject.data){
         res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:dicordMemberId, status:404 });
@@ -101,9 +99,11 @@ try {
          res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,discord_member_id:dicordMemberId, status:500 });
     }
 
-    const userTokens = await governorTokenContract.getVotes(userDBObject.data.userWalletAddress);
+    const userTokens = await governorTokenContract.getVotes((userDBObject.data as any)
+        .userWalletAddress);
 
-    res.status(200).json({userDBObject, tokenAmount:(Number(userTokens)/1e18), message:`${userDBObject.data.nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
+    res.status(200).json({userDBObject, tokenAmount:(Number(userTokens)/1e18), message:`${
+        (userDBObject.data as any).nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     
 } catch (error) {
     console.log(error);
@@ -112,24 +112,30 @@ try {
 }
 
 
-
-// Multiple users actions
 const monthlyTokenDistribution = async (req: Request, res: Response) => {
     try {
 
-        const monthActivities= await supabaseConfig.from('')
+        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members!inner(*)').lte('reward_month', new Date().toISOString());
 
+        if(monthActivities.error){
+            console.log(monthActivities.error);
+            res.status(500).json({data:null, error:monthActivities.error, message:"error", status:500});
+        }
+        if(!monthActivities.data || monthActivities.data.length === 0){
+            res.status(404).json({data:null, error:"No monthly activities found", message:"error", status:404});
+        }
 
-// [].map(async (userAddress) => {
+(monthActivities.data as any).map(async (activity: any) => {
 
-//     const tx = await governorTokenContract.rewardMonthlyTokenDistribution(BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1), userAddress);
+    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1), 
+(activity as any).dao_members.userWalletAddress);
         
-//         const txReceipt = await tx.wait();
+        const txReceipt = await tx.wait();
         
-//         console.log(txReceipt);
+        console.log(txReceipt);
         
-//         res.json({data:txReceipt,error:null, message:"success", status:200});
-// });
+        res.json({data:txReceipt,error:null, message:"success", status:200});
+});
     res.status(200).json({data:null, error:null, message:"success", status:200});
     } catch (error) {
             console.log(error);
@@ -137,16 +143,6 @@ const monthlyTokenDistribution = async (req: Request, res: Response) => {
     }
 }
 
-const updateMonthlyStats= async (req:Request, res:Response)=>{
-    const {discordMemberId} = req.params;
-    const  {}=req.body;
-    try{
-
-    }
-    catch(err){
-
-    }
-}
 
 export {
     intialTokenDistribution,
@@ -154,5 +150,5 @@ export {
     rewardMember,
     getUserTokenBalance,
     monthlyTokenDistribution,
-    updateMonthlyStats
+
 }
