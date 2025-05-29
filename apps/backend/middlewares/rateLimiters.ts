@@ -2,7 +2,7 @@ import { Request } from 'express';
 import rateLimit, { MemoryStore } from 'express-rate-limit';
 import { getMember } from '../controllers/MembersController';
 import { supabaseConfig } from '../config/supabase';
-import { governorTokenContract } from '../config/ethers.config';
+import { governorTokenContract } from '../config/ethersConfig';
 import dotenv from 'dotenv';
 dotenv.config();
 

@@ -1,37 +1,30 @@
 # syntax=docker/dockerfile:1
-
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
-
 ARG NODE_VERSION=22.14.0
-
 FROM node:${NODE_VERSION}-alpine
 
-# Use production node environment by default.
-ENV NODE_ENV=production
-
-
+# Set working directory
 WORKDIR /cron-jobs
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.npm to speed up subsequent builds.
-# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
-# into this layer.
-COPY package.json . 
+# Use development environment so devDependencies like nodemon will be installed
+ENV NODE_ENV=development
 
-RUN npm install
+# Copy only the package files first to leverage Docker cache
+COPY package.json package-lock.json* ./
 
-# Run the application as a non-root user.
-USER node
+# Install dependencies (including dev deps like nodemon)
+RUN npm install && npm install -g npm@11.4.1
 
-# Copy the rest of the source files into the image.
+# Install ts-node, nodemon globally if you insist — optional
+RUN npm install -g ts-node typescript nodemon
+
+# Copy the rest of your source code
 COPY . .
 
-# Expose the port that the application listens on.
+# Switch to non-root user after dependencies are installed
+USER node
+
+# Expose your app port
 EXPOSE 2138
 
-# Run the application.
-CMD ["npm", "run", "dev"]
+# Final run command — use direct path to nodemon, avoids npx
+CMD ["nodemon", "--watch", ".", "--exec", "ts-node", "index.ts"]

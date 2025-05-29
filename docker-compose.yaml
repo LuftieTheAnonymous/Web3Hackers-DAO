@@ -3,7 +3,7 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./apps/web3-builders-dapp
+      context: /apps/web3-builders-dapp
       dockerfile: Dockerfile
     command: ["npm", "run", "dev"]
     ports:
@@ -14,7 +14,7 @@ services:
 
   backend:
     build:
-      context: ./apps/backend
+      context: /apps/backend
       dockerfile: Dockerfile
     command: ["npm", "run", "dev"]
     ports:
@@ -24,7 +24,7 @@ services:
 
     cron-jobs:
       build:
-        context: ./apps/cron-jobs
+        context: /apps/cron-jobs
         dockerfile: Dockerfile
       command: ["npm", "run", "dev"]
       environment:
@@ -32,7 +32,7 @@ services:
     
     discord-bot:
       build:
-        context: ./apps/discord-bot
+        context: /apps/discord-bot
         dockerfile: Dockerfile
       command: ["npm", "run", "dev"]
       environment:

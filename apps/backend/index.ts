@@ -9,9 +9,7 @@ import router from "./routes/NotificationsRouter";
 import { NextFunction, Request, Response } from "express";
 import dotenv from 'dotenv';
 import cors from 'cors';
-const express = require('express');
-const fs = require('node:fs');
-const path = require('node:path');
+import express from 'express';
 const http = require('http');
 const app = express();
 import helmet from 'helmet';
@@ -55,7 +53,7 @@ app.use(express());
 
 app.use(cors({
     allowedHeaders:['Content-Type', 'Authorization', 'x-backend-eligibility', 'is-frontend-req'],
-    origin:['http://localhost:3000', 'https://localhost:3000', 'http://localhost:2138'],
+    origin:['http://localhost:3000', 'https://localhost:2137', 'http://localhost:2138'],
     methods:['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     maxAge: 600, // 10 minutes
 }));

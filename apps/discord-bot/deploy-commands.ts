@@ -53,3 +53,5 @@ export const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN || token);
 		console.log("Deployed commands error");
 	}
 })();
+
+

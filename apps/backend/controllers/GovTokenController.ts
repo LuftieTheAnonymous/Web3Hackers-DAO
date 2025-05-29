@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { governorTokenContract } from "../config/ethers.config";
+import { governorTokenContract } from "../config/ethersConfig";
 import { supabaseConfig } from "../config/supabase";
 
 

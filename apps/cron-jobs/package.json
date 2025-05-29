@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
-  "author": "",
+  "author": "Luftjunkie",
   "type": "commonjs",
   "main": "index.ts",
   "scripts": {

@@ -1,4 +1,4 @@
-import { daoContract } from "../config/ethers.config";
+import { daoContract } from "../config/ethersConfig";
 import dotenv from "dotenv";
 import { supabaseConfig } from "../config/supabase";
 import {format, formatDistanceStrict} from "date-fns";

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import dotenv from "dotenv";
-import { daoContract, proposalStates, provider } from "../config/ethers.config";
+import { daoContract, proposalStates, provider } from "../config/ethersConfig";
 import { supabaseConfig } from "../config/supabase";
 import { EventLog } from "ethers";
 

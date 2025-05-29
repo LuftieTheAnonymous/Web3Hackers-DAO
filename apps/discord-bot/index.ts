@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits, Collection, Message, Partials, GuildMember, VoiceState, AnyThreadChannel, ButtonBuilder, ActionRow, VoiceChannelEffect, GuildAuditLogsEntry } from 'discord.js';
+import { CustomClient, CustomClientType } from './types/discordBotTypes';
 
 // Require the necessary discord.js classes
 const dotenv = require('dotenv');
@@ -9,7 +10,7 @@ const { token } = require('./discordConfig.json');
 dotenv.config();
 
 
-export const client = new Client({ intents: [
+export const client:CustomClientType = new CustomClient({ intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
