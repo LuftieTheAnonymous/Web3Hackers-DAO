@@ -159,28 +159,28 @@ bytes32 constant private ACTIONS_MANAGER = keccak256("ACTIONS_MANAGER");
 
 
 // Variables
-uint256 public constant MIN_VOTING_PERIOD = 100; // 100 blocks
-uint256 public constant MAX_VOTING_PERIOD = 1000; // 1000 blocks
+uint256 private constant MIN_VOTING_PERIOD = 100; // 100 blocks
+uint256 private constant MAX_VOTING_PERIOD = 1000; // 1000 blocks
 
-uint256 public constant MIN_VOTING_DELAY = 1; // 1 block
-uint256 public constant MAX_VOTING_DELAY = 10; // 10 blocks
+uint256 private constant MIN_VOTING_DELAY = 1; // 1 block
+uint256 private constant MAX_VOTING_DELAY = 10; // 10 blocks
 
-uint256 public constant LOW_LEVEL_URGENCY_QUORUM = 40;
-uint256 public constant MEDIUM_LEVEL_URGENCY_QUORUM = 60;
-uint256 public constant HIGH_LEVEL_URGENCY_QUORUM = 90;
+uint256 private constant LOW_LEVEL_URGENCY_QUORUM = 40;
+uint256 private constant MEDIUM_LEVEL_URGENCY_QUORUM = 60;
+uint256 private constant HIGH_LEVEL_URGENCY_QUORUM = 90;
 
-uint256 public proposalCount;
-IVotes public immutable IVotestoken;
-ERC20Votes public immutable govToken;
+uint256 private proposalCount;
+IVotes private immutable IVotestoken;
+ERC20Votes private immutable govToken;
 
 
 // mappings
-mapping(UrgencyLevel => uint256) public urgencyLevelToQuorum;
-mapping(bytes32 => Proposal) public proposals; // proposalId to proposal
-mapping(bytes32 => mapping(address => Vote)) public proposalVotes; // proposalId to user address to vote
-mapping(bytes32 => address[]) public proposalVoters;
-mapping(address => Vote[]) public userVotes; // user address to proposalId to vote
-mapping(address => uint256) public userVotedCount;
+mapping(UrgencyLevel => uint256) private urgencyLevelToQuorum;
+mapping(bytes32 => Proposal) private proposals; // proposalId to proposal
+mapping(bytes32 => mapping(address => Vote)) private proposalVotes; // proposalId to user address to vote
+mapping(bytes32 => address[]) private proposalVoters;
+mapping(address => Vote[]) private userVotes; // user address to proposalId to vote
+mapping(address => uint256) private userVotedCount;
 
 modifier isVotingActive(bytes32 proposalId){
 
@@ -239,16 +239,16 @@ constructor(IVotes _token){
     }
 
 
-    function getIVotesToken() public view returns (IVotes) {
+    function getIVotesToken() external view returns (IVotes) {
         return IVotestoken;
     }
 
-    function getGovToken() public view returns (ERC20Votes) {
+    function getGovToken() external view returns (ERC20Votes) {
         return govToken;
     }
 
 
-    function getProposalCount() public view returns (uint256) {
+    function getProposalCount() external view returns (uint256) {
         return proposalCount;
     }
 
@@ -324,7 +324,7 @@ function getCustomProposalVotes(bytes32 proposalId)
     private view  
     returns (uint256[] memory customCalldataIndices, bool isExecutable) 
 {
-    for (uint i = 1; i < customCalldataIndices.length; i++) {
+    for (uint i = 1; i < arr.length; i++) {
         HighestVotedCustomOption memory key = arr[i];
         uint j = i;
 
@@ -355,7 +355,7 @@ isCustomExecutable = isExecutable;
 
 
 
-function getProposal(bytes32 proposalId) public view returns (Proposal memory)  {
+function getProposal(bytes32 proposalId) external view returns (Proposal memory)  {
     return proposals[proposalId];
 }
 

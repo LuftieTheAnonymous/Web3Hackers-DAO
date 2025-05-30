@@ -491,11 +491,11 @@ vm.prank(contractOwner);
 customGovernor.queueProposal(proposalId);
 
 
-CustomBuilderGovernor.HighestVotedCustomOption[5]
- memory highestVotedCustomOption = customGovernor.getCustomProposalVotes(proposalId);
+(uint256[]
+ memory highestIndicies, bool execute) = customGovernor.getHighestVotedCustomOption(proposalId);
 
- console.log(highestVotedCustomOption[0].castedVotes
- , "Highest Voted Custom Option Target");
+ console.log(highestIndicies.length, "Highest Voted Custom Option Indices");
+
 
 vm.expectRevert(CustomBuilderGovernor.ExecutionFailed.selector);
 vm.prank(contractOwner);
@@ -604,7 +604,7 @@ bytes32 proposalId =    customGovernor.createProposal("Coz I've said so though",
 govToken.delegate(user2);
 vm.stopPrank();
 
-
+    
 CustomBuilderGovernor.Proposal memory proposal = customGovernor.getProposal(proposalId);
 
 
@@ -664,7 +664,7 @@ proposalCreatedTargets = [address(govToken), address(govToken)];
 proposalCreatedValues = [0, 0];
  proposalCreatedCalldata = [
     abi.encodeWithSignature("punishMember(address,uint256)", user2, 15e18),
-    abi.encodeWithSignature("rewartUser(address,uint256)", user2, 20)
+    abi.encodeWithSignature("rewardUser(address,uint256)", user2, 20)
 ];
 bytes32 proposalId = customGovernor.createProposal(
     "because I say so",

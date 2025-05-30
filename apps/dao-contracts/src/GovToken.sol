@@ -172,37 +172,23 @@ if(address(0) == _address) {
     _;
     }
 
-  function grantManageRole(address account) public onlyOwner isAddressNonZero(account) {
+  function grantManageRole(address account) external onlyOwner isAddressNonZero(account) {
       _grantRole(MANAGE_ROLE, account);
       emit AdminRoleGranted(account);
     }
 
-  function revokeManageRole(address account) public onlyOwner isAddressNonZero(account) {
+  function revokeManageRole(address account) external onlyOwner isAddressNonZero(account) {
       _revokeRole(MANAGE_ROLE, account);
       emit AdminRoleRevoked(account);
     }
 
-    function addToWhitelist(address user) public onlyManageRole  isAddressNonZero(user) {
+    function addToWhitelist(address user) external onlyManageRole  isAddressNonZero(user) {
       whitelist[user] = true;
     }
 
-    function removeFromWhitelist(address user) public onlyManageRole isAddressNonZero(user)  {
+    function removeFromWhitelist(address user) external onlyManageRole isAddressNonZero(user)  {
       whitelist[user] = false;
     }
-
-
-
-    function totalSupply () public view virtual override(ERC20) returns (uint256) {
-      return super.totalSupply();
-    }
-
-
-    function decimals() public view virtual override(ERC20) returns (uint8) {
-      return 18;
-    }
-
-
-
     // Internal functions (Contract Callable)
     function _maxSupply() internal view virtual override(ERC20Votes) returns (uint256) {
       return MAX_SUPPLY;
@@ -227,26 +213,13 @@ if(address(0) == _address) {
     }
 
 
-      function _getVotingUnits(address account) internal view override(Votes, ERC20Votes) returns (uint256) {
-        return super._getVotingUnits(account);
-      }
 
     function _delegate(address account, address delegatee) internal virtual override(Votes, VotesExtended) {
-    super._delegate(account, delegatee);
+_delegate(account, delegatee);
     }
-
-        function _pause() internal virtual override(Pausable) {
-      super._pause();
-    }
-
-    function _unpause() internal virtual override(Pausable) {
-      super._unpause();
-    }
-
-
 
 function pause() external onlyOwner {
-      _pause();
+_pause(); 
     }
 
 function unpause() external onlyOwner {
@@ -295,7 +268,7 @@ function unpause() external onlyOwner {
       }
     }
 
-    function rewardUser(address user, uint256 amount) public nonReentrant  rewardOnlyInitialTokensReceivers(user) {
+    function rewardUser(address user, uint256 amount) external nonReentrant  rewardOnlyInitialTokensReceivers(user) {
       _mint(user, amount);
     emit UserRewarded(user, amount);
     }
@@ -311,12 +284,12 @@ function unpause() external onlyOwner {
   emit UserReceivedMonthlyDistribution(user, amount);
   }
 
-    function increaseUserMaliciousActions(address user) public onlyManageRole  {  
+    function increaseUserMaliciousActions(address user) external onlyManageRole  {  
       userMaliciousActions[user] += 1;
       emit MaliciousCounterIncreased(user);
     }
 
-    function readMemberInfluence(address user) public view returns (uint256) {
+    function readMemberInfluence(address user) external view returns (uint256) {
       return _getVotingUnits(user);
     }
 
@@ -324,9 +297,6 @@ function unpause() external onlyOwner {
     return super.transfer(to, amount);
     }
 
-    function approve(address spender, uint256 amount) public override(ERC20) returns (bool) {
-    return super.approve(spender, amount);
-    }
 
     function nonces(address _owner) public view virtual override(ERC20Permit, Nonces) returns (uint256) {
     return super.nonces(_owner);
@@ -336,10 +306,6 @@ function unpause() external onlyOwner {
       super.delegate(delegatee);
     }
 
-
-    function getPastBalanceOf(address account, uint256 timepoint) public view virtual override(VotesExtended) returns (uint256) {
-      return super.getPastBalanceOf(account, timepoint);
-    }
 
     function getPastVotes(address account, uint256 timepoint) public view virtual override(Votes) returns (uint256) {
       return super.getPastVotes(account, timepoint);
