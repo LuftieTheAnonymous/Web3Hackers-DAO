@@ -3,8 +3,11 @@ pragma solidity ^0.8.24;
 
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import {ERC20Votes} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract CustomBuilderGovernor {
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract CustomBuilderGovernor is ReentrancyGuard, AccessControl {
 
 // Errors
 error InvalidProposalState();
@@ -14,6 +17,8 @@ error NotElligibleToPropose();
 error NotReadyToStart();
 error AlreadyVoted();
 error ExecutionFailed();
+
+error NoRoleAssigned();
 
 // Events
 event ProposalCreated(
@@ -149,6 +154,10 @@ struct HighestVotedCustomOption{
     bool isExecutable;
 }
 
+
+bytes32 constant private ACTIONS_MANAGER = keccak256("ACTIONS_MANAGER");
+
+
 // Variables
 uint256 public constant MIN_VOTING_PERIOD = 100; // 100 blocks
 uint256 public constant MAX_VOTING_PERIOD = 1000; // 1000 blocks
@@ -190,6 +199,34 @@ if(proposalVotes[proposalId][msg.sender].isVoted){
     _;
 }
 
+modifier isElligibleToVote(bytes32 proposalId) {
+    if(govToken.getPastVotes(msg.sender, block.number - 1) == 0){
+        revert NotElligibleToPropose();
+    }
+    _;
+}
+
+modifier isElligibleToPropose() {
+  if(govToken.getPastVotes(msg.sender, block.number - 1) <= getProposalThreshold()){
+            revert NotElligibleToPropose();
+        }
+    _;
+}
+
+modifier onlyActionsManager(){
+    if(!hasRole(ACTIONS_MANAGER, msg.sender)){
+        revert NoRoleAssigned();
+    }
+    _;
+}
+
+modifier isProposalReadyToSucceed(bytes32 proposalId) {
+if(proposals[proposalId].state != ProposalState.Active || block.timestamp < proposals[proposalId].endBlockTimestamp){
+            revert InvalidProposalState();
+        }
+    _;
+}
+
 constructor(IVotes _token){
         IVotestoken = _token;
         govToken = ERC20Votes(address(_token));
@@ -197,6 +234,8 @@ constructor(IVotes _token){
         urgencyLevelToQuorum[UrgencyLevel.Low] = LOW_LEVEL_URGENCY_QUORUM;
         urgencyLevelToQuorum[UrgencyLevel.Medium] = MEDIUM_LEVEL_URGENCY_QUORUM;
         urgencyLevelToQuorum[UrgencyLevel.High] = HIGH_LEVEL_URGENCY_QUORUM;
+
+        _grantRole(ACTIONS_MANAGER, msg.sender);
     }
 
 
@@ -218,7 +257,7 @@ constructor(IVotes _token){
     }
 
 
-    function getProposalThreshold() public view returns (uint256) {
+    function getProposalThreshold() public view returns (uint256)  {
         return govToken.totalSupply() / 200;
     }
 
@@ -247,18 +286,42 @@ function getCustomProposalVotes(bytes32 proposalId)
     view
     returns (HighestVotedCustomOption[5] memory customVoteCounts)
 {
+    uint256[5] memory voteSums;
+    uint256[5] memory highestVoteWeight;
+    address[5] memory highestVoter;
+    bool[5] memory highestIsApproving;
+
     address[] memory voters = proposalVoters[proposalId];
     for (uint256 i = 0; i < voters.length; i++) {
         Vote memory vote = proposalVotes[proposalId][voters[i]];
+        uint8 option = vote.voteOption;
 
-        uint8 option = vote.voteOption; // 0 to 4 (MAX 5 options)
-      
-            customVoteCounts[i] = HighestVotedCustomOption(option, vote.weight, voters[i], vote.isApprovingVote);
+        if (option >= 5) continue;
+
+        // Sum weights per option
+        voteSums[option] += vote.weight;
+
+        // Check if this voter has highest weight for the option
+        if (vote.weight > highestVoteWeight[option]) {
+            highestVoteWeight[option] = vote.weight;
+            highestVoter[option] = voters[i];
+            highestIsApproving[option] = vote.isApprovingVote;
+        }
+    }
+
+    // Build final result array per option
+    for (uint8 j = 0; j < 5; j++) {
+        customVoteCounts[j] = HighestVotedCustomOption(
+            j,
+            voteSums[j],
+            highestVoter[j],
+            highestIsApproving[j]
+        );
     }
 }
 
-    function insertionSort(HighestVotedCustomOption[5] memory arr, bytes32 proposalId) 
-    public view  
+    function insertionSort(HighestVotedCustomOption[5] memory arr, bytes32 proposalId)
+    private view  
     returns (uint256[] memory customCalldataIndices, bool isExecutable) 
 {
     for (uint i = 1; i < customCalldataIndices.length; i++) {
@@ -281,7 +344,7 @@ function getCustomProposalVotes(bytes32 proposalId)
 
 
 
-function getHighestVotedCustomOption(bytes32 proposalId) public view returns (uint256[] memory indicies, bool isCustomExecutable) {
+function getHighestVotedCustomOption(bytes32 proposalId) external view returns (uint256[] memory indicies, bool isCustomExecutable) {
 
     HighestVotedCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
     (uint256[] memory customCalldataIndices, bool isExecutable) = insertionSort(customVoteCounts, proposalId);
@@ -292,7 +355,7 @@ isCustomExecutable = isExecutable;
 
 
 
-function getProposal(bytes32 proposalId) public view returns (Proposal memory) {
+function getProposal(bytes32 proposalId) public view returns (Proposal memory)  {
     return proposals[proposalId];
 }
 
@@ -310,10 +373,10 @@ function getProposalQuorumNeeded(bytes32 proposalId) public view returns (uint25
         bool isApprovingVote,
         bool isDefeatingVote,
         uint256[] calldata customCalldataIndices
-    ) public
+    ) external nonReentrant
     isVotingActive(proposalId)
+    isElligibleToVote(proposalId)
      {
-        govToken.delegate(msg.sender);
 
         uint256 weight = govToken.getPastVotes(msg.sender, block.number - 1);
 
@@ -355,11 +418,7 @@ userVotedCount[msg.sender]++;
         uint256 endBlockTimestamp,
         uint256 proposalTimelock,
         uint256 delayInSeconds
-    ) public returns (bytes32) {
-
-if(govToken.getPastVotes(msg.sender, block.number - 1) < getProposalThreshold() ||  govToken.getPastVotes(msg.sender, block.number - 1) == 0){
-            revert NotElligibleToPropose();
-        }
+    ) external nonReentrant isElligibleToPropose returns (bytes32)  {
 
 
         bytes32 proposalId = keccak256(abi.encodePacked(proposalCount,description, targets, values, isCustom, msg.sender, block.timestamp));
@@ -395,7 +454,7 @@ if(govToken.getPastVotes(msg.sender, block.number - 1) < getProposalThreshold() 
     }
 
 
-function activateProposal(bytes32 proposalId) external {
+function activateProposal(bytes32 proposalId) external onlyActionsManager nonReentrant {
  if(block.timestamp < proposals[proposalId].startBlockTimestamp && proposals[proposalId].state == ProposalState.Pending){
      revert NotReadyToStart();
  }
@@ -405,12 +464,8 @@ function activateProposal(bytes32 proposalId) external {
 }
 
 
-function succeedProposal(bytes32 proposalId) public {
+function succeedProposal(bytes32 proposalId) external onlyActionsManager isProposalReadyToSucceed(proposalId) nonReentrant {
  
-        if(proposals[proposalId].state != ProposalState.Active || block.timestamp < proposals[proposalId].endBlockTimestamp){
-            revert InvalidProposalState();
-        }
-
    uint256 quorumNeeded = getProposalQuorumNeeded(proposalId);
 
 if(!proposals[proposalId].isCustom){
@@ -451,7 +506,7 @@ if(!proposals[proposalId].isCustom){
 
 }
 
-function cancelProposal(bytes32 proposalId) public {
+function cancelProposal(bytes32 proposalId) external  {
    
    if(proposals[proposalId].state != ProposalState.Pending){
             revert InvalidProposalState();
@@ -465,7 +520,7 @@ function cancelProposal(bytes32 proposalId) public {
     }
 
 
-function queueProposal(bytes32 proposalId) public  {
+function queueProposal(bytes32 proposalId) external onlyActionsManager nonReentrant {
 if(proposals[proposalId].state != ProposalState.Succeeded ){
             revert InvalidProposalState();
 }
@@ -488,7 +543,7 @@ function callProposal(Proposal memory proposal) internal {
 
              if(target != address(0)){
                  emit CalldataExecuted();
-                 (bool success, bytes memory returnData) = target.call{value:value}(data);
+                 (bool success, ) = target.call{value:value}(data);
                  if(!success){
                      revert ExecutionFailed();
                  }
@@ -511,7 +566,7 @@ function callSelectedProposal(bytes32 proposalId, uint256[] memory customCalldat
              bytes memory data = proposals[proposalId].calldatas[customCalldataIndices[i]];
 
             if(target != address(0)){  
-                 (bool success, bytes memory returnData) = target.call{value:value}(data);
+                 (bool success, ) = target.call{value:value}(data);
                   emit CalldataExecuted();
                  if(!success){
                      revert ExecutionFailed();
@@ -525,10 +580,10 @@ function callSelectedProposal(bytes32 proposalId, uint256[] memory customCalldat
 
 
 
-function executeProposal(bytes32 proposalId) external {
+function executeProposal(bytes32 proposalId) external onlyActionsManager nonReentrant {
 Proposal memory proposal = proposals[proposalId];
 
-    if(proposal.state != ProposalState.Queued && proposal.queuedAt+ proposal.timelock > block.timestamp){
+    if(proposal.state != ProposalState.Queued && proposal.queuedAt + proposal.timelock > block.timestamp){
         revert InvalidProposalState();
     }
 
