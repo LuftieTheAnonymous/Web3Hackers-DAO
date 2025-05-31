@@ -21,20 +21,3 @@ export function DAO_CronJobs_elligibilityMiddleware(req:Request, res:Response, n
     next();
 }
 
-
-export function notificationsEligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
-
-    const isFrontend =req.headers['is-frontend-req'];
-
-    if(req.headers['x-backend-eligibility'] !== process.env.FRONTEND_ACCESS_SECRET || !isFrontend) {
-        res.status(403).json({error:"Forbidden", message:"You are not allowed to access this resource.", status:403});
-        return;
-    }
-
-    if(!isFrontend && req.headers['x-backend-eligibility'] !== process.env.CRONJOBS_INTERNAL_SECRET) {
-        res.status(403).json({error:"Forbidden", message:"You are not allowed to access this resource.", status:403});
-        return;
-    }
-
-    next();
-}

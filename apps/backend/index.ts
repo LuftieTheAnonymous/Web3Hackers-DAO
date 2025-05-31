@@ -5,7 +5,6 @@ import govTokenRouter from "./routes/GovTokenRouter";
 import governanceRouter from "./routes/GovernanceRouter";
 import membersRouter from "./routes/MembersRouter";
 import activityRouter from "./routes/ActivityRouter";
-import router from "./routes/NotificationsRouter";
 import { NextFunction, Request, Response } from "express";
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -71,7 +70,6 @@ app.use('/governance',(req:Request, res:Response, next:NextFunction)=>{
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
-app.use('/notifications', router);
 const server = http.createServer(app);
 
 

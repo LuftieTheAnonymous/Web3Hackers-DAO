@@ -26,7 +26,7 @@ try {
 
     console.log(data);
 
-    const tx = await governorTokenContract.handInUserInitialTokens(PSR, JEXS, W3I, TKL, KVTR, (data as any).userWalletAddress,  (data as any).isAdmin);
+    const tx = await governorTokenContract.handInUserInitialTokens(PSR, JEXS, W3I, TKL, KVTR, (data as any).userWalletAddress);
     
     const txReceipt = await tx.wait();
     

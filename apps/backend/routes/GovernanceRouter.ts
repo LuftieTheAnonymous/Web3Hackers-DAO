@@ -1,18 +1,21 @@
 import { Router } from "express";
 import { activateProposals, cancelProposal, executeProposals, finishProposals, getProposalDetails, getProposalQuorum, getProposalState, getProposalVotes, queueProposals } from "../controllers/GovernanceController";
 import { DAO_CronJobs_elligibilityMiddleware } from "../middlewares/internalEligibility";
+import { cronJobsActionsLimiter } from "../middlewares/rateLimiters";
 
 const governanceRouter = Router();
 
+
+
 governanceRouter.post('/cancel_proposal/:proposalId', cancelProposal);
 
-governanceRouter.get('/activate_proposals',DAO_CronJobs_elligibilityMiddleware, activateProposals);
+governanceRouter.get('/activate_proposals',DAO_CronJobs_elligibilityMiddleware, cronJobsActionsLimiter, activateProposals);
 
-governanceRouter.post('/finish_proposals',DAO_CronJobs_elligibilityMiddleware, finishProposals);
+governanceRouter.post('/finish_proposals',DAO_CronJobs_elligibilityMiddleware, cronJobsActionsLimiter, finishProposals);
 
-governanceRouter.get('/queue_proposals',DAO_CronJobs_elligibilityMiddleware, queueProposals);
+governanceRouter.get('/queue_proposals',DAO_CronJobs_elligibilityMiddleware, cronJobsActionsLimiter, queueProposals);
 
-governanceRouter.get('/execute_proposals',DAO_CronJobs_elligibilityMiddleware, executeProposals);
+governanceRouter.get('/execute_proposals',DAO_CronJobs_elligibilityMiddleware, cronJobsActionsLimiter, executeProposals);
 
 governanceRouter.get('/get_proposal_votes/:proposalId', getProposalVotes);
 
