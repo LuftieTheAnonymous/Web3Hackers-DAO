@@ -6,6 +6,9 @@ module.exports={
     async execute(interaction:any) {
        
         if(interaction.isModalSubmit() && interaction.customId === 'wallet-modal'){
+       
+            await interaction.deferReply();
+       
             const walletAddress = interaction.fields.getTextInputValue('walletAddress');
             console.log(interaction.user);
             console.log(walletAddress);
@@ -16,6 +19,7 @@ module.exports={
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string
                 },
                 body: JSON.stringify({ 
                     walletAddress, 
@@ -29,9 +33,10 @@ module.exports={
             const response = await userRegister.json();
 
             if(!response || response.error){ 
-                return await interaction.reply({content:response.error, flags:MessageFlags.Ephemeral});
+                return await interaction.editReply
+                ({content:response.error});
             }
-            await interaction.reply({content:'Check your DM for more info 😅', flags:MessageFlags.Ephemeral});
+            await interaction.editReply({content:'Check your DM for more info 😅'});
             await interaction.user.send({content:`Congratulations! You have setup your wallet correctly in the DAO-members register ! Now go back to the server run command ${inlineCode('/initial-token-distribution')} `, flags:MessageFlags.Ephemeral});
         
         return;

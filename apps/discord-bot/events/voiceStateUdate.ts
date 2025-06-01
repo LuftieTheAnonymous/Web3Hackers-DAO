@@ -85,7 +85,10 @@ module.exports = {
             if (session.maxAmountOfUsers > 1) {
               const chatActivityFetch =  await fetch(`http://localhost:2137/activity/insert/voice-activity/${oldState.member.id}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                      headers: {
+                  'Content-Type': 'application/json',
+                'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string
+                },
                     body: JSON.stringify({
                         voice_chat_id: oldState.channelId,
                         minutes_spent: minutes,

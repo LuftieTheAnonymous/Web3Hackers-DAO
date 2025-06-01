@@ -7,20 +7,14 @@
     import {VotesExtended} from "../lib/openzeppelin-contracts/contracts/governance/utils/VotesExtended.sol";
     import {Nonces} from "../lib/openzeppelin-contracts/contracts/utils/Nonces.sol";
     import {Votes} from "../lib/openzeppelin-contracts/contracts/governance/utils/Votes.sol";
-    import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
     import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-
-
     import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
-  import {Pausable} from "../lib/openzeppelin-contracts/contracts/utils/Pausable.sol";
 
 
-    contract GovernmentToken is ERC20, ERC20Permit, ERC20Votes, VotesExtended, AccessControl, Ownable, ReentrancyGuard, Pausable {
+    contract GovernmentToken is ERC20, ERC20Permit, ERC20Votes, VotesExtended, AccessControl, ReentrancyGuard {
 
-    error IntialTokensAlreadyReceived();
     error IntialTokensNotReceived();
-    error MaliciousActionsLimitReached();
     error MonthlyDistributionNotReady();
     error SupplySurpassed();
     error AddressNonZero();
@@ -69,7 +63,8 @@
       uint256 private constant DSR_ADMIN_MULTIPLIER = 35;
       uint256 private constant DSR_USER_MULTIPLIER = 5 ;
       uint256 private monthly_distribution_timestamp; 
-      bytes32 public constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
+      bytes32 private constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
+      bytes32 private constant GRANTER_ROLE = keccak256("GRANTER_ROLE");
 
       mapping(address => bool) private receivedInitialTokens;
       mapping(address=>uint256) public userMaliciousActions;
@@ -82,7 +77,7 @@
 
   mapping(address => uint256) private lastClaimedTime;
 
-        constructor() ERC20("BuilderToken", "BUILD") Ownable(msg.sender) ERC20Permit("BuilderToken") {
+        constructor() ERC20("BuilderToken", "BUILD") ERC20Permit("BuilderToken") {
           // Programming Seniority Level (PSR) options
           psrOptions[TokenReceiveLevel.LOW] = 15;
           psrOptions[TokenReceiveLevel.MEDIUM_LOW] = 40;
@@ -119,14 +114,9 @@
         kvtrOptions[KnowledgeVerificationTestRate.EXPERT_PLUS] = 1000;
         
         _grantRole(MANAGE_ROLE, msg.sender);
+        _grantRole(GRANTER_ROLE, msg.sender);
         } 
 
-        modifier hasExceededSupply(){
-          if(totalSupply() > MAX_SUPPLY) {
-            revert SupplySurpassed();
-            }
-            _;
-        }
 
         modifier rewardOnlyInitialTokensReceivers(address member) {
     if(!receivedInitialTokens[member] && whitelist[member] == false) {
@@ -157,6 +147,13 @@
       _;
     }
 
+    modifier onlyGranterRole() {
+      if(!hasRole(GRANTER_ROLE, msg.sender)) {
+        revert NoProperAdminRole();
+      }
+      _;
+    }
+
     modifier isMonthlyDistributionTime() {
       if(block.timestamp - lastClaimedTime[msg.sender] < 30 * 24 * 60 * 60){
         revert MonthlyDistributionNotReady();
@@ -172,12 +169,12 @@ if(address(0) == _address) {
     _;
     }
 
-  function grantManageRole(address account) external onlyOwner isAddressNonZero(account) {
+  function grantManageRole(address account) external onlyGranterRole isAddressNonZero(account) {
       _grantRole(MANAGE_ROLE, account);
       emit AdminRoleGranted(account);
     }
 
-  function revokeManageRole(address account) external onlyOwner isAddressNonZero(account) {
+  function revokeManageRole(address account) external onlyGranterRole isAddressNonZero(account) {
       _revokeRole(MANAGE_ROLE, account);
       emit AdminRoleRevoked(account);
     }
@@ -194,7 +191,7 @@ if(address(0) == _address) {
       return MAX_SUPPLY;
     }
 
-    function _mint(address account, uint256 amount) internal override(ERC20) mintOnlyBelowMaxSupply(amount) hasExceededSupply {
+    function _mint(address account, uint256 amount) internal override(ERC20) mintOnlyBelowMaxSupply(amount) mintOnlyBelowMaxSupply(amount) {
     super._mint(account, amount);
     }
 
@@ -213,18 +210,9 @@ if(address(0) == _address) {
     }
 
 
-
-    function _delegate(address account, address delegatee) internal virtual override(Votes, VotesExtended) {
-_delegate(account, delegatee);
-    }
-
-function pause() external onlyOwner {
-_pause(); 
-    }
-
-function unpause() external onlyOwner {
-      _unpause();
-}
+  function _delegate(address account, address delegatee) internal virtual override(Votes, VotesExtended) {
+  super._delegate(account, delegatee);
+  }
 
       // Public functions (User-Interactive)
     function handInUserInitialTokens(TokenReceiveLevel _psrLevel, TokenReceiveLevel _jexsLevel, TechnologyKnowledgeLevel _tklLevel, TokenReceiveLevel _web3IntrestLevel, KnowledgeVerificationTestRate _kvtrLevel, address receiverAddress) external isAddressNonZero(receiverAddress) onlyWhitelisted(receiverAddress)    {
@@ -275,7 +263,7 @@ function unpause() external onlyOwner {
 
   function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported, uint256 vcMinutes, uint256 avgMessagesPerDay, address user) external isMonthlyDistributionTime onlyManageRole nonReentrant  {
 
-    uint256 amount = dailyReports * 125e16 + DAOVotingPartcipation * 3e18 + DAOProposalsSucceeded * 175e16 + problemsSolved * 3e18 + issuesReported * 145e16 + vcMinutes * 1e17 + avgMessagesPerDay * 1e14;
+    uint256 amount = dailyReports * 125e15 + DAOVotingPartcipation * 3e17 + DAOProposalsSucceeded * 175e15 + problemsSolved * 3e16 + issuesReported * 145e16 + vcMinutes * 1e16 + avgMessagesPerDay * 1e14;
 
   _mint(user, amount);
 
@@ -293,24 +281,14 @@ function unpause() external onlyOwner {
       return _getVotingUnits(user);
     }
 
-    function transfer(address to, uint256 amount) public override(ERC20) returns (bool) {
-    return super.transfer(to, amount);
-    }
-
-
     function nonces(address _owner) public view virtual override(ERC20Permit, Nonces) returns (uint256) {
     return super.nonces(_owner);
     }
 
-    function delegate(address delegatee) public virtual override(Votes) {
-      super.delegate(delegatee);
+  function delegate(address delegatee) public virtual override(Votes) {
+   _delegate(msg.sender, delegatee);
     }
 
-
-    function getPastVotes(address account, uint256 timepoint) public view virtual override(Votes) returns (uint256) {
-      return super.getPastVotes(account, timepoint);
-    }
-
-
+    
 
     }

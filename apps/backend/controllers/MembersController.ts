@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { supabaseConfig } from "../config/supabase";
+import { governorTokenContract } from "../config/ethersConfig";
 
 export const getMembers = async (req:Request, res:Response) => {
 try{
@@ -30,10 +31,16 @@ export const addMember= async (req:Request, res:Response) => {
     try{
         const {data, error} = await supabaseConfig.from('dao_members').insert([{discord_member_id:discordId,isAdmin:isAdmin, photoURL:photoURL, userWalletAddress:walletAddress, nickname:nickname}]);
 
-
         if(error){
             res.status(500).json({message:"error", data:null, error:error.message, status:500 });
         }
+
+            const tx = await governorTokenContract.addToWhitelist(walletAddress);
+                
+                const txReceipt = await tx.wait();
+                
+                console.log(txReceipt);
+
 
 res.status(200).json({message:"success", data:{discord_member_id:discordId, userWalletAddress:walletAddress, nickname, isAdmin}, error:null, status:200 });
 }catch(err){
@@ -59,7 +66,7 @@ export const getMember= async (req:Request, res:Response) => {
 
 
      res.status(200).json({message:"success", data, error:null, status:200 });
-        
+
     }catch(err){
     res.status(500).json({message:"error", data:null, error:err, status:500 });
     }

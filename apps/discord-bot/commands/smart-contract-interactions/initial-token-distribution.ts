@@ -9,13 +9,18 @@ data: new SlashCommandBuilder().setName('initial-token-distribution').setDescrip
 async execute(interaction:any){
 
 
-    const checkAbilityResponse = await fetch(`http://localhost:2137/members/get-member/${interaction.user.id}`);
+    const checkAbilityResponse = await fetch(`http://localhost:2137/gov_token/influence/${interaction.user.id}`);
 
     const checkAbilityResponseJson = await checkAbilityResponse.json();
 
     if(!checkAbilityResponseJson || checkAbilityResponseJson.error){ 
         return await interaction.reply({content:checkAbilityResponseJson.error, flags:MessageFlags.Ephemeral});
     }
+
+    if(Number(checkAbilityResponseJson.tokenAmount) > 0){
+        return await interaction.reply({content:`You already have ${Number(checkAbilityResponseJson.tokenAmount)} tokens, you can use them to vote on proposals, create proposals and more !`, flags:MessageFlags.Ephemeral});
+    }
+    
 
 
 const customObject:{

@@ -1,11 +1,20 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 
 import { CronJob } from "cron";
 
 
-export const activateProposalsJob = new CronJob("* * * * *", async () => {
+export const activateProposalsJob = new CronJob("* */15 * * *", async () => {
 try{
       console.log('activateProposalJob is running');
-    const response =  await fetch('http://localhost:2137/governance/activate_proposals');
+    const response =  await fetch('http://localhost:2137/governance/activate_proposals', {
+      method:'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-backend-eligibility': process.env.CRONJOBS_INTERNAL_SECRET as string
+      },
+    });
   const data = await response.json();
 
   console.log('Activate Proposal Data');
@@ -22,7 +31,13 @@ try{
 export const queueProposalsJob= new CronJob("* */15 * * *", async () => {
   try{
     console.log('queueProposalJob is running');
-  const response =  await fetch('http://localhost:2137/governance/queue_proposals');
+  const response =  await fetch('http://localhost:2137/governance/queue_proposals', {
+    method:'GET',
+  headers: {
+        'Content-Type': 'application/json',
+        'x-backend-eligibility': process.env.CRONJOBS_INTERNAL_SECRET as string
+      },
+  });
   const data = await response.json();
 
     console.log('Queue Proposal Data');
@@ -39,7 +54,13 @@ export const queueProposalsJob= new CronJob("* */15 * * *", async () => {
 export const executeProposalsJob= new CronJob("* */15 * * *", async () => {
 try{
       console.log('executeProposalJob is running');
-    const response =  await fetch('http://localhost:2137/governance/execute_proposals');
+    const response =  await fetch('http://localhost:2137/governance/execute_proposals', {
+      method:'GET',
+  headers: {
+        'Content-Type': 'application/json',
+        'x-backend-eligibility': process.env.CRONJOBS_INTERNAL_SECRET as string
+      },
+    });
   const data = await response.json();
 
   console.log('Execute Proposal Data');
@@ -56,7 +77,13 @@ try{
 export const finishProposalsJob= new CronJob("* */15 * * *", async () => {
 try{
       console.log('finishProposalJob is running');
-    const response =  await fetch('http://localhost:2137/governance/finish_proposals');
+    const response =  await fetch('http://localhost:2137/governance/finish_proposals', {
+      method:'GET',
+        headers: {
+        'Content-Type': 'application/json',
+        'x-backend-eligibility': process.env.CRONJOBS_INTERNAL_SECRET as string
+      },
+    });
   const data = await response.json();
 
     console.log('Finish Proposal Data');

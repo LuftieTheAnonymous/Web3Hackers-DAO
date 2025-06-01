@@ -52,7 +52,7 @@ app.use(express());
 
 app.use(cors({
     allowedHeaders:['Content-Type', 'Authorization', 'x-backend-eligibility', 'is-frontend-req'],
-    origin:['http://localhost:3000', 'https://localhost:2137', 'http://localhost:2138'],
+    origin:['http://localhost:3000', 'http://localhost:2138'],
     methods:['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     maxAge: 600, // 10 minutes
 }));

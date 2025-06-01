@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { governorTokenContract } from "../config/ethersConfig";
 import { supabaseConfig } from "../config/supabase";
+import retry from "async-retry";
 
 
 // Single User Action
@@ -102,6 +103,8 @@ try {
     const userTokens = await governorTokenContract.getVotes((userDBObject.data as any)
         .userWalletAddress);
 
+        console.log(Number(userTokens));
+
     res.status(200).json({userDBObject, tokenAmount:(Number(userTokens)/1e18), message:`${
         (userDBObject.data as any).nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     
@@ -125,23 +128,45 @@ const monthlyTokenDistribution = async (req: Request, res: Response) => {
             res.status(404).json({data:null, error:"No monthly activities found", message:"error", status:404});
         }
 
-(monthActivities.data as any).map(async (activity: any) => {
+const promisesArray = (monthActivities.data as any).map(async (activity: any) => {
 
-    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1), 
-(activity as any).dao_members.userWalletAddress);
+    return  Promise.resolve(async()=>{
+
+  await retry((async () => {
+              const tx = await governorTokenContract.rewardMonthlyTokenDistribution(BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1), 
+            (activity as any).dao_members.userWalletAddress);
         
         const txReceipt = await tx.wait();
-        
         console.log(txReceipt);
+          }),{
+            retries:5,
+            maxTimeout: 1 * 1000 * 3600, // 1 hour
+            onRetry(err,attempt){
+                console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
+            }
+          });
+    
         
-        res.json({data:txReceipt,error:null, message:"success", status:200});
+    });
+
 });
+
+        const result = await Promise.all(promisesArray);
+
+        console.log(result);
+
+        if(!result || result.length === 0){
+            res.status(404).json({data:null, error:"No monthly activities found", message:"error", status:404});
+        }
+
     res.status(200).json({data:null, error:null, message:"success", status:200});
     } catch (error) {
             console.log(error);
     res.status(500).json({data:null, error, message:"error", status:500});
     }
 }
+
+
 
 
 export {

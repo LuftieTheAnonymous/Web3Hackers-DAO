@@ -4,16 +4,16 @@ import dotenv from "dotenv";
 import { daoContract, proposalStates, provider } from "../config/ethersConfig";
 import { supabaseConfig } from "../config/supabase";
 import { EventLog } from "ethers";
-
+import pLimit from 'p-limit';
+import retry from 'async-retry';
 
 export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
     args: string[]
 }
 
-
 dotenv.config();
 
-import pLimit from 'p-limit';
+
 
 const activateProposals = async (req: Request, res: Response) => {
   try {
@@ -57,7 +57,6 @@ const activateProposals = async (req: Request, res: Response) => {
   }
 };
 
-
 const finishProposals= async (req: Request, res: Response) => {
     try{
         
@@ -66,11 +65,10 @@ const finishProposals= async (req: Request, res: Response) => {
 
      const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
 
-     console.log(events);
-
-
  const receipts =    events.map(async (event) => {
-        const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
+      return  await retry(async ()=>{
+            return Promise.resolve(async()=>{
+           const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
         console.log(proposal);
         if(proposal[6] === 1 && new Date(Number(proposal[4]) * 1000).getTime() <= new Date().getTime()){
             const tx = await daoContract.finishProposal((event as ProposalEventArgs).args[0]);
@@ -79,9 +77,28 @@ const finishProposals= async (req: Request, res: Response) => {
             const txReceipt = await tx.wait();
 return txReceipt
         }
+     })
+        },{
+            retries: 5,
+            maxTimeout: 1 * 1000 * 3600, // 1 hour
+            onRetry(err, attempt) {
+                console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
+            }
+        })
+        
+
+
+   
     });
+
+    const receiptsResults = await Promise.all(receipts);
+
+    console.log(receiptsResults);
+    if(!receiptsResults || receiptsResults.length === 0){
+         res.status(404).json({data:null, error:"No proposals to finish", message:"error", status:404});
+    }
     
-    res.status(200).json({data:receipts, error:null, message:"success", status:200});
+    res.status(200).json({data:receiptsResults, error:null, message:"success", status:200});
 
     }
      catch(err){
@@ -98,7 +115,9 @@ try{
      const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
 
  const receipts =    events.map(async (event) => {
-        const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
+    return  await retry(async ()=>{
+return  Promise.resolve(async()=>{
+            const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
         console.log(proposal);
         if(proposal[6] === 4){
             const tx = await daoContract.queueProposal((event as ProposalEventArgs).args[0]);
@@ -108,7 +127,22 @@ try{
     return txReceipt
           
         }
+})
+    }, {
+            retries: 5,
+            maxTimeout: 1 * 1000 * 3600, // 1 hour
+            onRetry(err, attempt) {
+                console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
+            }
     });
+    });
+
+    const receiptsResults = await Promise.all(receipts);
+    console.log(receiptsResults);
+
+    if(!receiptsResults || receiptsResults.length === 0){
+         res.status(404).json({data:null, error:"No proposals to queue", message:"error", status:404});
+    }
 
     res.status(200).json({data:receipts, error:null, message:"success", status:200});
     }
@@ -117,7 +151,6 @@ try{
         res.status(500).json({data:null, error:err, message:"error", status:500});
      }
     }
-
 
 const cancelProposal = async (req: Request, res: Response) => {
     const {proposalId} = req.params;
@@ -149,7 +182,9 @@ const executeProposals = async (req: Request, res: Response) => {
 
 
 const receipts =events.map(async (event) => {
-                const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]); 
+     return  await retry(async ()=>{
+              return Promise.resolve((async()=>{
+  const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]); 
                 if(proposal[6] === 5){
                     const tx = await daoContract.executeProposal((event as ProposalEventArgs).args[0]);
                     console.log(tx);
@@ -158,7 +193,23 @@ const receipts =events.map(async (event) => {
                     console.log(txReceipt);
             
                 }
+              }))
+            }, {
+            retries: 5,
+            maxTimeout: 1 * 1000 * 3600, // 1 hour
+            onRetry(err, attempt) {
+                console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
+            }
             });
+        });
+
+        const receiptsResults = await Promise.all(receipts);
+        console.log(receiptsResults);
+
+        if(!receiptsResults || receiptsResults.length === 0){
+             res.status(404).json({data:null, error:"No proposals to execute", message:"error", status:404});
+        }
+
             res.status(200).send({message:"success", status:200, data:receipts, error:null});
         }
     catch(error){

@@ -1,11 +1,12 @@
 import express from 'express';
 import { addMember, getMember, getMembers } from '../controllers/MembersController';
+import { DAO_Discord_elligibilityMiddleware } from '../middlewares/internalEligibility';
 
 const membersRouter = express.Router();
 
 membersRouter.get('/get-all-members', getMembers);
 
-membersRouter.post('/add-member', addMember);
+membersRouter.post('/add-member', DAO_Discord_elligibilityMiddleware, addMember);
 
 membersRouter.get('/get-member/:discordId', getMember);
 

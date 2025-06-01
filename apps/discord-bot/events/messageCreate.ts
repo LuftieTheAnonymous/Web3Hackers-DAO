@@ -40,9 +40,10 @@ module.exports={
               
              await fetch(`http://localhost:2137/activity/update/${member.id}`,{
                     method:'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                  headers: {
+                  'Content-Type': 'application/json',
+                'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string
+                },
                     body: JSON.stringify({
                     activity,
                     id:`${message.author.id}-${new Date().getFullYear()}-${new Date().getMonth()}`,

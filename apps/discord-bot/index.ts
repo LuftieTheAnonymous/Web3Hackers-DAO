@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection, Message, Partials, GuildMember, VoiceState, AnyThreadChannel, ButtonBuilder, ActionRow, VoiceChannelEffect, GuildAuditLogsEntry } from 'discord.js';
+import {  GatewayIntentBits, Collection, Partials } from 'discord.js';
 import { CustomClient, CustomClientType } from './types/discordBotTypes';
 
 // Require the necessary discord.js classes

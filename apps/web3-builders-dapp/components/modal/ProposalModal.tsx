@@ -307,7 +307,6 @@ return (
   writeContract({
     abi: tokenContractAbi,
     address: TOKEN_CONTRACT_ADDRESS,
-    type:'eip1559',
     functionName:'delegate',
     args:[address],
   },{

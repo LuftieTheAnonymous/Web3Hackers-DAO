@@ -92,7 +92,6 @@ const { memberDiscordId } = req.params;
 
 const insertVoiceChatActivity=async(req:Request, res:Response)=>{
     try{
-        const {memberDiscordId}=req.params;
         const activityData = req.body;
 
         const {data,error}= await supabaseConfig.from('voice_chat_participation').insert([activityData]);

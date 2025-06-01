@@ -63,9 +63,10 @@ selectCollector.on('collect', async (i:SelectMenuInteraction)=>{
             
  await fetch(`http://localhost:2137/activity/update/${value}`,{
             method:'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+         headers: {
+                  'Content-Type': 'application/json',
+                'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string
+                },
             body: JSON.stringify({
             activity:'problems_solved',
             id:`${value}-${new Date().getFullYear()}-${new Date().getMonth()}`,
