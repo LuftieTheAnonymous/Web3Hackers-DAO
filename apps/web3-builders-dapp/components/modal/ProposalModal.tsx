@@ -158,8 +158,8 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
        BigInt(values['urgencyLevel']),
       values['isCustom'] === 'standard' ? false : true, 
       BigInt(new Date(values['proposalEndTime']).getTime()) / BigInt(1000),
-      BigInt(Number(values['proposalDelay']) * Number(values['proposalDelayUnit'])),
       BigInt(Number(values['timelockPeriod']) * Number(values['timelockUnit'])),
+      BigInt(Number(values['proposalDelay']) * Number(values['proposalDelayUnit']))
       ],
     },{
      onError: (error) => {

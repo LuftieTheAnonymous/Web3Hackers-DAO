@@ -23,7 +23,7 @@ module.exports = {
 ) {
 try{
 
-    
+    await interaction.deferReply();
 
     const priceOf = interaction.options.getString('price-of');
     const priceInTickers= interaction.options.getString('price-in-tickers');
@@ -32,14 +32,14 @@ try{
     const cryptoPriceTickers = await getTokenURL(priceOf as string, priceInTickers as string);
 
     if(!cryptoPriceTickers || cryptoPriceTickers.Response === 'Error'){ 
-        return await interaction.reply({content:`${cryptoPriceTickers.Response}: ${cryptoPriceTickers.Message}`, flags:MessageFlags.Ephemeral});
+        return await interaction.followUp({content:`${cryptoPriceTickers.Response}: ${cryptoPriceTickers.Message}`});
 }
 
-await interaction.reply(`The price on ${priceOf} with tickers ${priceInTickers} are:\n ${Object.keys(cryptoPriceTickers).map((ticker: string) => `${priceOf} 💱 ${ticker} : ${cryptoPriceTickers[ticker]}`).join('\n')}`);
+await interaction.followUp(`The price on ${priceOf} with tickers ${priceInTickers} are:\n ${Object.keys(cryptoPriceTickers).map((ticker: string) => `${priceOf} 💱 ${ticker} : ${cryptoPriceTickers[ticker]}`).join('\n')}`);
 }
 catch(error) {
     console.error(`Error executing ${interaction}:`, error);
-    await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    await interaction.followUp({ content: 'There was an error while executing this command!' });
     }
 }
 }

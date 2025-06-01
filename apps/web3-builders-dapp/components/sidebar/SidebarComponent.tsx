@@ -32,21 +32,25 @@ const items = [
       title: "Home",
       url: "/",
       icon: Home,
+      display:true
     },
     {
       title: "Profile",
       url: `/profile/${address}`,
       icon: User,
+      display: address ? true : false
     },
     {
       title: "Settings",
       url: `/settings/${address}`,
       icon: UserCog2Icon,
+      display: address ? true : false
     },
     {
       title: "About Us",
       url: "/about-us",
       icon: User,
+      display: true
     },
    
 
@@ -64,7 +68,7 @@ const items = [
               <SidebarMenu>
                 {items.map((item) => (
                   <SidebarMenuItem  key={item.title}>
-                    <SidebarMenuButton className='hover:bg-(--hacker-green-4)  transition-all' asChild>
+                    <SidebarMenuButton className={`hover:bg-(--hacker-green-4)  transition-all ${item.display ? '' : 'hidden'}`} asChild>
                       <a href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
