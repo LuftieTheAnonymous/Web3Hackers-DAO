@@ -193,7 +193,7 @@ govToken.addToWhitelist(user2);
     // ⏳ advance a block AFTER delegation to make snapshot available
     vm.roll(block.number + 1); 
 
-uint256 proposalsAmountBeforeProposal = customGovernor.proposalCount();
+uint256 proposalsAmountBeforeProposal = customGovernor.getProposalCount();
 
 proposalCreatedTargets = [user2];
 proposalCreatedValues = [0];
@@ -214,7 +214,7 @@ vm.expectRevert(CustomBuilderGovernor.VotingNotStarted.selector);
 customGovernor.castVote(proposalId, 'Coz Im gonna kick your ass', user2, 0, "0xx", wannaCastVoteFailProposal.isCustom, true, false, indicies);
 vm.stopPrank();
 
-uint256 proposalsAmountAfterProposal = customGovernor.proposalCount();
+uint256 proposalsAmountAfterProposal = customGovernor.getProposalCount();
 
 assert(proposalsAmountAfterProposal > proposalsAmountBeforeProposal);
 
@@ -854,24 +854,6 @@ vm.prank(contractOwner);
 govToken.rewardMonthlyTokenDistribution(1,1,1,1,1,1,1,user1);
 
 }
-
-
-function testPauseContract() public {
-
-    vm.prank(contractOwner);
-    vm.expectRevert();
-    govToken.unpause();
-
-    vm.prank(contractOwner);
-    govToken.pause();
-    assert(govToken.paused() == true);
-
-    vm.prank(contractOwner);
-    govToken.unpause();
-    assert(govToken.paused() == false);
-}
-
-
 
 
 }

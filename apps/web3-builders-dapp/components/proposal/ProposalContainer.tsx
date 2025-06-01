@@ -8,7 +8,7 @@ import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/gove
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import useRealtimeDocuments from '@/hooks/useRealtimeDocuments';
 import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaCheck, FaFlag, FaPaperPlane } from 'react-icons/fa'
 import { MdCancel } from 'react-icons/md'
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
@@ -29,7 +29,7 @@ proposalData, commentsData, proposalId
 }: Props<T, U>) {
 
     const {objectData:proposalObj}=useRealtimeDocument({'tableName':'dao_proposals', initialObj: proposalData});
-const [timeToStart, setTimeToStart] = React.useState<{seconds: number, minutes: number, hours: number, days: number}>({
+const [timeToStart, setTimeToStart] = useState<{seconds: number, minutes: number, hours: number, days: number}>({
   seconds: 0,
   minutes: 0,
   hours: 0,
@@ -49,7 +49,7 @@ const {writeContract}=useWriteContract({
     });
 
 
-    const handleStandardProposalVote =  (proposalNumber: number) => {
+    const handleStandardProposalVote =  (proposalNumber: number, calldataIndicies?: number[], isExecuting?: boolean, isDefeating?: boolean) => {
       if(proposalOnchainData && (proposalOnchainData as any).state !== 1){
         toast.error("Proposal has not started yet, please wait until it starts to vote.");
         return;
@@ -58,7 +58,7 @@ const {writeContract}=useWriteContract({
           abi: governorContractAbi,
           address: GOVERNOR_CONTRACT_ADDRESS,
           functionName: "castVote",
-          args:[(proposalObj as any).proposal_id, "", address, proposalNumber, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, true, false, []],
+          args:[(proposalObj as any).proposal_id, "", address, proposalNumber, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, (proposalObj as any).isCustom ? isExecuting : false, (proposalObj as any).isCustom ? isDefeating : false, calldataIndicies ? calldataIndicies.map((index) => BigInt(index)) : []],
         })
     }
 
@@ -129,6 +129,7 @@ const {writeContract}=useWriteContract({
 <div className="flex flex-col gap-4">
   {(proposalObj as any).dao_vote_options.map((item:any, index:number)=>(<Button
   key={item.id}
+  onClick={()=>handleStandardProposalVote(item.voteOptionIndex, item.calldataIndicies, item.isExecuting, item.isDefeating)}
   className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>
     {item.voting_option_text}
   </Button>))}
@@ -148,8 +149,74 @@ const {writeContract}=useWriteContract({
     
 {serverData && proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={serverData} state={state}/>}
     
+
+
+
     </div>
+
   
+  <div className="w-full  flex flex-wrap p-6 h-full  gap-8">
+    <div className={`w-full max-w-xl ${isMobile ? 'flex-col' : 'flex-row'} flex h-80 border border-(--hacker-green-4) rounded-lg gap-4`}>
+      <div className="w-full h-full bg-zinc-800 rounded-lg p-4 overflow-y-auto">
+        <p className='text-(--hacker-green-4) text-xl'>Votes</p>
+        <div className="flex flex-col w-full gap-4 mt-4">
+      <div className="flex justify-between items-center bg-zinc-700 w-full p-4 rounded-lg h-16">
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 bg-zinc-600 rounded-full"></div>
+        <div className="flex flex-col gap-1">
+            <p className='text-(--hacker-green-4) text-sm'>Username</p>
+            <p className='text-white text-xs'>Voted For: <span className='text-(--hacker-green-4)'>Option 1</span></p>
+        </div>
+
+        </div>
+        <Button className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>Reason</Button>
+      </div>
+        </div>
+      </div>
+    </div>
+
+       <div className={`w-full max-w-xl  ${isMobile ? 'flex-col' : 'flex-row'} h-80 border-(--hacker-green-4) border rounded-lg flex gap-4`}>
+      <div className="w-full h-full bg-zinc-800 rounded-lg p-4 overflow-y-auto">
+        <p className='text-(--hacker-green-4) text-xl'>Voters</p>
+        <div className="flex gap-6 mt-4">
+          <div className="flex flex-col items-center gap-1">
+
+            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
+              
+            </div>
+            <p className='text-white text-sm'>Username</p>
+          </div>
+
+            <div className="flex flex-col items-center gap-1">
+
+            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
+              
+            </div>
+            <p className='text-white text-sm'>Username</p>
+          </div>
+
+            <div className="flex flex-col items-center gap-1">
+
+            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
+              
+            </div>
+            <p className='text-white text-sm'>Username</p>
+          </div>
+
+            <div className="flex flex-col items-center gap-1">
+
+            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
+              
+            </div>
+            <p className='text-white text-sm'>Username</p>
+          </div>
+             
+            
+        </div>
+      </div>
+    </div>
+  </div>
+
   </>
   )
 }
