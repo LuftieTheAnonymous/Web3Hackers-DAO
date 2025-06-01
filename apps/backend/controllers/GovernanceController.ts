@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import dotenv from "dotenv";
 import { daoContract, proposalStates, provider } from "../config/ethersConfig";
 import { supabaseConfig } from "../config/supabase";
-import { EventLog } from "ethers";
+import { ethers, EventLog } from "ethers";
 import pLimit from 'p-limit';
 import retry from 'async-retry';
 
@@ -25,24 +25,30 @@ const activateProposals = async (req: Request, res: Response) => {
 
     const limit = pLimit(5); // Run max 5 activations at a time
 
-    const tasks = (data as any[]).map((event) => limit(async () => {
+    const tasks = (data as any[]).map((event) =>{
+        return limit(async () => {
       try {
         const proposal = await daoContract.getProposal(event.proposal_id);
 
+        console.log(proposal);
+
         const deadline = Number(proposal[3]) * 1000 + Number(proposal[17]);
 
-        if (Date.now() >= deadline && proposal.state === 5) {
-          const tx = await daoContract.activateProposal(proposal[0]);
+
+        if (new Date().getTime() >= deadline && Number(proposal.state) === 0) {
+          const tx = await daoContract.activateProposal(proposal[0],{
+              maxPriorityFeePerGas: ethers.parseUnits("2", "gwei"),
+  maxFeePerGas: ethers.parseUnits("50", "gwei"),
+          });
           const receipt = await tx.wait();
           return { success: true, proposalId: proposal[0], receipt };
-        } else {
-          return { success: false, proposalId: proposal[0], reason: 'Not eligible yet or already active' };
-        }
+        } 
       } catch (err) {
         console.error(`Error activating proposal ${event.proposal_id}:`, err);
         return { success: false, proposalId: event.proposal_id, error: err };
       }
-    }));
+    })
+    });
 
     const results = await Promise.allSettled(tasks);
 

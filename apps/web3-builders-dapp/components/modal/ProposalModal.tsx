@@ -151,12 +151,12 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
       type:'eip1559',
       functionName:'createProposal',
       args:[
-      values['shortDescripton'], 
-      targets, 
-      calldataValues, 
+      values['shortDescripton'],
+      targets,
+      calldataValues,
       calldataEndodedBytes,
-       BigInt(values['urgencyLevel']),
-      values['isCustom'] === 'standard' ? false : true, 
+      BigInt(values['urgencyLevel']),
+      values['isCustom'] === 'standard' ? false : true,
       BigInt(new Date(values['proposalEndTime']).getTime()) / BigInt(1000),
       BigInt(Number(values['timelockPeriod']) * Number(values['timelockUnit'])),
       BigInt(Number(values['proposalDelay']) * Number(values['proposalDelayUnit']))
