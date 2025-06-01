@@ -111,6 +111,9 @@ return;
 {fullProposalObject && (fullProposalObject as any).state === 1 &&
       <p className={`${new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-gray-700'}   text-xs`}>{fullProposalObject as any && `${formatDistanceStrict(new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000), new Date())}`}</p>
 }
+
+
+
 </div>
     </div>
       </div>

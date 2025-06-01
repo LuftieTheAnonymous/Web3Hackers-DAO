@@ -7,7 +7,7 @@ import { useSidebar } from '@/components/ui/sidebar'
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import useRealtimeDocuments from '@/hooks/useRealtimeDocuments';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
 import React, { useEffect } from 'react'
 import { FaCheck, FaFlag, FaPaperPlane } from 'react-icons/fa'
 import { MdCancel } from 'react-icons/md'
@@ -79,9 +79,17 @@ const {writeContract}=useWriteContract({
     </div>
     
     <div className="flex items-center gap-2">
-     <p className='text-white text-sm'>{proposalOnchainData as any && (proposalOnchainData as any).state !== 1 && 
-     new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000).getTime() - new Date().getTime() > 0 
-     && <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))}</span>} to start</p>
+     {proposalOnchainData as any && Number((proposalOnchainData as any).state) !== 1 && 
+     new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000).getTime() - new Date().getTime() >= 0 
+     &&      <p className='text-white text-sm'>
+     <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))}</span>
+     to start
+     </p>
+     } 
+
+     {proposalOnchainData && (proposalOnchainData as any).state === 1 &&
+           <p className={`${new Date(Number(((proposalOnchainData as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-gray-700'}   text-xs`}>{proposalOnchainData as any && `${formatDistanceStrict(new Date(Number(((proposalOnchainData as any).endBlockTimestamp)) * 1000), new Date())}`} <span className='text-white'>until the end</span></p>
+     }
     </div>
     </div>
     

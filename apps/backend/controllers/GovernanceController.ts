@@ -76,7 +76,7 @@ const finishProposals= async (req: Request, res: Response) => {
             return Promise.resolve(async()=>{
            const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
         console.log(proposal);
-        if(proposal[6] === 1 && new Date(Number(proposal[4]) * 1000).getTime() <= new Date().getTime()){
+        if(Number(proposal[6]) === 1 && new Date(Number(proposal[4]) * 1000).getTime() <= new Date().getTime()){
             const tx = await daoContract.finishProposal((event as ProposalEventArgs).args[0]);
             console.log(tx);
     
@@ -125,7 +125,7 @@ try{
 return  Promise.resolve(async()=>{
             const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
         console.log(proposal);
-        if(proposal[6] === 4){
+        if(Number(proposal[6]) === 4){
             const tx = await daoContract.queueProposal((event as ProposalEventArgs).args[0]);
             console.log(tx);
     
@@ -161,8 +161,6 @@ return  Promise.resolve(async()=>{
 const cancelProposal = async (req: Request, res: Response) => {
     const {proposalId} = req.params;
         try{
-
-            
                 const tx = await daoContract.cancelProposal(proposalId);
     
                 console.log(tx);
@@ -191,7 +189,7 @@ const receipts =events.map(async (event) => {
      return  await retry(async ()=>{
               return Promise.resolve((async()=>{
   const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]); 
-                if(proposal[6] === 5){
+                if(Number(proposal[6]) === 5){
                     const tx = await daoContract.executeProposal((event as ProposalEventArgs).args[0]);
                     console.log(tx);
             
