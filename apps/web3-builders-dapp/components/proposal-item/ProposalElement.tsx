@@ -90,7 +90,7 @@ return;
       <div className={`w-full border-b ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} `}>
       <div className="flex justify-between items-center px-3 py-2">
       <div onClick={()=>console.log(proposalObj)} className="flex items-center gap-1 text-white">
-       {proposalObj && proposalObj.dao_members && proposalObj.dao_members.photoURL ? <Image width={32} height={32} className='w-full h-full rounded-full' src={proposalObj.dao_members.photoURL} alt="" /> : <div className='w-8 h-8 rounded-full bg-zinc-600'></div>}
+       {proposalObj && proposalObj.dao_members && proposalObj.dao_members.photoURL ? <Image width={32} height={32} className='w-8 h-8 object-cover rounded-full' src={proposalObj.dao_members.photoURL} alt="" /> : <div className='w-8 h-8 rounded-full object-cover bg-zinc-600'></div>}
         <p className='text-sm'>@{proposalObj && proposalObj.dao_members &&  proposalObj.dao_members.nickname}</p>
       </div>
 

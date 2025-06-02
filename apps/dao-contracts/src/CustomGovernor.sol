@@ -238,16 +238,6 @@ constructor(IVotes _token){
         _grantRole(ACTIONS_MANAGER, msg.sender);
     }
 
-
-    function getIVotesToken() external view returns (IVotes) {
-        return IVotestoken;
-    }
-
-    function getGovToken() external view returns (ERC20Votes) {
-        return govToken;
-    }
-
-
     function getProposalCount() external view returns (uint256) {
         return proposalCount;
     }
@@ -318,6 +308,17 @@ function getCustomProposalVotes(bytes32 proposalId)
             highestIsApproving[j]
         );
     }
+}
+
+function getProposalVotes(bytes32 proposalId) external view returns (Vote[] memory) {
+    address[] memory voters = proposalVoters[proposalId];
+    Vote[] memory votes = new Vote[](voters.length);
+    
+    for (uint256 i = 0; i < voters.length; i++) {
+        votes[i] = proposalVotes[proposalId][voters[i]];
+    }
+
+    return votes;
 }
 
     function insertionSort(HighestVotedCustomOption[5] memory arr, bytes32 proposalId)

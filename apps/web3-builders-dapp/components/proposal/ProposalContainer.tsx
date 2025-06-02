@@ -48,6 +48,12 @@ const {writeContract}=useWriteContract({
       args:[proposalId],
     });
 
+    const {data:proposalVotes}=useReadContract({
+      abi: governorContractAbi,
+      address: GOVERNOR_CONTRACT_ADDRESS,
+      functionName: "getProposalVotes",
+      args:[proposalId],
+    });
 
     const handleStandardProposalVote =  (proposalNumber: number, calldataIndicies?: number[], isExecuting?: boolean, isDefeating?: boolean) => {
       if(proposalOnchainData && (proposalOnchainData as any).state !== 1){

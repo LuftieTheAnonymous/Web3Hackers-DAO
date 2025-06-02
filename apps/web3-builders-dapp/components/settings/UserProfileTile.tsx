@@ -8,7 +8,6 @@ import { Button } from '../ui/button'
 import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
 import supabase from '@/lib/db/dbConfig';
-import WebPushNotificationComponent from '../web-push/WebPushNotificationComponent,';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import Image from 'next/image';
 
@@ -44,24 +43,37 @@ function UserProfileTile({intialDocument}: Props) {
 
   }
 
-//   const handleSave=async()=>{
-// try{
+  const handleSave=async()=>{
+try{
 
-//   const image = await supabase.storage.from('profile-cover').upload(`${address}`, fileInputRef.current?.files?.[0] as File);
+  const image = await supabase.storage.from('profile-cover').upload(`${address}`, fileInputRef.current?.files?.[0] as File, {
+    upsert: true,
+  });
+  console.log(image);
 
-//   if(image.error){
-//     toast.error('Something went wrong !');
-//     console.log(image.error);
-//     return;
-//   }
+  if(image.error){
+    toast.error('Something went wrong !');
+    console.log(image.error);
+    return;
+  }
 
-//     await supabase.from('dao_members').update({photoURL: image.data?.path}).eq('wallet_address', address);
-//     toast.success('Profile updated successfully !');
+  const { data } = await supabase.storage.from('profile-cover').getPublicUrl(`${address}`);
 
-// }catch(e){
-//   console.log(e);
-// }
-//   }
+  console.log(data);
+
+
+  if(!data.publicUrl){
+    toast.error('Something went wrong while uploading the image !');
+    return;
+  }
+
+    await supabase.from('dao_members').update({photoURL: data.publicUrl ? data.publicUrl : objectData.photoURL, nickname: objectData.nickname}).eq('userWalletAddress', address);
+    toast.success('Profile updated successfully !');
+
+}catch(e){
+  console.log(e);
+}
+  }
 
   return (
      <div className="flex flex-col justify-between max-w-sm w-full bg-zinc-800 border border-(--hacker-green-4) self-center h-[36rem] p-4 rounded-md">
@@ -70,8 +82,8 @@ function UserProfileTile({intialDocument}: Props) {
         
           <div className="flex flex-col gap-4 p-2">
 <div onClick={() => fileInputRef.current?.click()} className='w-36 self-center h-36 cursor-pointer bg-zinc-700 rounded-full flex justify-center items-center'>
-{objectData && objectData.photoURL && <Image alt={'avatar'} src={objectData.photoURL} width={160} height={160} className='rounded-full w-36 h-36'/>}
- {objectData && !objectData.photoURL && customCover ? <img src={customCover} className='w-36 h-36 rounded-full'/> : <FaImage className='text-(--hacker-green-4) text-6xl'/>}
+{objectData && objectData.photoURL && !customCover && <Image alt={'avatar'} src={objectData.photoURL} width={160} height={160} className='rounded-full w-36 h-36'/>}
+ {objectData && objectData.photoURL && customCover ? <img src={customCover} className='w-36 h-36 rounded-full object-cover'/> : <FaImage className='text-(--hacker-green-4) text-6xl'/>}
   <input onChange={handleFileUpload} accept='image/*' ref={fileInputRef} type="file" className='hidden'/>
 </div>
 <div className="flex flex-col gap-2">
@@ -92,7 +104,7 @@ function UserProfileTile({intialDocument}: Props) {
               </div>
 
 <div className='self-end'>
-  <Button  className='bg-(--hacker-green-4) px-6 text-zinc-800 cursor-pointer hover:bg-(--hacker-green-5) hover:text-white hover:scale-90'>
+  <Button onClick={handleSave}  className='bg-(--hacker-green-4) px-6 text-zinc-800 cursor-pointer hover:bg-(--hacker-green-5) hover:text-white hover:scale-90'>
     Save
   </Button>
 </div>
