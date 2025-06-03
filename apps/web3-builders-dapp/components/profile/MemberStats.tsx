@@ -1,25 +1,50 @@
 import React from 'react'
+import VotingsParticipatedChart from './container/charts/VotingsParticipatedChart'
+import { useAccount, useReadContract, useReadContracts } from 'wagmi'
+import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
+import VotesTypesCastedChart from './container/charts/VotesTypesCastedChart';
+import { Button } from '../ui/button';
 
 type Props = {}
 
 function MemberStats({}: Props) {
+const {address}=useAccount();
+const [isCustom, setIsCustom] = React.useState(false);
+  const {data:userVotedProposalsCount} = useReadContract({
+    abi: governorContractAbi,
+    address: GOVERNOR_CONTRACT_ADDRESS,
+    functionName: 'getUserVotedCount',
+    args:[address]
+  });
+
+  const {data:userVotes} = useReadContract({
+    abi: governorContractAbi,
+    address: GOVERNOR_CONTRACT_ADDRESS,
+    functionName: 'getUserVotes',
+    args:[address]
+  });
+
+
+
   return (
     <div className='max-w-[97.5rem] p-3 w-full mx-auto'>
 
-<div className="flex flex-col gap-1">
+<div onClick={()=>{console.log(userVotes,userVotedProposalsCount)}} className="flex flex-col gap-1">
 <p className='text-white text-2xl font-semibold'>Member's Statistics </p>
 <p className='text-gray-500 text-sm'> Here's a summary of your stats in the DAO so far.</p>
 </div>
 
+
+<div className="flex items gap-3 py-4">
+  <Button onClick={()=>{setIsCustom(true)}} className={`cursor-pointer ${isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Custom</Button>
+  <Button onClick={()=>{setIsCustom(false)}} className={`cursor-pointer ${!isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Standard</Button>
+</div>
 <div className="flex flex-col md:flex-row gap-4 w-full items-center justify-center py-2">
 
-<div className="bg-zinc-800 p-6 flex justify-center text-white border border-(--hacker-green-4) items-center rounded-lg max-w-sm h-80 w-full">
-    {"Place for a chart"}
-</div>
+{userVotes && userVotedProposalsCount && (userVotes as any[]) && (userVotedProposalsCount as any) && <VotingsParticipatedChart proposals={(userVotes as any[])}/>}
 
-<div className="bg-zinc-800 p-6 flex justify-center text-white border-(--hacker-green-4) border items-center rounded-lg max-w-2xl h-80 w-full">
-    {"Place for a chart"}
-</div>
+
+{userVotes && userVotedProposalsCount && (userVotes as any[]) && (userVotedProposalsCount as any) && <VotesTypesCastedChart isCustom={isCustom} proposals={(userVotes as any[])}  />}
 
 
 

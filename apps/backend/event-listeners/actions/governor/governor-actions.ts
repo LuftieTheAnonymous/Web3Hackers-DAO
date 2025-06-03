@@ -24,9 +24,10 @@ export async function notifyOnProposalCreated(message: string) {
 
       const result =  await Promise.all(promisesArray);
 
-    console.log({message:"success", data: result, error:null, status:200});
+    console.log('Notifications sent successfully', result);
+
     }catch(err){
         console.log(err);
-      return {message:"error", data:null, error:err, status:500}
+      
     }
 }

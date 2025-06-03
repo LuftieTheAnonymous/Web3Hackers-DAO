@@ -6,11 +6,10 @@ import { Button } from '../ui/button'
 import { Calendar, EllipsisIcon } from 'lucide-react'
 import { useAccount, useWriteContract } from 'wagmi';
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
-import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
 import {useLottie} from "lottie-react";
 import cryptoLottieAnimation from "@/public/gifs/Crypto-Lottie-Animation.json";
 import Image from 'next/image';
-import { notifyEveryDAOMember } from '@/lib/web-push/db/actions';
+
 
 type Props = {}
 
@@ -25,18 +24,8 @@ function ProposalCard({}: Props) {
   };
 
   const { View } = useLottie(options);
-  const {writeContract}=useWriteContract();
 
 
-
-const handlePropose=async()=>{
-  try{
-
-    await notifyEveryDAOMember('A new proposal has been created', 'notifyOnNewProposals');
-  }catch(err){
-    console.error('Error notifying DAO members:', err);
-  }
-}
 
   return (
     <div className={`w-full h-full  ${(address && !currentUser) ? 'flex flex-col gap-6 justify-center items-center h-screen' : 'h-full'}`}>
@@ -64,7 +53,9 @@ const handlePropose=async()=>{
   <Calendar className='text-(--hacker-green-4)'/>
 </button>
       </div>
-      <Button className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 mr-4'>Propose</Button>
+      <Button
+   
+      className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 mr-4'>Propose</Button>
     </div>
     </div> }
 

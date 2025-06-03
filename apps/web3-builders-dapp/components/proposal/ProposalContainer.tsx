@@ -9,14 +9,20 @@ import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import useRealtimeDocuments from '@/hooks/useRealtimeDocuments';
 import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
 import React, { useEffect, useState } from 'react'
-import { FaCheck, FaFlag, FaPaperPlane } from 'react-icons/fa'
+import { FaCheck, FaFlag, FaPaperPlane, FaPencilAlt } from 'react-icons/fa'
 import { MdCancel } from 'react-icons/md'
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
-import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '../ui/dialog';
 import { ethers } from 'ethers';
 import Image from 'next/image';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { toast } from 'sonner';
+import VotesCard from './voting-data/votes/VotesCard';
+import VotingResultChart from './voting-data/chart/VotingResultChart';
+import VotingDataContainer from './voting-data/VotingDataContainer';
+import { VoteIcon } from 'lucide-react';
+import { Textarea } from '../ui/textarea';
+
 
 type Props<T, U> = {
     proposalData: T,
@@ -28,18 +34,16 @@ function ProposalContainer<T, U>({
 proposalData, commentsData, proposalId
 }: Props<T, U>) {
 
+  const [isReason, setIsReason] = useState<boolean>(false);
+  const [reason, setReason] = useState<string>('');
+
     const {objectData:proposalObj}=useRealtimeDocument({'tableName':'dao_proposals', initialObj: proposalData});
-const [timeToStart, setTimeToStart] = useState<{seconds: number, minutes: number, hours: number, days: number}>({
-  seconds: 0,
-  minutes: 0,
-  hours: 0,
-  days: 0
-});
     const {serverData}=useRealtimeDocuments({initialData:commentsData,tableName:'dao_voting_comments',parameterOnChanges:'proposal_id'});
 const {address}=useAccount();
 const {writeContract}=useWriteContract({
   
 });
+
 
     const {data:proposalOnchainData, error}=useReadContract({
       abi: governorContractAbi,
@@ -48,12 +52,7 @@ const {writeContract}=useWriteContract({
       args:[proposalId],
     });
 
-    const {data:proposalVotes}=useReadContract({
-      abi: governorContractAbi,
-      address: GOVERNOR_CONTRACT_ADDRESS,
-      functionName: "getProposalVotes",
-      args:[proposalId],
-    });
+
 
     const handleStandardProposalVote =  (proposalNumber: number, calldataIndicies?: number[], isExecuting?: boolean, isDefeating?: boolean) => {
       if(proposalOnchainData && (proposalOnchainData as any).state !== 1){
@@ -64,7 +63,7 @@ const {writeContract}=useWriteContract({
           abi: governorContractAbi,
           address: GOVERNOR_CONTRACT_ADDRESS,
           functionName: "castVote",
-          args:[(proposalObj as any).proposal_id, "", address, proposalNumber, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, (proposalObj as any).isCustom ? isExecuting : false, (proposalObj as any).isCustom ? isDefeating : false, calldataIndicies ? calldataIndicies.map((index) => BigInt(index)) : []],
+          args:[(proposalObj as any).proposal_id, reason, address, proposalNumber, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, (proposalObj as any).isCustom ? isExecuting : false, (proposalObj as any).isCustom ? isDefeating : false, calldataIndicies ? calldataIndicies.map((index) => BigInt(index)) : []],
         })
     }
 
@@ -88,7 +87,7 @@ const {writeContract}=useWriteContract({
      {proposalOnchainData as any && Number((proposalOnchainData as any).state) !== 1 && 
      new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000).getTime() - new Date().getTime() >= 0 
      &&      <p className='text-white text-sm'>
-     <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))}</span>
+     <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))} </span>
      to start
      </p>
      } 
@@ -132,15 +131,23 @@ const {writeContract}=useWriteContract({
 </DialogTitle>
         </DialogHeader>
 
-<div className="flex flex-col gap-4">
+{!isReason && <div className="flex flex-col gap-4">
   {(proposalObj as any).dao_vote_options.map((item:any, index:number)=>(<Button
   key={item.id}
   onClick={()=>handleStandardProposalVote(item.voteOptionIndex, item.calldataIndicies, item.isExecuting, item.isDefeating)}
   className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>
     {item.voting_option_text}
   </Button>))}
-</div>
+</div>}
 
+{isReason && <div className="flex flex-col gap-4">
+ <Textarea onChange={(e)=>setReason(e.target.value)} placeholder='Reason for voting' className='bg-zinc-800 h-40 resize-none border border-(--hacker-green-4) text-white outline-0'/> 
+  </div>}
+
+      <DialogFooter className='flex justify-between  gap-6  mx-auto  w-full'>
+        <Button onClick={()=>setIsReason(false)} className={`cursor-pointer hover:bg-zinc-600 hover:text-white bg-(--hacker-green-4) text-zinc-800`}>Votes <VoteIcon/> </Button>
+        <Button onClick={()=>setIsReason(true)} className={`cursor-pointer hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800`}>Reason <FaPencilAlt/></Button>
+      </DialogFooter>
       </DialogContent>
      </Dialog>
       
@@ -161,67 +168,7 @@ const {writeContract}=useWriteContract({
     </div>
 
   
-  <div className="w-full  flex flex-wrap p-6 h-full  gap-8">
-    <div className={`w-full max-w-xl ${isMobile ? 'flex-col' : 'flex-row'} flex h-80 border border-(--hacker-green-4) rounded-lg gap-4`}>
-      <div className="w-full h-full bg-zinc-800 rounded-lg p-4 overflow-y-auto">
-        <p className='text-(--hacker-green-4) text-xl'>Votes</p>
-        <div className="flex flex-col w-full gap-4 mt-4">
-      <div className="flex justify-between items-center bg-zinc-700 w-full p-4 rounded-lg h-16">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-zinc-600 rounded-full"></div>
-        <div className="flex flex-col gap-1">
-            <p className='text-(--hacker-green-4) text-sm'>Username</p>
-            <p className='text-white text-xs'>Voted For: <span className='text-(--hacker-green-4)'>Option 1</span></p>
-        </div>
-
-        </div>
-        <Button className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>Reason</Button>
-      </div>
-        </div>
-      </div>
-    </div>
-
-       <div className={`w-full max-w-xl  ${isMobile ? 'flex-col' : 'flex-row'} h-80 border-(--hacker-green-4) border rounded-lg flex gap-4`}>
-      <div className="w-full h-full bg-zinc-800 rounded-lg p-4 overflow-y-auto">
-        <p className='text-(--hacker-green-4) text-xl'>Voters</p>
-        <div className="flex gap-6 mt-4">
-          <div className="flex flex-col items-center gap-1">
-
-            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
-              
-            </div>
-            <p className='text-white text-sm'>Username</p>
-          </div>
-
-            <div className="flex flex-col items-center gap-1">
-
-            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
-              
-            </div>
-            <p className='text-white text-sm'>Username</p>
-          </div>
-
-            <div className="flex flex-col items-center gap-1">
-
-            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
-              
-            </div>
-            <p className='text-white text-sm'>Username</p>
-          </div>
-
-            <div className="flex flex-col items-center gap-1">
-
-            <div className="w-12 h-12 bg-zinc-600 rounded-full cursor-pointer transition-all hover:animate-spin">
-              
-            </div>
-            <p className='text-white text-sm'>Username</p>
-          </div>
-             
-            
-        </div>
-      </div>
-    </div>
-  </div>
+<VotingDataContainer isCustom={proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom} proposalId={proposalId as `0x${string}`}/>
 
   </>
   )

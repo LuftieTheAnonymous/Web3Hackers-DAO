@@ -413,6 +413,7 @@ const goForward=useCallback(() => {
                   <Calendar
                   {...field}
                     mode="single"
+                  fromDate={new Date(new Date().getTime()+ 1000 * 60 * 60 * 24)} // From today
                 selected={field.value ? new Date(field.value) : undefined}
                   classNames={{
                     'day_selected': 'bg-(--hacker-green-4) rounded-md hover:text-zinc-800 py-1 px-2 self-center',

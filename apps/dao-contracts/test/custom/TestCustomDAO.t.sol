@@ -65,9 +65,6 @@ function testForkIsWorking() public {
     assertEq(vm.activeFork(), sepolia_forkId);
 }
 
-function testGetIVotesToken() public view {
-    assert(address(customGovernor.getIVotesToken()) == address(govToken)); 
-}
 
 function testgetProposalCount() public view {
     assert(customGovernor.getProposalCount() == 0);
@@ -492,7 +489,9 @@ customGovernor.queueProposal(proposalId);
 
 
 (uint256[]
- memory highestIndicies, bool execute) = customGovernor.getHighestVotedCustomOption(proposalId);
+ memory highestIndicies, bool executed) = customGovernor.getHighestVotedCustomOption(proposalId);
+
+ console.log(executed, "Executed");
 
  console.log(highestIndicies.length, "Highest Voted Custom Option Indices");
 

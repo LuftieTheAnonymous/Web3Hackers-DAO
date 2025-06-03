@@ -242,8 +242,16 @@ constructor(IVotes _token){
         return proposalCount;
     }
 
-    function getUrgencyQuorum(UrgencyLevel urgencyLevel) public view returns (uint256) {
+    function getUrgencyQuorum(UrgencyLevel urgencyLevel) internal view returns (uint256) {
         return urgencyLevelToQuorum[urgencyLevel];
+    }
+
+    function getUserVotedCount(address user) external view returns (uint256) {
+        return userVotedCount[user];
+    }
+
+    function getUserVotes(address user) external view returns (Vote[] memory) {
+        return userVotes[user];
     }
 
 
@@ -360,7 +368,7 @@ function getProposal(bytes32 proposalId) external view returns (Proposal memory)
     return proposals[proposalId];
 }
 
-function getProposalQuorumNeeded(bytes32 proposalId) public view returns (uint256) {
+function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint256) {
         return (govToken.totalSupply() * getUrgencyQuorum(proposals[proposalId].urgencyLevel)) / 100;
     }
 
