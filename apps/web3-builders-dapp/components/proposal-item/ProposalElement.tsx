@@ -136,7 +136,7 @@ return;
 
 <div  className="flex ml-3 gap-2 items-center">
 <div className='w-8 h-8 bg-(--hacker-green-4) rounded-full flex justify-center items-center'>
-  <span className='text-xs text-zinc-800'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Number((proposalVotes as BigInt[])[0]))}%</span>
+  <span className='text-xs text-zinc-800'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[0]))).toFixed(0)}%</span>
 </div>
 
 <button onClick={()=>handleVoteClick(0)} className='flex items-center cursor-pointer gap-1  hover:scale-95 transition-all  text-(--hacker-green-4)'>
@@ -150,7 +150,7 @@ return;
 
 <div className="flex gap-1 items-center">
 <div className='w-8 h-8 bg-red-500 rounded-full flex justify-center items-center'>
-  <span className='text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Number((proposalVotes as BigInt[])[1]))}%</span>
+  <span className='text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[2]))).toFixed(0)}%</span>
 </div>
 
 
@@ -165,7 +165,7 @@ return;
 
 <div className="flex gap-2 items-center">
 <div className='w-8 h-8  bg-blue-500 rounded-full overflow-hidden flex justify-center items-center'>
-  <span className='text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Number((proposalVotes as BigInt[])[2]))}%</span>
+  <span className='text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[1]))).toFixed(0)}%</span>
 </div>
 
 

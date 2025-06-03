@@ -11,7 +11,7 @@ import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
 import React, { useEffect, useState } from 'react'
 import { FaCheck, FaFlag, FaPaperPlane, FaPencilAlt } from 'react-icons/fa'
 import { MdCancel } from 'react-icons/md'
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
+import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from 'wagmi';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '../ui/dialog';
 import { ethers } from 'ethers';
 import Image from 'next/image';
@@ -22,6 +22,8 @@ import VotingResultChart from './voting-data/chart/VotingResultChart';
 import VotingDataContainer from './voting-data/VotingDataContainer';
 import { VoteIcon } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
+import VotingStandardModal from './voting-data/VotingStandardModal';
+import { decodeEventLog } from 'viem';
 
 
 type Props<T, U> = {
@@ -52,6 +54,40 @@ const {writeContract}=useWriteContract({
       args:[proposalId],
     });
 
+
+    useWatchContractEvent({
+      abi: governorContractAbi,
+      address: GOVERNOR_CONTRACT_ADDRESS,
+      eventName: "ProposalVoted",
+      'onLogs': (logs) => {
+        console.log('ProposalVoted logs:', logs);
+ logs.forEach((log) => {
+    try{
+      const decoded= decodeEventLog({
+        abi: governorContractAbi,
+        eventName: "ProposalVoted",
+        data: log.data,
+        topics: log.topics,
+      });
+
+      console.log('Decoded ProposalVoted log:', decoded);
+      if(decoded && decoded.args && decoded.args.find((log) => (log as any).votedProposalId === proposalId && (log as any).voter === address)){
+        toast.success('Your vote has been cast successfully!');
+        setIsReason(false);
+        setReason('');
+      }
+    }catch(e){
+      console.error('Error decoding ProposalVoted log:', e);
+      return null;
+    }
+   });
+
+
+      },
+      onError(error) {
+        toast.error(`Error casting vote: ${error.message}`);
+      },
+    });
 
 
     const handleStandardProposalVote =  (proposalNumber: number, calldataIndicies?: number[], isExecuting?: boolean, isDefeating?: boolean) => {
@@ -116,7 +152,7 @@ const {writeContract}=useWriteContract({
   }
   
     
-    <div onClick={()=>console.log(proposalOnchainData)} className={`max-w-2xl mx-auto self-center w-full bg-zinc-800 h-12 rounded-lg flex items-center gap-5 overflow-y-hidden ${proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? 'justify-center' : 'justify-between'} overflow-x-auto p-7`}>
+    <div  className={`max-w-2xl mx-auto self-center w-full bg-zinc-800 h-12 rounded-lg flex items-center gap-5 overflow-y-hidden ${proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? 'justify-center' : 'justify-between'} overflow-x-auto p-7`}>
       {proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? <>
      <Dialog>
 
@@ -152,9 +188,27 @@ const {writeContract}=useWriteContract({
      </Dialog>
       
       </> : <>
-      <Button onClick={()=>handleStandardProposalVote(0)} className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>Vote For <FaCheck /></Button>
-      <Button onClick={()=>handleStandardProposalVote(1)} className='cursor-pointer transition-all hover:scale-95 bg-blue-500 hover:bg-blue-400 hover:text-zinc-800'>Abstain <FaFlag /></Button>
-      <Button onClick={()=>handleStandardProposalVote(2)} className='cursor-pointer transition-all hover:scale-95 hover:bg-red-400 hover:text-zinc-800 bg-red-500'>Vote Against <MdCancel /></Button>
+<VotingStandardModal
+TriggerButton={()=>(<Button className='cursor-pointer transition-all hover:scale-95 hover:bg-(--hacker-green-5) hover:text-white bg-(--hacker-green-4) text-zinc-800'>Vote For <FaCheck /></Button>)}
+dialogTitle='Vote For This Proposal'
+typeReasonFunction={(value:string)=>setReason(value)}
+castVoteFunction={()=>handleStandardProposalVote(0)}
+/>
+
+<VotingStandardModal
+TriggerButton={()=>( <Button  className='cursor-pointer transition-all hover:scale-95 bg-blue-500 hover:bg-blue-400 hover:text-zinc-800'>Abstain <FaFlag /></Button>)}
+dialogTitle='Abstain This Proposal'
+typeReasonFunction={(value:string)=>setReason(value)}
+castVoteFunction={()=>handleStandardProposalVote(1)}
+/>
+
+<VotingStandardModal
+TriggerButton={()=>(<Button className='cursor-pointer transition-all hover:scale-95 hover:bg-red-400 hover:text-zinc-800 bg-red-500'>Vote Against <MdCancel /></Button>)}
+dialogTitle='Reject This Proposal'
+typeReasonFunction={(value:string)=>setReason(value)}
+castVoteFunction={()=>handleStandardProposalVote(2)}
+/>
+
       </> }
     </div>
     </div>

@@ -12,6 +12,7 @@ import express from 'express';
 const http = require('http');
 const app = express();
 import helmet from 'helmet';
+import { client } from "./redis/quickStart";
 dotenv.config();
 
 // contentSecurityPolicy - strict set of rules that only allows resources from the same origin
@@ -60,7 +61,6 @@ app.use(cors({
 app.use(express.json());
 
 
-// app.use(cors(corsOptions));
 app.use('/governance',(req:Request, res:Response, next:NextFunction)=>{
     if(req.originalUrl === '/governance/') {
         console.log(`${req.originalUrl}, ${req.method} ${new Date().toISOString()}`);
@@ -72,9 +72,20 @@ app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
 const server = http.createServer(app);
 
+client.on('error', err => console.log('Redis Client Error', err));
 
-server.listen(2137, () => {
+client.connect();
 
+app.post('/redis-test', async (req: Request, res: Response) => {
+    await client.set('testKey', 'testValue');
+    const value = await client.get('testKey');
+    console.log('Redis test value:', value);
+    res.status(200).json({ message: 'Redis test successful', value });
+});
+
+
+server.listen(2137, async () => {
+    
 executeGovenorContractEvents();
 executeGovenorTokenEvents();
 

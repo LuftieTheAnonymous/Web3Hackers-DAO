@@ -13,7 +13,7 @@ function VoterListElement({voteData}: Props) {
         <div className="flex items-center gap-2">
         <div className="flex flex-col gap-1">
             <p className='text-(--hacker-green-4) text-sm'>{voteData.voter}</p>
-            <p className='text-white text-xs'>Voted For: <span className={`${voteData.isCustom && voteData.isApprovingVote ? 'text-(--hacker-green-4)' :voteData.isCustom && voteData.isDefeatingVote ? 'text-red-500' : !voteData.isCustom && Number(voteData.voteOption) === 0 ? 'text-(--hacker-green-4)' :!voteData.isCustom && Number(voteData.voteOption) === 1 ? 'text-red-500' : !voteData.isCustom && Number(voteData.voteOption) === 2 ? 'text-blue-500' : 'text-white' } `}>{Number(voteData.voteOption) === 0 ? 'Approve' : Number(voteData.voteOption) === 1 ? 'Defeat' : 'Abstain'}</span> </p>
+            <p className='text-white text-xs'>Voted For: <span className={`${voteData.isCustom && voteData.isApprovingVote ? 'text-(--hacker-green-4)' :voteData.isCustom && voteData.isDefeatingVote ? 'text-red-500' : !voteData.isCustom && Number(voteData.voteOption) === 0 ? 'text-(--hacker-green-4)' :!voteData.isCustom && Number(voteData.voteOption) === 2 ? 'text-red-500' : !voteData.isCustom && Number(voteData.voteOption) === 1 ? 'text-blue-500' : 'text-white' } `}>{Number(voteData.voteOption) === 0 ? 'Approve' : Number(voteData.voteOption) === 2 ? 'Defeat' : 'Abstain'}</span> </p>
         </div>
 
         </div>

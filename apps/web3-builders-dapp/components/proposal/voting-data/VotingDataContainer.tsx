@@ -27,26 +27,26 @@ function VotingDataContainer({proposalId, isCustom}: Props) {
 
 
 <VotingResultChart isCustom={isCustom} chartData={isCustom ? [
-   {voteOption: 'Option 1', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 0).length, 
+   {voteOption: 'Option 1', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 0).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0),
     fill: '#f6cd00', icon: FaDiceOne
    },
-    {voteOption: 'Option 2', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 1).length, 
+    {voteOption: 'Option 2', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 1).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0), 
     fill: '#00e660', icon: FaDiceTwo
     },
-    {voteOption: 'Option 3', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 2).length, 
+    {voteOption: 'Option 3', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 2).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0), 
     fill: '#006aff', icon: FaDiceThree
     },
-    {voteOption: 'Option 4', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 3).length, fill: '#ff00a1', icon: FaDiceFour},
-    {voteOption: 'Option 5', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 4).length, fill: '#59008c', icon: FaDiceFive},
+    {voteOption: 'Option 4', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 3).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0), fill: '#ff00a1', icon: FaDiceFour},
+    {voteOption: 'Option 5', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 4).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0), fill: '#59008c', icon: FaDiceFive},
 ] : [
-  {voteOption: 'Approve', isFor: true, isAbstain:false, isDefeat:false, value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 0).length,
+  {voteOption: 'Approve', isFor: true, isAbstain:false, isDefeat:false, value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 0).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0),
     fill: '#00e660', icon: FaCheckCircle
 
   },
-   {voteOption: 'Abstain', isFor: false, isAbstain:true, isDefeat:false,  value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 1).length, 
+   {voteOption: 'Abstain', isFor: false, isAbstain:true, isDefeat:false,  value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 1).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0), 
     fill: '#0080ff', icon: FaHandHolding
    },
-   {voteOption: 'Defeat', isFor: false, isAbstain:false, isDefeat:true,  value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 2).length, 
+   {voteOption: 'Defeat', isFor: false, isAbstain:false, isDefeat:true,  value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 2).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0), 
     fill: '#ff0000', icon: MdCancel
    },
 ] }/>

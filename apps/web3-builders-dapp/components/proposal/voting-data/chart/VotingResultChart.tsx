@@ -31,7 +31,7 @@ type Props = {
 
 function VotingResultChart({chartData, isCustom}: Props) {
   return (
-    <ChartContainer config={isCustom ? customVotingChartConfig : standardVotingChartConfig} className="w-full p-2 bg-zinc-800 rounded-lg max-w-lg min-h-52">
+    <ChartContainer config={isCustom ? customVotingChartConfig : standardVotingChartConfig} className="w-full p-2 bg-zinc-800 border border-(--hacker-green-4) rounded-lg max-w-lg min-h-52">
       <BarChart accessibilityLayer data={chartData}>
 <CartesianGrid vertical={false} />
 <XAxis dataKey={'voteOption'} tickLine={false} axisLine={false} />
@@ -49,8 +49,8 @@ function VotingResultChart({chartData, isCustom}: Props) {
   ))}
 </Bar>
 
-        <ChartTooltip content={<ChartTooltipContent labelKey="voteOption" />}/>
-        <ChartLegend content={<ChartLegendContent nameKey="voteOption"/>}/>
+        <ChartTooltip content={<ChartTooltipContent  labelKey="voteOption" />}/>
+        <ChartLegend content={<ChartLegendContent  nameKey="voteOption"/>}/>
       </BarChart>
     </ChartContainer>
   )
