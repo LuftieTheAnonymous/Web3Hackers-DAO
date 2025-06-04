@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import rateLimit, { MemoryStore } from 'express-rate-limit';
-import { supabaseConfig } from '../config/supabase';
-import { governorTokenContract } from '../config/ethersConfig';
+import { supabaseConfig } from '../config/supabase.js';
+import { governorTokenContract } from '../config/ethersConfig.js';
 import dotenv from 'dotenv';
 dotenv.config();
 

@@ -1,18 +1,21 @@
-import { logger } from "./config/logger";
-import {  executeGovenorTokenEvents } from "./event-listeners/GovTokenEventListener";
-import { executeGovenorContractEvents } from "./event-listeners/GovenorEventListener";
-import govTokenRouter from "./routes/GovTokenRouter";
-import governanceRouter from "./routes/GovernanceRouter";
-import membersRouter from "./routes/MembersRouter";
-import activityRouter from "./routes/ActivityRouter";
+import {  executeGovenorTokenEvents } from "./event-listeners/GovTokenEventListener.js";
+import { executeGovenorContractEvents } from "./event-listeners/GovenorEventListener.js";
+import govTokenRouter from "./routes/GovTokenRouter.js";
+import governanceRouter from "./routes/GovernanceRouter.js";
+import membersRouter from "./routes/MembersRouter.js";
+import activityRouter from "./routes/ActivityRouter.js";
 import { NextFunction, Request, Response } from "express";
 import dotenv from 'dotenv';
 import cors from 'cors';
 import express from 'express';
-const http = require('http');
-const app = express();
+import http from "http";
 import helmet from 'helmet';
-import { client } from "./redis/quickStart";
+import redisClient  from "./redis/set-up.js";
+import logger from "./config/winstonConfig.js";
+import './redis/bullmq/main.js';
+import './redis/bullmq/worker.js';
+import './redis/bullmq/queueEvents.js';
+const app = express();
 dotenv.config();
 
 // contentSecurityPolicy - strict set of rules that only allows resources from the same origin
@@ -72,22 +75,28 @@ app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
 const server = http.createServer(app);
 
-client.on('error', err => console.log('Redis Client Error', err));
+redisClient.on('error', (err:any) => console.log('Redis Client Error', err));
 
-client.connect();
+if (!redisClient.isOpen) await redisClient.connect();
+
+
+await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
 app.post('/redis-test', async (req: Request, res: Response) => {
-    await client.set('testKey', 'testValue');
-    const value = await client.get('testKey');
+    await redisClient.set('testKey', 'testValue');
+    const value = await redisClient.get('testKey');
     console.log('Redis test value:', value);
     res.status(200).json({ message: 'Redis test successful', value });
 });
 
-
 server.listen(2137, async () => {
+    logger.info('Server started on port 2137', {
+        timestamp: new Date().toISOString(),
+        port: 2137,
+    });
+
     
 executeGovenorContractEvents();
 executeGovenorTokenEvents();
 
- logger.info('Server is running on port 2137');
 });

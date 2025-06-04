@@ -1,10 +1,10 @@
-import { supabaseConfig } from "../../../config/supabase";
+import { supabaseConfig } from "../../../config/supabase.js";
 import webpush from 'web-push';
 
-export async function notifyOnProposalCreated(message: string) {
+export async function notifyDAOMembersOnEvent(message: string, notificationReceivePropertyName: string) {
     
     try{
-        const {data, error} = await supabaseConfig.from('notification_settings').select('endpoint, auth_key, p256h_key, userAddress').eq('notifyOnNewProposals', true);
+        const {data, error} = await supabaseConfig.from('notification_settings').select('endpoint, auth_key, p256h_key, userAddress').eq(notificationReceivePropertyName, true);
 
         if(error){
             console.log({message:"error", data:null, error:error.message, status:500});

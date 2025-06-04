@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { insertVoiceChatActivity, upsertActivity } from "../controllers/ActivityController";
-import { DAO_Discord_elligibilityMiddleware } from "../middlewares/internalEligibility";
+import { insertVoiceChatActivity, upsertActivity } from "../controllers/ActivityController.js";
+import { DAO_Discord_elligibilityMiddleware } from "../middlewares/internalEligibility.js";
 
 const activityRouter = Router();
 

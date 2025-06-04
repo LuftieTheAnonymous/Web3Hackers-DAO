@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { supabaseConfig } from "../config/supabase";
-import { governorTokenContract } from "../config/ethersConfig";
+import { supabaseConfig } from "../config/supabase.js";
+import { governorTokenContract } from "../config/ethersConfig.js";
 
 export const getMembers = async (req:Request, res:Response) => {
 try{
@@ -15,7 +15,6 @@ if(!data){
 res.status(500).json({message:"error", data:null, error:err, status:500 });
 }
 };
-
 
 export const addMember= async (req:Request, res:Response) => {
 

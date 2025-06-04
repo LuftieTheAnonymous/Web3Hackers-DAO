@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { supabaseConfig } from "../config/supabase";
+import { supabaseConfig } from "../config/supabase.js";
 
 const upsertActivity = async (req: Request, res: Response) => {
     try {
