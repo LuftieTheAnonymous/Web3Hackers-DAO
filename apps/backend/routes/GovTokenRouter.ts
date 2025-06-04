@@ -6,7 +6,7 @@ import { DAO_Discord_elligibilityMiddleware } from "../middlewares/internalEligi
 
 const govTokenRouter = Router();
 
-govTokenRouter.get('/influence/:dicordMemberId',  getUserTokenBalance);
+govTokenRouter.get('/influence/:dicordMemberId', getUserTokenBalance);
 
 // govTokenRouter.get('/monthly_token_distribution', DAO_CronJobs_elligibilityMiddleware, cronJobsActionsLimiter, monthlyTokenDistribution);
 

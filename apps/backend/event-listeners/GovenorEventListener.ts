@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { supabaseConfig } from "../config/supabase.js";
 import {format, formatDistanceStrict} from "date-fns";
 import { notifyDAOMembersOnEvent } from "./actions/governor/governor-actions.js";
+import redisClient from "../redis/set-up.js";
 
 dotenv.config();
 
@@ -13,43 +14,82 @@ daoContract.on("ProposalCreated", async (proposalId) => {
         try{
             console.log("Proposal Created triggered", proposalId);
 
-        const proposal = await daoContract.getProposal(proposalId);
+            
+            const proposal = await daoContract.getProposal(proposalId);
+            const redisStoredNickname= await redisClient.get(`${proposal[1]}:nickname`);
 
-        const {data:memberData} = await supabaseConfig.from('dao_members').select('*').eq('userWalletAddress', proposal[1]).single();
-
-        if(!memberData){
-            throw new Error("Member not found");
-        }
-        console.log("Proposal details", proposal, "Proposal", proposalId);
-
-
-  await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-           content: `# New Proposal Announcement 📣 !\n A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
-  "components": [
-      {
-          "type": 1,
-          "components": [
-            {
-              "type": 2,
-              "label": "View Proposal",
-              "style": 5,
-              url:`http://localhost:3000/proposal/${proposalId}`,
-            }
-          ]
-        },
-
+            if(!redisStoredNickname){
+                const {data:memberData} = await supabaseConfig.from('dao_members').select('*').eq('userWalletAddress', proposal[1]).single();
         
- 
-  ]
-}),
-        });
-     
-        await notifyDAOMembersOnEvent(`A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
+                await redisClient.set(`${proposal[1]}:nickname`, memberData.nickname);
+
+                if(!memberData){
+                    throw new Error("Member not found");
+                }
+                console.log("Proposal details", proposal, "Proposal", proposalId);
+        
+        
+          await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                   content: `# New Proposal Announcement 📣 !\n A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
+          "components": [
+              {
+                  "type": 1,
+                  "components": [
+                    {
+                      "type": 2,
+                      "label": "View Proposal",
+                      "style": 5,
+                      url:`http://localhost:3000/proposal/${proposalId}`,
+                    }
+                  ]
+                },
+        
+                
+         
+          ]
+        }),
+                });
+             
+                await notifyDAOMembersOnEvent(`A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
+               
+                return;
+            }
+
+             await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                   content: `# New Proposal Announcement 📣 !\n A new proposal has been created by ${redisStoredNickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
+          "components": [
+              {
+                  "type": 1,
+                  "components": [
+                    {
+                      "type": 2,
+                      "label": "View Proposal",
+                      "style": 5,
+                      url:`http://localhost:3000/proposal/${proposalId}`,
+                    }
+                  ]
+                },
+        
+                
+         
+          ]
+        }),
+                });
+             
+                await notifyDAOMembersOnEvent(`A new proposal has been created by ${redisStoredNickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
+
+
+
         }catch(err){
             console.error(err);
         }

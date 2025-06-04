@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 
 import dotenv from "dotenv";
-import { daoContract, proposalStates, provider } from "../config/ethersConfig.js";
-import { supabaseConfig } from "../config/supabase.js";
-import { ethers, EventLog } from "ethers";
-import pLimit from 'p-limit';
-import retry from 'async-retry';
+import { daoContract, proposalStates } from "../config/ethersConfig.js";
+
+import { EventLog } from "ethers";
+;
 
 export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
     args: string[]

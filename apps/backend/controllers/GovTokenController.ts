@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { governorTokenContract } from "../config/ethersConfig.js";
 import { supabaseConfig } from "../config/supabase.js";
 import retry from "async-retry";
+import redisClient from "../redis/set-up.js";
 
 
 // Single User Action
@@ -90,7 +91,15 @@ try {
 
     console.log(dicordMemberId);
 
+    const redisStoredNickname= await redisClient.hGet(`dao_members:${dicordMemberId}`, 'nickname');
+    const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${dicordMemberId}`, 'userWalletAddress');
+
+if(!redisStoredNickname && !redisStoredWalletAddress){
     const userDBObject= await supabaseConfig.from('dao_members').select('userWalletAddress, nickname').eq('discord_member_id', Number(dicordMemberId)).single();
+
+    await redisClient.hSet(`dao_members:${dicordMemberId}`, 'nickname', (userDBObject.data as any).nickname);
+    await redisClient.hSet(`dao_members:${dicordMemberId}`, 'userWalletAddress', (userDBObject.data as any).userWalletAddress);
+
 
     if(!userDBObject.data){
         res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:dicordMemberId, status:404 });
@@ -107,6 +116,15 @@ try {
 
     res.status(200).json({userDBObject, tokenAmount:(Number(userTokens)/1e18), message:`${
         (userDBObject.data as any).nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
+    return;
+}
+
+const userTokens = await governorTokenContract.getVotes(redisStoredWalletAddress);
+
+console.log(Number(userTokens));
+
+res.status(200).json({userDBObject:{nickname:redisStoredNickname, userWalletAddress:redisStoredWalletAddress}, tokenAmount:(Number(userTokens)/1e18), message:`${
+    redisStoredNickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     
 } catch (error) {
     console.log(error);
