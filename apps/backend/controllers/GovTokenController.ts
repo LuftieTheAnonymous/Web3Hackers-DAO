@@ -96,23 +96,23 @@ try {
 
 if(!redisStoredNickname && !redisStoredWalletAddress){
     const userDBObject= await supabaseConfig.from('dao_members').select('userWalletAddress, nickname').eq('discord_member_id', Number(dicordMemberId)).single();
-
-    await redisClient.hSet(`dao_members:${dicordMemberId}`, 'nickname', (userDBObject.data as any).nickname);
-    await redisClient.hSet(`dao_members:${dicordMemberId}`, 'userWalletAddress', (userDBObject.data as any).userWalletAddress);
-
-
+    
+    
     if(!userDBObject.data){
-        res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:dicordMemberId, status:404 });
+        res.status(404).json({message:"error", data:null, tokenAmount:null,
+             error:"The user with provided nickname was not found", discord_member_id:dicordMemberId, status:404 });
     }
-
+    
     if(userDBObject.error){
-         res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,discord_member_id:dicordMemberId, status:500 });
+        res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,discord_member_id:dicordMemberId, status:500 });
     }
+    
+        await redisClient.hSet(`dao_members:${dicordMemberId}`, 'nickname', (userDBObject.data as any).nickname);
+        await redisClient.hSet(`dao_members:${dicordMemberId}`, 'userWalletAddress', (userDBObject.data as any).userWalletAddress);
 
     const userTokens = await governorTokenContract.getVotes((userDBObject.data as any)
         .userWalletAddress);
 
-        console.log(Number(userTokens));
 
     res.status(200).json({userDBObject, tokenAmount:(Number(userTokens)/1e18), message:`${
         (userDBObject.data as any).nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});

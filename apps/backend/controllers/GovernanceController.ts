@@ -13,9 +13,6 @@ export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
 dotenv.config();
 
 
-
-
-
 const cancelProposal = async (req: Request, res: Response) => {
     const {proposalId} = req.params;
         try{
@@ -24,6 +21,8 @@ const cancelProposal = async (req: Request, res: Response) => {
                 console.log(tx);
     
                 const txReceipt = await tx.wait();
+
+                console.log(txReceipt);
     
                 res.status(200).send({message:"success", status:200, data:txReceipt, error:null});
         }
@@ -65,8 +64,6 @@ const getProposalState = async (req: Request, res: Response) => {
     }
 }
 
-
-
 const getProposalDetails = async (req: Request, res: Response) => {
     try{
         const {proposalId} = req.params;
@@ -77,6 +74,8 @@ const getProposalDetails = async (req: Request, res: Response) => {
         res.status(500).send({message:"error", status:500, data:null, error:err});
     }
 }
+
+
 
 export {
     cancelProposal,

@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import redisClient from '../redis/set-up.js';
 dotenv.config();
 
-const cronJobsActionsLimiter = rateLimit({
+const rateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 20, // Limit each IP to 100 requests per windowMs
     message: {'error': 'Too many requests mate, please try again later.'},
@@ -36,18 +36,26 @@ const proposalCreationLimiter= rateLimit({
     windowMs: 7 * 24 * 60 * 60 * 1000, 
     limit: async(req, res)=>{
 
-      const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter:${req.params.discordId}`, 'userWalletAddress');
-      const redisStoredIsAdmin = await redisClient.hGet(`proposalCreationLimiter:${req.params.discordId}`, 'isAdmin');
+      const authorizationHeader = req.headers.authorization;
+      if (!authorizationHeader) {
+        console.warn("No discordId provided in rate limiter:", req.ip);
+        return 0;
+      }
+
+      const discordId = authorizationHeader.split(" ")[1];
+
+      const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress');
+      const redisStoredIsAdmin = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'isAdmin');
       
       if(!redisStoredWalletAddr && !redisStoredIsAdmin){
-        const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(req.params.discordId)).single();
+        const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(discordId)).single();
       
         
         if(!memberData || !memberData.userWalletAddress){
           return 0;
         }
-        await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'userWalletAddress', memberData.userWalletAddress);
-        await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'isAdmin', `${memberData.isAdmin}`);
+        await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress', memberData.userWalletAddress);
+        await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'isAdmin', `${memberData.isAdmin}`);
   
         const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
   
@@ -196,4 +204,4 @@ keyGenerator: (req: Request, res)=> {
 );
 
 
-export { cronJobsActionsLimiter, proposalCreationLimiter };
+export { rateLimiter, proposalCreationLimiter };
