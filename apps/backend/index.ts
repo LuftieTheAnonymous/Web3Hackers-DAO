@@ -64,12 +64,7 @@ app.use(cors({
 app.use(express.json());
 
 
-app.use('/governance',(req:Request, res:Response, next:NextFunction)=>{
-    if(req.originalUrl === '/governance/') {
-        console.log(`${req.originalUrl}, ${req.method} ${new Date().toISOString()}`);
-    }
-    next();
-}, governanceRouter);
+app.use('/governance', governanceRouter);
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
@@ -82,12 +77,6 @@ if (!redisClient.isOpen) await redisClient.connect();
 
 await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
-app.post('/redis-test', async (req: Request, res: Response) => {
-    await redisClient.set('testKey', 'testValue');
-    const value = await redisClient.get('testKey');
-    console.log('Redis test value:', value);
-    res.status(200).json({ message: 'Redis test successful', value });
-});
 
 server.listen(2137, async () => {
     logger.info('Server started on port 2137', {

@@ -411,6 +411,9 @@ CustomBuilderGovernor.Proposal memory proposalAfterExecuted = customGovernor.get
 
 assert(proposalAfterExecuted.state == CustomBuilderGovernor.ProposalState.Executed);
 
+
+
+
 }
 
 
@@ -533,7 +536,7 @@ console.log(pastVotes, 'User Balance Before Casting Vote');
 
 proposalCreatedTargets = [address(govToken)];
 proposalCreatedValues = [0];
-proposalCreatedCalldata=[abi.encodeWithSignature("rewardsgUser(address,uint256)", user2, 15e18)];
+proposalCreatedCalldata=[abi.encodeWithSignature("rewardUser(address,uint256)", user2, 15e18)];
 indicies.push(0);
 
 bytes32 proposalId =    customGovernor.createProposal("Coz I've said so though", proposalCreatedTargets, proposalCreatedValues, proposalCreatedCalldata, CustomBuilderGovernor.UrgencyLevel.Medium, false, block.timestamp + 604800,1000,3000);

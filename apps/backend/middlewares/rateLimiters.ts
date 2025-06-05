@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import rateLimit, { MemoryStore } from 'express-rate-limit';
+import rateLimit from 'express-rate-limit';
 import { supabaseConfig } from '../config/supabase.js';
 import { governorTokenContract } from '../config/ethersConfig.js';
 import dotenv from 'dotenv';
@@ -31,6 +31,63 @@ const rateLimiter = rateLimit({
        }
     },
 });
+
+
+const rewardUserLimiter= rateLimit({
+    windowMs: 60 * 60 * 1000, 
+    limit: 5, 
+    message: {'error': 'Too many requests mate, please try again later.'},
+    statusCode: 429,
+    standardHeaders: 'draft-8', // Enable the `RateLimit-*` headers
+    identifier: 'adminFunctionAccess',
+    keyGenerator: async (req: Request, res) => {
+       try{
+ const authorizationHeader = req.headers.authorization;
+        if (!authorizationHeader) {
+            console.warn("No authorization header provided in rate limiter:", req.ip);
+            return `${req.ip}`;
+        }
+        const headerAuthorizationValue = authorizationHeader.split(" ")[1]; 
+        res.status(200).send({message: 'Rate limit applied successfully.', header: `adminFunctionAccess-${headerAuthorizationValue}`, status: 200});
+        return `adminFunctionAccess-${headerAuthorizationValue}`;
+        
+       }catch(err){
+        console.error("Rate limiter keyGenerator error:", err);
+        res.status(500).send({error: 'Internal Server Error', message: 'An error occurred while processing your request.'});
+        return `${req.ip}`;
+       }
+    },
+});
+
+const punishUserLimiter= rateLimit({
+    windowMs: 60 * 60 * 1000, 
+    limit: 5, 
+    message: {'error': 'Too many requests mate, please try again later.'},
+    statusCode: 429,
+    standardHeaders: 'draft-8', // Enable the `RateLimit-*` headers
+    identifier: 'adminFunctionAccess',
+    keyGenerator: async (req: Request, res) => {
+       try{
+ const authorizationHeader = req.headers.authorization;
+        if (!authorizationHeader) {
+            console.warn("No authorization header provided in rate limiter:", req.ip);
+            return `${req.ip}`;
+        }
+        const headerAuthorizationValue = authorizationHeader.split(" ")[1]; 
+        res.status(200).send({message: 'Rate limit applied successfully.', header: `adminFunctionAccess-${headerAuthorizationValue}`, status: 200});
+        return `adminFunctionAccess-${headerAuthorizationValue}`;
+        
+       }catch(err){
+        console.error("Rate limiter keyGenerator error:", err);
+        res.status(500).send({error: 'Internal Server Error', message: 'An error occurred while processing your request.'});
+        return `${req.ip}`;
+       }
+    },
+});
+
+
+
+
 
 const proposalCreationLimiter= rateLimit({
     windowMs: 7 * 24 * 60 * 60 * 1000, 
@@ -204,4 +261,4 @@ keyGenerator: (req: Request, res)=> {
 );
 
 
-export { rateLimiter, proposalCreationLimiter };
+export { rateLimiter, proposalCreationLimiter, rewardUserLimiter, punishUserLimiter };

@@ -70,15 +70,42 @@ const punishMember = async (req: Request, res: Response) => {
         const {userAddress} = req.params;
 
         const {amount} = req.body;
-        
+
+
+        const redisStoredNickname= await redisClient.hGet(`dao_members:${userAddress}`, 'nickname');
+    const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${userAddress}`, 'userWalletAddress');
+
+if(!redisStoredNickname && !redisStoredWalletAddress){
+    const userDBObject= await supabaseConfig.from('dao_members').select('userWalletAddress, nickname').eq('userWalletAddress', userAddress).single();
+
+    if(!userDBObject.data){
+        res.status(404).json({message:"error", data:null, tokenAmount:null,
+        error:"The user with provided nickname was not found", userAddress, status:404 });
+    }
+
+    if(userDBObject.error){
+        res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,userAddress, status:500 });
+    }
+
         const tx = await governorTokenContract.punishMember(userAddress, amount);
-        
+
         const txReceipt = await tx.wait();
-        
+
         console.log(txReceipt);
-        
+
         res.status(200).json({data:txReceipt,error:null, message:"success", status:200});
-       
+
+        return;
+}
+
+const tx = await governorTokenContract.punishMember(redisStoredWalletAddress, amount);
+
+const txReceipt = await tx.wait();
+
+console.log(txReceipt);
+
+res.status(200).json({data:txReceipt,error:null, message:"success", status:200});
+
     } catch (error) {
             console.log(error);
     res.status(500).json({data:null, error, message:"error", status:500});

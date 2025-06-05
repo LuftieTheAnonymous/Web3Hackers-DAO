@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getUserTokenBalance, intialTokenDistribution, punishMember, rewardMember } from "../controllers/GovTokenController.js";
-import { DAO_Discord_elligibilityMiddleware } from "../middlewares/internalEligibility.js";
+import { DAO_Discord_elligibilityMiddleware, rewardPunishEndpointEligibilityMiddleware } from "../middlewares/internalEligibility.js";
+import { punishUserLimiter, rewardUserLimiter } from "../middlewares/rateLimiters.js";
 
 
 
@@ -8,11 +9,9 @@ const govTokenRouter = Router();
 
 govTokenRouter.get('/influence/:dicordMemberId', getUserTokenBalance);
 
-// govTokenRouter.get('/monthly_token_distribution', DAO_CronJobs_elligibilityMiddleware, cronJobsActionsLimiter, monthlyTokenDistribution);
+govTokenRouter.post('/reward_member/:userAddress',rewardPunishEndpointEligibilityMiddleware, rewardUserLimiter, rewardMember);
 
-govTokenRouter.post('/reward_member/:userAddress', rewardMember);
-
-govTokenRouter.post('/punish_member/:userAddress', punishMember);
+govTokenRouter.post('/punish_member/:userAddress',rewardPunishEndpointEligibilityMiddleware, punishUserLimiter, punishMember);
 
 govTokenRouter.post('/intial_token_distribution/:memberDiscordId',DAO_Discord_elligibilityMiddleware, intialTokenDistribution);
 
