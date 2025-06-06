@@ -158,13 +158,6 @@ struct HighestVotedCustomOption{
 bytes32 constant private ACTIONS_MANAGER = keccak256("ACTIONS_MANAGER");
 
 
-// Variables
-uint256 private constant MIN_VOTING_PERIOD = 100; // 100 blocks
-uint256 private constant MAX_VOTING_PERIOD = 1000; // 1000 blocks
-
-uint256 private constant MIN_VOTING_DELAY = 1; // 1 block
-uint256 private constant MAX_VOTING_DELAY = 10; // 10 blocks
-
 uint256 private constant LOW_LEVEL_URGENCY_QUORUM = 40;
 uint256 private constant MEDIUM_LEVEL_URGENCY_QUORUM = 60;
 uint256 private constant HIGH_LEVEL_URGENCY_QUORUM = 90;

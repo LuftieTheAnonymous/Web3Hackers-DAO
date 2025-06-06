@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ArrowLeft, ArrowRight, CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { toast } from 'sonner'
 
 
 type Props = {
@@ -112,14 +113,12 @@ setValue('isCustom', value);
 
 
  function SecondStepContent({
-  register,
-  formState,
   watch,
   control,
   setValue
  }: Props) {
 
-const {fields, append, update} = useFieldArray({name: 'functionsCalldatas', control});
+const {fields, append} = useFieldArray({name: 'functionsCalldatas', control});
 
 
 
@@ -157,7 +156,7 @@ const [callDataIndex, setCallDataIndex] = React.useState(0);
           )}
         />
 
-{fields.length > 0 && <div className='flex justify-between py-4 px-2 items-center gap-3'>
+{fields.length > 0 && <div className='flex justify-between py-4 px-2 items-center gap-4'>
   <Button disabled={callDataIndex <= 0} onClick={(e) => {
    e.preventDefault();
    setCallDataIndex(callDataIndex - 1); 
@@ -178,9 +177,10 @@ const [callDataIndex, setCallDataIndex] = React.useState(0);
 callDataIndex===index && <div key={field.id}>
 <FormField
           control={control}
+          
           name={`functionsCalldatas.${index}.calldata`}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className='py-2'>
               <FormLabel className='text-white text-base font-light'>Function to call on chain</FormLabel>
               <FormControl>
               <Select 
@@ -214,7 +214,7 @@ callDataIndex===index && <div key={field.id}>
               control={control}
               name={`functionsCalldatas.${index}.destinationAddress`}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='py-2'>
                   <FormLabel className='text-white text-base font-light'>Destination Address</FormLabel>
                   <FormControl>
     <Input {...field} id='userAddr' placeholder='Enter the user address'
@@ -230,10 +230,10 @@ callDataIndex===index && <div key={field.id}>
               control={control}
               name={`functionsCalldatas.${index}.tokenAmount`}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='py-2'>
                   <FormLabel className='text-white text-base font-light'>Amount</FormLabel>
                   <FormControl>
-    <Input {...field} onChange={(e) => setValue(`functionsCalldatas.${index}.tokenAmount`, BigInt(e.target.value))} value={Number(watch(`functionsCalldatas.${index}.tokenAmount`))} id='tokenAmount' placeholder='Enter the user address' type='number'
+    <Input min={1} max={1500} {...field} onChange={(e) => setValue(`functionsCalldatas.${index}.tokenAmount`, BigInt(e.target.value))} value={Number(watch(`functionsCalldatas.${index}.tokenAmount`))} id='tokenAmount' placeholder='Enter the user address' type='number'
     className='text-white border border-(--hacker-green-4) outline-none '/>
                     
                   </FormControl>
@@ -385,9 +385,9 @@ const goForward=useCallback(() => {
 }
 
 
- function FourthStepContent({control, setValue}: Props) {
+ function FourthStepContent({control, setValue, watch, setError}: Props) {
   return (
-    <div className='flex flex-col gap-3'>
+    <div className='flex flex-col gap-4'>
 
 <FormField
           control={control}
@@ -423,7 +423,7 @@ const goForward=useCallback(() => {
                   'day_today':'bg-(--hacker-green-4) text-white rounded-md',
                     
                   }}
-                    onSelect={(date) => {
+                    onSelect={(date: Date) => {
                       if(!date) return
                       setValue('proposalEndTime', date);
                       console.log(field, date);
@@ -451,7 +451,7 @@ const goForward=useCallback(() => {
               <FormControl>
 
        <div className="flex w-full gap-3 items-center">
-    <Input {...field} id='customOptionName' value={
+    <Input min={0} {...field} id='customOptionName' value={
       field.value ?
       Number(field.value) : 0
     } onChange={(e) => setValue('proposalDelay', Number(e.target.value))} placeholder='Amount of time units' type='number'
@@ -473,7 +473,15 @@ const goForward=useCallback(() => {
             <FormItem>
  <FormLabel className='text-white text-base font-light'>Proposal Units</FormLabel>
               <FormControl>
-       <Select {...field} value={String(field.value)} onValueChange={(value) => setValue('proposalDelayUnit', Number(value))}>
+       <Select {...field} value={String(field.value)} onValueChange={(value) => {
+        if(new Date(watch('proposalEndTime').getTime()).getTime() - new Date(new Date().getTime() + watch('proposalDelay') * Number(value)).getTime() < 1000 * 60 * 60 * 3){
+          setError('proposalEndTime', {message: 'Proposal voting period must be at least 3 hours from now'});
+          toast.error('Proposal voting period must be at least 3 hours from now');
+          return
+        }
+
+        setValue('proposalDelayUnit', Number(value));
+       }}>
   <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
     <SelectValue placeholder="Time Unit" />
   </SelectTrigger>
@@ -513,7 +521,7 @@ const goForward=useCallback(() => {
               <FormControl>
 
        <div className="flex w-full gap-3 items-center">
-    <Input {...field} id='customOptionName' 
+    <Input min={0} {...field} id='customOptionName' 
      value={
       field.value ?
       Number(field.value) : 0
@@ -537,7 +545,14 @@ const goForward=useCallback(() => {
             <FormItem>
  <FormLabel className='text-white text-base font-light'>Timelock Units</FormLabel>
               <FormControl>
-       <Select {...field} value={String(field.value)} onValueChange={(value) => setValue('timelockUnit', Number(value))}>
+       <Select {...field} value={String(field.value)} onValueChange={(value) => {
+        if(watch('timelockPeriod') * Number(value) > 1000 * 60 * 60 * 24 * 7){
+          setError('timelockPeriod', {message: 'Timelock period must be at most 7 days'});
+          toast.error('Timelock period must be at most 7 days');
+          return
+        }
+        setValue('timelockUnit', Number(value))
+       }}>
   <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
     <SelectValue placeholder="Time Unit" />
   </SelectTrigger>

@@ -14,9 +14,7 @@ type Props = {
 function ProposalList({proposals}: Props) {
 
     const {serverData}=useRealtimeDocuments({initialData:proposals,tableName:'dao_proposals',parameterOnChanges:'proposal_id'});
-
-    const {address}=useAccount();
-    const {currentUser}=useGetLoggedInUser();
+    const {currentUser, isLoading}=useGetLoggedInUser();
 
 
   return (
@@ -25,7 +23,7 @@ function ProposalList({proposals}: Props) {
        <DropdownBar/>
     <div className="flex flex-col overflow-y-auto items-center gap-6  w-full">
 
-    {serverData && serverData.map((proposal,index)=>(<ProposalElement proposalObj={proposal} key={proposal.proposal_id} proposalId={proposal.proposal_id} />))}
+    {serverData && !currentUser && !isLoading && serverData.map((proposal,index)=>(<ProposalElement proposalObj={proposal} key={proposal.proposal_id} proposalId={proposal.proposal_id} />))}
     
     </div>
 

@@ -10,19 +10,29 @@ type Props = {}
 function useGetLoggedInUser() {
 
     const {address}=useAccount();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 const [currentUser, setCurrentUser] = useState<any>(null);
 
 const getLoggedInUser= useCallback(async()=>{
-if(address){
-      const {data, error}=await supabase.from('dao_members').select('*').eq('userWalletAddress', address).single();
+  if(address){
+  setIsLoading(true);
+      const {data, error }=await supabase.from('dao_members').select('*').eq('userWalletAddress', address).single();
       
+      if(!data){
+        setCurrentUser(null);
+        setIsLoading(false);
+        return;
+      }
+
       if(error) {
         setCurrentUser(null);
+        setIsLoading(false);
         console.log(error);
         return;
       }
 
   setCurrentUser(data);
+  setIsLoading(false);
 }
 },[address]);
 
@@ -31,7 +41,7 @@ useEffect(()=>{
 getLoggedInUser();
 },[getLoggedInUser]);
 
-return {currentUser}
+return {currentUser, isLoading};
  
 }
 

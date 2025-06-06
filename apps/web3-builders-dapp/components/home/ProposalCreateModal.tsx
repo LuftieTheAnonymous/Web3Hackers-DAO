@@ -9,6 +9,7 @@ import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import {useLottie} from "lottie-react";
 import cryptoLottieAnimation from "@/public/gifs/Crypto-Lottie-Animation.json";
 import Image from 'next/image';
+import { Skeleton } from '../ui/skeleton';
 
 
 type Props = {}
@@ -16,7 +17,7 @@ type Props = {}
 function ProposalCard({}: Props) {
 
   const {address}=useAccount();
-  const {currentUser}=useGetLoggedInUser();
+  const {currentUser, isLoading}=useGetLoggedInUser();
 
   const options = {
     animationData: cryptoLottieAnimation,
@@ -28,8 +29,8 @@ function ProposalCard({}: Props) {
 
 
   return (
-    <div className={`w-full h-full  ${(address && !currentUser) ? 'flex flex-col gap-6 justify-center items-center h-screen' : 'h-full'}`}>
-{(address && currentUser) &&    <div className="max-w-2xl my-6  drop-shadow-green-500 hover:-translate-y-1 transition-all duration-500 drop-shadow-sm mx-auto rounded-lg flex flex-col gap-2  w-full h-80 bg-zinc-800">
+    <div className={`w-full h-full  ${(address && !currentUser && !isLoading) ? 'flex flex-col gap-6 justify-center items-center h-screen' : 'h-full'}`}>
+{address && currentUser && !isLoading ?    <div className="max-w-2xl my-6  drop-shadow-green-500 hover:-translate-y-1 transition-all duration-500 drop-shadow-sm mx-auto rounded-lg flex flex-col gap-2  w-full h-80 bg-zinc-800">
     <div className="flex justify-between items-center px-3 py-2 border-b border-(--hacker-green-4)">
       <div className="flex items-center gap-1 text-white">
         <div className='w-8 h-8 bg-zinc-600 rounded-full'>
@@ -57,9 +58,28 @@ function ProposalCard({}: Props) {
    
       className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 mr-4'>Propose</Button>
     </div>
-    </div> }
+    </div> : isLoading && <Skeleton className='max-w-2xl my-6  drop-shadow-green-500 hover:-translate-y-1 transition-all duration-500 drop-shadow-sm mx-auto rounded-lg flex flex-col gap-2  w-full h-96 bg-zinc-800'>
 
-    {address && !currentUser && <div className='flex flex-col gap-8 items-center w-full h-screen justify-center p-2'>
+<div className="w-full p-2 h-12 flex items-center gap-2 border-b-(--hacker-green-4) border-b">
+  <Skeleton className='w-8 h-8 rounded-full bg-gray-400'/>
+  <Skeleton className='w-32 h-4'/>
+</div>
+
+<Skeleton className='px-4 py-2 h-full'/>
+
+<div className="flex justify-between  items-center pt-2 border-t border-(--hacker-green-4) py-2 w-full gap-2">
+
+  <div className="flex gap-4 items-center ml-4">
+  <Skeleton className='w-8 h-8 rounded-full bg-gray-400'/>
+  <Skeleton className='w-8 h-8 rounded-full bg-gray-400'/>
+  </div>
+
+<Skeleton className='w-24 h-8 rounded-lg bg-gray-400'/>
+</div>
+
+    </Skeleton> }
+
+    {address && !currentUser && !isLoading && <div className='flex flex-col gap-8 items-center w-full h-screen justify-center p-2'>
 
 <p className='text-white text-3xl font-semibold text-center'>You are not a member of our Discord Community and DAO member yet !</p>
 
