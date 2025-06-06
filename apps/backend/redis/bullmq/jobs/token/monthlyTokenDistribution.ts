@@ -4,7 +4,7 @@ import retry from "async-retry";
 export const monthlyTokenDistribution = async () => {
     try {
 
-        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members!inner(*)').lte('reward_month', new Date().toISOString());
+        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members!inner(*)').contains('id', `${new Date().getFullYear()}-${new Date().getMonth()}`);
 
         if(monthActivities.error){
             console.log(monthActivities.error);
@@ -19,7 +19,7 @@ const promisesArray = (monthActivities.data as any).map(async (activity: any) =>
     return  Promise.resolve(async()=>{
 
   await retry((async () => {
-              const tx = await governorTokenContract.rewardMonthlyTokenDistribution(BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1),BigInt(1), 
+              const tx = await governorTokenContract.rewardMonthlyTokenDistribution(BigInt(activity.daily_sent_reports),BigInt(activity.votings_participated),BigInt(activity.proposals_accepted),BigInt(activity.problems_solved),BigInt(activity.resources_share), BigInt(activity.proposals_created), BigInt((activity.general_chat_messages + activity.crypto_discussion_messages) / 30), 
             (activity as any).dao_members.userWalletAddress);
         
         const txReceipt = await tx.wait();

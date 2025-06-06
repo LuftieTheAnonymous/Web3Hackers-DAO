@@ -50,7 +50,7 @@ const rewardMember = async (req: Request, res: Response) => {
 
         const {amount} = req.body;
         
-        const tx = await governorTokenContract.rewardUser(userAddress, BigInt(Number(amount)));
+        const tx = await governorTokenContract.rewardUser(userAddress, BigInt(Number(amount)*1e18));
         
         const txReceipt = await tx.wait();
         
@@ -87,7 +87,7 @@ if(!redisStoredNickname && !redisStoredWalletAddress){
         res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,userAddress, status:500 });
     }
 
-        const tx = await governorTokenContract.punishMember(userAddress, amount);
+        const tx = await governorTokenContract.punishMember(userAddress, BigInt(Number(amount)*1e18));
 
         const txReceipt = await tx.wait();
 

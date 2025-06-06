@@ -3,7 +3,7 @@ import { daoContract } from "../../../../config/ethersConfig.js";
 import pLimit from 'p-limit';
 import { supabaseConfig } from "../../../../config/supabase.js";
 
-const activateProposals = async () => {
+export const activateProposals = async () => {
   try {
     const { data } = await supabaseConfig.from('dao_proposals').select('*');
 

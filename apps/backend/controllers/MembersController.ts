@@ -76,8 +76,6 @@ export const getMember= async (req:Request, res:Response) => {
     const redisStoredNickname = await redisClient.hGet(`dao_members:${discordId}`, 'nickname');
     const redisStoredDiscordId = await redisClient.hGet(`dao_members:${discordId}`, 'discordId');
     const redisStoredPhotoURL = await redisClient.hGet(`dao_members:${discordId}`, 'photoURL');
-    
-    
     try{
         
         if(!redisStoredWalletAddr && !redisStoredIsAdmin && !redisStoredNickname && !redisStoredDiscordId){

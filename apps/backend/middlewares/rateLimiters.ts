@@ -21,12 +21,10 @@ const rateLimiter = rateLimit({
             return `${req.ip}`;
         }
         const headerAuthorizationValue = authorizationHeader.split(" ")[1]; 
-        res.status(200).send({message: 'Rate limit applied successfully.', header: `web3builders-dao-dapp-${headerAuthorizationValue}`, status: 200});
         return `web3builders-dao-dapp-${headerAuthorizationValue}`;
         
        }catch(err){
         console.error("Rate limiter keyGenerator error:", err);
-        res.status(500).send({error: 'Internal Server Error', message: 'An error occurred while processing your request.'});
         return `${req.ip}`;
        }
     },
@@ -34,9 +32,9 @@ const rateLimiter = rateLimit({
 
 
 const rewardUserLimiter= rateLimit({
-    windowMs: 60 * 60 * 1000, 
+    windowMs: 15 * 60 * 1000, 
     limit: 5, 
-    message: {'error': 'Too many requests mate, please try again later.'},
+    message: {'error': 'Too many requests mate, please try again later. You have utilized your reward limit (5) in the last 15 minutes.'},
     statusCode: 429,
     standardHeaders: 'draft-8', // Enable the `RateLimit-*` headers
     identifier: 'adminFunctionAccess',
@@ -48,24 +46,26 @@ const rewardUserLimiter= rateLimit({
             return `${req.ip}`;
         }
         const headerAuthorizationValue = authorizationHeader.split(" ")[1]; 
-        res.status(200).send({message: 'Rate limit applied successfully.', header: `adminFunctionAccess-${headerAuthorizationValue}`, status: 200});
         return `adminFunctionAccess-${headerAuthorizationValue}`;
         
        }catch(err){
         console.error("Rate limiter keyGenerator error:", err);
-        res.status(500).send({error: 'Internal Server Error', message: 'An error occurred while processing your request.'});
         return `${req.ip}`;
        }
     },
 });
 
 const punishUserLimiter= rateLimit({
-    windowMs: 60 * 60 * 1000, 
+    windowMs: 15 * 60 * 1000, 
     limit: 5, 
     message: {'error': 'Too many requests mate, please try again later.'},
     statusCode: 429,
     standardHeaders: 'draft-8', // Enable the `RateLimit-*` headers
     identifier: 'adminFunctionAccess',
+    handler: async (req, res, next) => {
+      console.log(req.ip);
+      console.log(req.headers.authorization);
+    },
     keyGenerator: async (req: Request, res) => {
        try{
  const authorizationHeader = req.headers.authorization;
@@ -74,19 +74,15 @@ const punishUserLimiter= rateLimit({
             return `${req.ip}`;
         }
         const headerAuthorizationValue = authorizationHeader.split(" ")[1]; 
-        res.status(200).send({message: 'Rate limit applied successfully.', header: `adminFunctionAccess-${headerAuthorizationValue}`, status: 200});
         return `adminFunctionAccess-${headerAuthorizationValue}`;
         
        }catch(err){
         console.error("Rate limiter keyGenerator error:", err);
-        res.status(500).send({error: 'Internal Server Error', message: 'An error occurred while processing your request.'});
+console.error('An error occurred while processing your request.');
         return `${req.ip}`;
        }
     },
 });
-
-
-
 
 
 const proposalCreationLimiter= rateLimit({
@@ -152,8 +148,6 @@ const proposalCreationLimiter= rateLimit({
         }
 
       }
-      
-      
       
       
       return 0;

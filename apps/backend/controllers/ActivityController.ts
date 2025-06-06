@@ -4,92 +4,55 @@ import redisClient from "../redis/set-up.js";
 
 const upsertActivity = async (req: Request, res: Response) => {
     try {
-const methodUsed = req.method;
-console.log(methodUsed);
-const { memberDiscordId } = req.params;
+        const methodUsed = req.method;
+        const { memberDiscordId } = req.params;
         const { activity, id } = req.body;
-const redisStoredDiscordId = await redisClient.hGet(`dao_members:${memberDiscordId}`, 'discordId');
 
-const { data, error } = await supabaseConfig
-    .from('dao_month_activity')
-    .select('*')
-    .eq('member_id', Number(memberDiscordId))
-    .eq('id', id)
-    .single();
+        const redisKey = `activity:${id}:${memberDiscordId}`;
 
-    console.log(data);
-    console.log(error);
+        // Check if hash exists
+        const existing = await redisClient.exists(redisKey);
 
-    if(error){
-     res.status(500).json({
-            message: "error",
-            data: null,
-            error: error.message,
-            status: 500
+        console.log(existing);
+
+        if (methodUsed === 'POST') {
+            // If doesn't exist, set fresh
+            if (!existing) {
+                await redisClient.hSet(redisKey, {
+                    discordId: memberDiscordId,
+                    [activity]: 1
+                });
+            } else {
+                // Otherwise, increment
+                await redisClient.hIncrBy(redisKey, activity, 1);
+                console.log('Incremented');
+            }
+        } else {
+            // For non-POST, try to decrement
+            const current = await redisClient.hGet(redisKey, activity);
+            const currentValue = parseInt(current ?? '0', 10);
+            const newValue = Math.max(0, currentValue - 1); // Avoid going negative
+
+            await redisClient.hSet(redisKey, activity, newValue);
+        }
+
+        res.status(200).json({
+            message: "success",
+            data: "Updated activity in Redis",
+            error: null,
+            status: 200
         });
-    }
-
-if (!data) {
-    const { data: insertData, error: insertError } = await supabaseConfig
-        .from('dao_month_activity')
-        .insert({
-            id,
-            [activity]: 1,
-            member_id: Number(memberDiscordId)
-        }).single();
-
-        console.log(insertData);
-        console.log(insertError);
-
-    if (insertError) {
-         res.status(500).json({
-            message: "error",
-            data: null,
-            error: insertError.message,
-            status: 500
-        });
-    }
-
- res.status(200).json({
-        message: "success",
-        data: insertData,
-        error: null,
-        status: 200
-    });
-
-} else {
-    const { data: updateData, error: updateError } = await supabaseConfig
-        .from('dao_month_activity')
-        .update({ [activity]: methodUsed === 'POST' ? (data[activity] + 1) : (data[activity] - 1) })
-        .eq('id', id);
-        
-if (updateError) {
-         res.status(500).json({
-            message: "error",
-            data: null,
-            error: updateError.message,
-            status: 500
-        });
-    }
-
-     res.status(200).json({
-        message: "success",
-        data: updateData,
-        error: null,
-        status: 200
-    });
-}
-
 
     } catch (err) {
-         res.status(500).json({
+        res.status(500).json({
             message: "error",
             data: null,
             error: err instanceof Error ? err.message : JSON.stringify(err),
             status: 500
         });
     }
-}
+};
+
 
 const insertVoiceChatActivity=async(req:Request, res:Response)=>{
     try{
@@ -103,7 +66,7 @@ const insertVoiceChatActivity=async(req:Request, res:Response)=>{
                 data: null,
                 error: error instanceof Error ? error.message : JSON.stringify(error),
                 status: 500
-            })
+            });
         }
 
         res.status(200).json({
@@ -111,7 +74,7 @@ const insertVoiceChatActivity=async(req:Request, res:Response)=>{
             data,
             error: null,
             status: 200
-        })
+        });
 
     }catch(err){
         res.status(500).json({
@@ -119,7 +82,7 @@ const insertVoiceChatActivity=async(req:Request, res:Response)=>{
             data: null,
             error: err instanceof Error ? err.message : JSON.stringify(err),
             status: 500
-        })
+        });
     }
 }
 
