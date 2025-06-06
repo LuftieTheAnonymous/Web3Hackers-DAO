@@ -1,5 +1,6 @@
 import ProfilePageContainer from '@/components/profile/container/ProfilePageContainer'
 import supabase from '@/lib/db/dbConfig'
+import { notFound } from 'next/navigation'
 import React from 'react'
 
 type Props = {
@@ -16,10 +17,14 @@ const { data, error } = await supabase
   .eq('userWalletAddress', profileId)
   .single();
 
+  if(error && !data){
+notFound();
+  }
+
 
   return (
    <>
-   {data && <ProfilePageContainer
+   {data && <ProfilePageContainer walletAddress={profileId}
    profileData={data} />}
    </>
   )

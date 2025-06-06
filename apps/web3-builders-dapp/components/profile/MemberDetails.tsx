@@ -10,12 +10,12 @@ import { readContract } from 'viem/actions';
 import { useAccount, useReadContracts } from 'wagmi';
 
 type Props
- = {objectData:any}
+ = {objectData:any, walletAddress:string};
 
-function MemberDetails({objectData}: Props) {
+function MemberDetails({objectData, walletAddress}: Props) {
 
 
-    const {address}=useAccount();
+
 const tokenContractData =   {
     address:TOKEN_CONTRACT_ADDRESS,
     abi:tokenContractAbi
@@ -31,7 +31,7 @@ const governorContractData= {
             {
               ...tokenContractData,
                 functionName:'balanceOf',
-                args:[address]
+                args:[walletAddress]
               },
               {
                 ...tokenContractData,
@@ -39,8 +39,8 @@ const governorContractData= {
               }, 
                 {
                     ...governorContractData,
-                    functionName:'userVotedCount',
-                    args:[address]
+                    functionName:'getUserVotedCount',
+                    args:[walletAddress]
                 }
              
         ]
@@ -81,7 +81,7 @@ text-(--hacker-green-4)
 '
 />
 
-<span className='
+<span onClick={()=>{console.log(data)}} className='
 text-3xl
 font-bold
 '>

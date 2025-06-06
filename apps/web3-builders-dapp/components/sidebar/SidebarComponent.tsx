@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/sidebar"
 import ProposalModal from '../modal/ProposalModal'
 import { ConnectKitButton } from 'connectkit'
+
 import { useAccount } from 'wagmi'
 
 
  function SidebarComponent({}: Props) {
 
   const {address}=useAccount();
+  
 
     
     // Menu items.

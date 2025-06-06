@@ -9,10 +9,11 @@ import useRealtimeDocument from '@/hooks/useRealtimeDocument'
 
 type Props<T> = {
     profileData:T,
+    walletAddress:string
 
 }
 
-function ProfilePageContainer<T>({profileData, 
+function ProfilePageContainer<T>({profileData,  walletAddress
 
 }: Props<T>) {
 
@@ -25,7 +26,7 @@ function ProfilePageContainer<T>({profileData,
           <div className=" max-w-6xl w-full mx-auto flex-col lg:flex-row gap-6 flex justify-between items-center py-6 px-4
            ">
     <MemberTile objectData={objectData}/>
-   <MemberDetails objectData={objectData}
+   <MemberDetails objectData={objectData} walletAddress={walletAddress}
    />
            </div>
           
@@ -35,7 +36,7 @@ function ProfilePageContainer<T>({profileData,
      <Button className='bg-zinc-800 cursor-pointer hover:bg-(--hacker-green-4) hover:text-zinc-800 hover:scale-90'>Proposals</Button>
  
    </div>
-          <MemberStats/>
+          <MemberStats walletAddress={walletAddress as `0x${string}`}/>
           </div>
     </div>
   )

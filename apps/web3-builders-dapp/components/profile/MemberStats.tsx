@@ -5,23 +5,23 @@ import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/gove
 import VotesTypesCastedChart from './container/charts/VotesTypesCastedChart';
 import { Button } from '../ui/button';
 
-type Props = {}
+type Props = {walletAddress:`0x${string}`};
 
-function MemberStats({}: Props) {
-const {address}=useAccount();
+function MemberStats({walletAddress}: Props) {
+
 const [isCustom, setIsCustom] = React.useState(false);
   const {data:userVotedProposalsCount} = useReadContract({
     abi: governorContractAbi,
     address: GOVERNOR_CONTRACT_ADDRESS,
     functionName: 'getUserVotedCount',
-    args:[address]
+    args:[walletAddress]
   });
 
   const {data:userVotes} = useReadContract({
     abi: governorContractAbi,
     address: GOVERNOR_CONTRACT_ADDRESS,
     functionName: 'getUserVotes',
-    args:[address]
+    args:[walletAddress]
   });
 
 
