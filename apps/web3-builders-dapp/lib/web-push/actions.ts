@@ -2,7 +2,9 @@
 
 import webpush, { PushSubscription } from 'web-push';
 import { upsertWebPushSubscription } from './db/actions';
-import supabase from '../db/dbConfig';
+import { supabase } from '../db/supabaseConfigClient';
+
+
 
 
 
@@ -44,7 +46,8 @@ try{
         
     }
 
-    const {error: notificationError} = await supabase.from('notification_settings').delete().eq('userAddress', address);
+    const {error: notificationError} = await 
+    supabase.from('notification_settings').delete().eq('userAddress', address);
     
     if(!notificationError){
         subscription = null;
@@ -65,7 +68,8 @@ const sendNotification=async(message:string, notificationReceivePropertyName:str
     }
     try{
 
-        const {data: subscriptionData, error} = await supabase.from('notification_settings').select('endpoint, auth_key, p256h_key, user_address').eq(notificationReceivePropertyName, true);
+        const {data: subscriptionData, error} = await 
+        supabase.from('notification_settings').select('endpoint, auth_key, p256h_key, user_address').eq(notificationReceivePropertyName, true);
     
         if(error || !subscriptionData){
             throw new Error(`Failed to fetch subscriptions: ${error?.message || 'No subscriptions found'}`);

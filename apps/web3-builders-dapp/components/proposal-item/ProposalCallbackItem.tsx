@@ -1,6 +1,4 @@
-import { LucideProps } from 'lucide-react'
 import React from 'react'
-import { IconType } from 'react-icons/lib'
 import { PiHandCoinsFill } from 'react-icons/pi'
 
 type Props = {

@@ -18,13 +18,14 @@ type Props = {
 
 function ProposalList({proposals}: Props) {
 const {address}=useAccount();
-    const {serverData}=useRealtimeDocuments({initialData:proposals,tableName:'dao_proposals',parameterOnChanges:'proposal_id'});
-    const {currentUser, isLoading}=useGetLoggedInUser();
+    const {serverData,isLoading
+
+    }=useRealtimeDocuments({initialData:proposals,tableName:'dao_proposals',parameterOnChanges:'proposal_id'});
+
 
     const {View} = useLottie({animationData: cryptoLottieAnimation, loop: true});
 
 
-    
      useWatchContractEvent({
           abi: governorContractAbi,
           address: GOVERNOR_CONTRACT_ADDRESS,
@@ -58,9 +59,11 @@ const {address}=useAccount();
         });
 
   return (
-    <>
+    <>    
      
-          {serverData && currentUser && !isLoading && <>
+          {serverData &&
+          localStorage &&
+          localStorage.getItem('supabase_jwt') && <>
           <p onClick={()=>{console.log(serverData)}} className='text-white text-2xl font-semibold '>List with current proposals</p>
           <DropdownBar/>
           </>
@@ -108,7 +111,7 @@ const {address}=useAccount();
 </Skeleton>
 </>}
 
-{!isLoading && !address && !currentUser && <div className='flex flex-col gap-8 items-center justify-center w-full h-screen'>
+{!isLoading && !address &&  <div className='flex flex-col gap-8 items-center justify-center w-full h-screen'>
 <p className='text-white text-center text-2xl flex flex-col gap-2 md:text-4xl font-semibold break-words '>Welcome to <span className='text-(--hacker-green-4) bg-zinc-700 leading-8 p-2 rounded-lg'>Web3 Builders DAO</span></p>
 
 <div className="w-full max-w-md h-80 flex justify-center items-center">
@@ -118,7 +121,7 @@ const {address}=useAccount();
 <p className='text-white text-sm italic'>* If you have already registered your wallet on discord, please connect your wallet with the app to continue *</p>
 </div>}
 
-    {serverData && currentUser && !isLoading && serverData.map((proposal,index)=>(<ProposalElement proposalObj={proposal} key={proposal.proposal_id} proposalId={proposal.proposal_id} />))}
+    {serverData  && !isLoading && serverData.map((proposal,index)=>(<ProposalElement proposalObj={proposal} key={proposal.proposal_id} proposalId={proposal.proposal_id} />))}
     
     </div>
 

@@ -2,17 +2,20 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
-import { Bell, Settings2Icon, SettingsIcon, SunMoonIcon } from 'lucide-react'
+import { Bell, SunMoonIcon } from 'lucide-react'
 import WebPushNotificationComponent from '../web-push/WebPushNotificationComponent,'
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
-import supabase from '@/lib/db/dbConfig';
 import { toast } from 'sonner';
 import usePushNotifications from '@/hooks/usePushNotifications';
+import { supabase } from '@/lib/db/supabaseConfigClient';
+
 type Props = {
    notificationMemberData:any
 }
 
 function NotificationTile({notificationMemberData}: Props) {
+
+
 
    const {objectData}=useRealtimeDocument({initialObj:notificationMemberData, tableName: 'notification_settings'});
 const [defaultNotificationSettings, setDefaultNotificationSettings] = React.useState<Record<string, boolean>>({

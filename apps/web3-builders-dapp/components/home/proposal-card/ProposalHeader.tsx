@@ -1,6 +1,7 @@
 
 
-import supabase from '@/lib/db/dbConfig'
+
+import { supabase } from '@/lib/db/supabaseConfigClient';
 import React from 'react'
 
 type Props = {

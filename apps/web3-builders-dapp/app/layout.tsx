@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   
 };
 
-export default  function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -57,7 +57,7 @@ export default  function RootLayout({
   <div className="flex flex-col w-full h-full gap-2">
 <Navbar/>
 {children}
-<Toaster closeButton />
+<Toaster className='bg-zinc-800 border border-(--hacker-green-4)' closeButton />
   </div>
 
 

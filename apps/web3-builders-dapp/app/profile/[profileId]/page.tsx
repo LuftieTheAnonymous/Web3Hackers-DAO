@@ -1,5 +1,6 @@
 import ProfilePageContainer from '@/components/profile/container/ProfilePageContainer'
-import supabase from '@/lib/db/dbConfig'
+
+import { supabase } from '@/lib/db/supabaseConfigClient'
 import { notFound } from 'next/navigation'
 import React from 'react'
 

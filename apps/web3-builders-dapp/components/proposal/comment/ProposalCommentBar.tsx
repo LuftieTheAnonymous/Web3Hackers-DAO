@@ -6,13 +6,14 @@ import CommentList from './CommentList'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { FaPaperPlane } from 'react-icons/fa'
-import supabase from '@/lib/db/dbConfig'
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAccount } from 'wagmi';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/db/supabaseConfigClient';
+
 
 type Props = {
   state: 'expanded' | 'collapsed',
@@ -22,6 +23,9 @@ type Props = {
 
 function ProposalCommentBar({state, proposalData, proposalId}: Props) {
   const {address}=useAccount();
+
+
+
 
   const zodMessageObject=z.object({
     message: z.string().min(1,{message:'Message must be at least 1 character'}).max(500, {message:'Message must be less than 500 characters'}),

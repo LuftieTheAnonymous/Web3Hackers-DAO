@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi';
 import {useCallback} from 'react';
-import supabase from '@/lib/db/dbConfig';
+import { supabase } from '@/lib/db/supabaseConfigClient';
+
 
 type Props = {}
 
@@ -12,6 +13,7 @@ function useGetLoggedInUser() {
     const {address}=useAccount();
     const [isLoading, setIsLoading] = useState<boolean>(false);
 const [currentUser, setCurrentUser] = useState<any>(null);
+
 
 const getLoggedInUser= useCallback(async()=>{
   if(address){

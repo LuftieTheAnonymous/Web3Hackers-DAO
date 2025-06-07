@@ -7,6 +7,7 @@ import MemberTile from '@/components/profile/MemberTile'
 import { Button } from '@/components/ui/button'
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
 
+
 type Props<T> = {
     profileData:T,
     walletAddress:string
@@ -18,6 +19,8 @@ function ProfilePageContainer<T>({profileData,  walletAddress
 }: Props<T>) {
 
     const {objectData}=useRealtimeDocument({initialObj:profileData,tableName:'dao_members'});
+
+
     
 
 

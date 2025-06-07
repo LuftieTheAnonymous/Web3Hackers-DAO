@@ -1,7 +1,8 @@
 'use server';
 
-import supabase from "@/lib/db/dbConfig";
 
+
+import { supabase } from '@/lib/db/supabaseConfigClient';
 import webpush from 'web-push';
 
 webpush.setVapidDetails(

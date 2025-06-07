@@ -7,9 +7,10 @@ import { Textarea } from '../ui/textarea'
 import { Button } from '../ui/button'
 import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
-import supabase from '@/lib/db/dbConfig';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import Image from 'next/image';
+import { supabase } from '@/lib/db/supabaseConfigClient';
+
 
 type Props = {intialDocument:any}
 

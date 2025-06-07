@@ -15,8 +15,6 @@ import {IoCodeSlash} from "react-icons/io5";
 type Props = {};
 
 function RulesAndTermsPage({}: Props) {
-
-
   return (
     <div className='w-full h-full'>
 

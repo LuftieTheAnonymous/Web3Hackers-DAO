@@ -54,7 +54,7 @@ const {address}=useAccount();
             (fullProposalObject as any).isCustom, 
             voteOption === 0 ? true : false, 
             voteOption !== 0 ? true : false, 
-            [0]],
+            []],
         })
     }
 
@@ -95,8 +95,7 @@ return;
       </div>
 
 <div className="flex items-center gap-2">
-<p  className=' text-xs  text-white'>
-  
+<p className=' text-xs  text-white'>
   {fullProposalObject as any && (fullProposalObject as any).state === 1 && (fullProposalObject as any) && new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() && '🔓 Open'}
   {fullProposalObject as any && (fullProposalObject as any).state === 2 && '❌ Cancelled'}
   {fullProposalObject as any && (fullProposalObject as any).state === 6 && '🔒 Queued'}
@@ -139,7 +138,7 @@ return;
   <span className='text-xs text-zinc-800'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[0]))).toFixed(0)}%</span>
 </div>
 
-<button onClick={()=>handleVoteClick(0)} className='flex items-center cursor-pointer gap-1  hover:scale-95 transition-all  text-(--hacker-green-4)'>
+<button onClick={()=>handleVoteClick(0)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all text-(--hacker-green-4)'>
     <Check />
     <span className='text-sm'>
     For

@@ -1,5 +1,5 @@
 'use client';
-import { subscribeUser, unsubscribeUser,sendNotification } from '@/lib/web-push/actions';
+import { subscribeUser, unsubscribeUser } from '@/lib/web-push/actions';
 import { upsertWebPushSubscription } from '@/lib/web-push/db/actions';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';

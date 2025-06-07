@@ -1,13 +1,15 @@
 'use client';
-import supabase from '@/lib/db/dbConfig';
+
+
+import { supabase } from '@/lib/db/supabaseConfigClient';
 import React, { useEffect } from 'react'
 
 type Props<T> = {
     initialObj: T,
-    tableName: string,
+    tableName: string
 }
 
-function useRealtimeDocument<T>({initialObj, tableName}: Props<T>) {
+function useRealtimeDocument<T>({initialObj, tableName }: Props<T>) {
   const [serverObjectData,setServerObjectData] = React.useState<T>(initialObj);
 
 

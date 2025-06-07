@@ -66,8 +66,9 @@ import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/conf
 import { decodeEventLog, encodeFunctionData } from 'viem';
 import { toast } from 'sonner';
 import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
-import supabase from '@/lib/db/dbConfig';
 import { notifyEveryDAOMember } from '@/lib/web-push/db/actions';
+import { supabase } from '@/lib/db/supabaseConfigClient';
+
 
 
 function ProposalModal({children}: Props) {

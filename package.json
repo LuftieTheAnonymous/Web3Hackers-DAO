@@ -12,6 +12,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "prettier": "^3.5.3",
     "turbo": "^2.5.4",
     "typescript": "5.8.2"
@@ -25,8 +26,10 @@
     "packages/*"
   ],
   "dependencies": {
+    "@supabase/ssr": "^0.6.1",
     "cron": "^4.3.0",
     "date-fns": "^4.1.0",
+    "jsonwebtoken": "^9.0.2",
     "next": "^15.3.3"
   }
 }

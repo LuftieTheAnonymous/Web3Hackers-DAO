@@ -43,7 +43,7 @@ proposalData, commentsData, proposalId
     const {serverData}=useRealtimeDocuments({initialData:commentsData,tableName:'dao_voting_comments',parameterOnChanges:'proposal_id'});
 const {address}=useAccount();
 const {writeContract}=useWriteContract({
-  
+
 });
 
 
