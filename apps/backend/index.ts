@@ -1,3 +1,4 @@
+import  jwt  from 'jsonwebtoken';
 import {  executeGovenorTokenEvents } from "./event-listeners/GovTokenEventListener.js";
 import { executeGovenorContractEvents } from "./event-listeners/GovenorEventListener.js";
 import govTokenRouter from "./routes/GovTokenRouter.js";
@@ -62,6 +63,21 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+
+  const payload = {
+    authorization: process.env.SUPABASE_BACKEND_ACTIONS_ALLOWANCE as string,
+    role: 'authenticated',
+  };
+
+  const token = jwt.sign(payload, process.env.NEXT_PUBLIC_SUPABASE_JWT_SECRET as string, {
+    expiresIn: '120d',
+    issuer: 'web3-builders-dao-backend',
+
+  });
+
+  console.log(token, "token");
+  
 
 
 app.use('/governance', governanceRouter);

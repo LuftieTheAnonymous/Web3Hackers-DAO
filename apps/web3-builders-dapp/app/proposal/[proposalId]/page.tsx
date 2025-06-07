@@ -12,7 +12,7 @@ const {data:commentsData}=await supabase.from('dao_voting_comments').select('*, 
 
   return (
     <div className='w-full h-full'>
-      <p className="text-white" onClick={()=>{console.log(data)}}>Click: </p>
+     
 {data && <ProposalContainer proposalId={proposalId} commentsData={commentsData ?? []} proposalData={data} />}
 
     </div>
