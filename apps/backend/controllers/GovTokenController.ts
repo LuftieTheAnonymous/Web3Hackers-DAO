@@ -20,13 +20,18 @@ try {
 
     if(!data){
         res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:memberDiscordId, status:404 });
+    return;
     }
     
-    if(error){
-         res.status(500).json({message:"error", data:null, error:error.message,discord_member_id:memberDiscordId, status:500 });
-    }
-
     console.log(data);
+
+    console.log(error);
+
+    if(error){
+         res.status(500).json({message:"error", data:null, error:error.message, errorObj:error, discord_member_id:memberDiscordId, status:500 });
+       return;
+        }
+
 
     const tx = await governorTokenContract.handInUserInitialTokens(PSR, JEXS, W3I, TKL, KVTR, (data as any).userWalletAddress);
     

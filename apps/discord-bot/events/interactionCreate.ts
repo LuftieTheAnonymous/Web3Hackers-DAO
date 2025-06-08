@@ -32,6 +32,9 @@ module.exports={
 
             const response = await userRegister.json();
 
+            console.log(response);
+
+
             if(!response || response.error){ 
                 return await interaction.editReply
                 ({content:response.error});

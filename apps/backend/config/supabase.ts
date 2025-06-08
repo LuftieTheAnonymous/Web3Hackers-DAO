@@ -9,7 +9,7 @@ export const supabaseConfig = createClient(
     {
         'global':{
             headers:{
-                'Authorization': `Bearer ${process.env.SUPABASE_BACKEND_ACTION_JWT_TOKEN}`
+                'Authorization': `Bearer ${process.env.SUPABASE_BACKEND_ACTION_JWT_TOKEN as string}`
             }
         }
     }

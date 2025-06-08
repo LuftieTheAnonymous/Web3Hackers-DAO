@@ -42,8 +42,11 @@ export const addMember= async (req:Request, res:Response) => {
     try{
         const {data, error} = await supabaseConfig.from('dao_members').insert([{discord_member_id:discordId,isAdmin:isAdmin, photoURL:photoURL, userWalletAddress:walletAddress, nickname:nickname}]);
 
+        console.log(data, error);
+
         if(error){
             res.status(500).json({message:"error", data:null, error:error.message, status:500 });
+return;
         }
 
             const tx = await governorTokenContract.addToWhitelist(walletAddress);
