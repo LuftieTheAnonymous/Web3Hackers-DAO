@@ -39,9 +39,12 @@ export const addMember= async (req:Request, res:Response) => {
     }=req.body;
 
     console.log(req.body);
+
+    console.log(req.headers['x-backend-eligibility'], 'x-backend-eligibility');
+    console.log(req.headers['authorization'], 'authorization');
     try{
         const {data, error} = await supabaseConfig.from('dao_members').insert([{discord_member_id:discordId,isAdmin:isAdmin, photoURL:photoURL, userWalletAddress:walletAddress, nickname:nickname}]);
-
+        
         console.log(data, error);
 
         if(error){

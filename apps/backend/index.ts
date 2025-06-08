@@ -64,22 +64,6 @@ app.use(cors({
 
 app.use(express.json());
 
-
-  const payload = {
-    authorization: process.env.SUPABASE_BACKEND_ACTIONS_ALLOWANCE as string,
-    role: 'authenticated',
-  };
-
-  const token = jwt.sign(payload, process.env.NEXT_PUBLIC_SUPABASE_JWT_SECRET as string, {
-    expiresIn: '120d',
-    issuer: 'web3-builders-dao-backend',
-
-  });
-
-  console.log(token, "token");
-  
-
-
 app.use('/governance', governanceRouter);
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);
