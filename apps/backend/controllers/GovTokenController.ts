@@ -14,6 +14,7 @@ try {
     if(memberDiscordId === undefined || PSR === undefined || JEXS === undefined || W3I === undefined || TKL === undefined || KVTR === undefined){
         console.log(PSR, JEXS, W3I, TKL, KVTR, memberDiscordId);
         res.status(400).json({message:"error", data:null, error:"Please provide all the required parameters", status:400});
+        return;
     }
 
     const {data, error} = await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(memberDiscordId)).single();

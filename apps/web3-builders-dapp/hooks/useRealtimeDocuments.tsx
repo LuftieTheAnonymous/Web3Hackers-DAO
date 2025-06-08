@@ -26,6 +26,7 @@ const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes"
 }, (payload:any) => {
     console.log(payload);
     setData([...serverData,payload.new]);
+    setLoading(false);
  
 })
 .on("postgres_changes", {
@@ -34,6 +35,7 @@ const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes"
     table:tableName
 }, (payload:any) => {
     setData(serverData.filter((item:any) => item[parameterOnChanges] !== payload.old[parameterOnChanges]));
+    setLoading(false);
  
 }).on("postgres_changes", {
     event:'UPDATE',
@@ -41,6 +43,7 @@ const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes"
     table:tableName
 }, (payload:any) => {
     setData(serverData.map((item:any) => item[parameterOnChanges] === payload.new[parameterOnChanges] ? payload.new : item));
+        setLoading(false);
   
 }).subscribe();
       setLoading(false);

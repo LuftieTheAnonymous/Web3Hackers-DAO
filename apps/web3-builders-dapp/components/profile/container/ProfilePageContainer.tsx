@@ -15,14 +15,9 @@ type Props<T> = {
 }
 
 function ProfilePageContainer<T>({profileData,  walletAddress
-
 }: Props<T>) {
 
     const {objectData}=useRealtimeDocument({initialObj:profileData,tableName:'dao_members'});
-
-
-    
-
 
   return (
      <div className='w-full h-full'>

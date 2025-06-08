@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { daoContract, proposalStates } from "../config/ethersConfig.js";
 
 import { EventLog } from "ethers";
+import { supabaseConfig } from "../config/supabase.js";
+import redisClient from "../redis/set-up.js";
 ;
 
 export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
@@ -76,10 +78,46 @@ const getProposalDetails = async (req: Request, res: Response) => {
 }
 
 
+const getEmbededProposalDetails = async (req: Request, res: Response) => {
+    const {proposalId} = req.params;
+
+    const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`);
+    console.log(redisStoredProposal);
+
+        try{
+            if(!redisStoredProposal){
+                const {data, error}= await supabaseConfig.from('dao_proposals').select('*, dao_members!inner(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*)').eq('proposal_id', Number(req.params.proposalId)).single();
+    
+    if(!data || error){
+        res.status(500).send({message:"error", status:500, data:null, error});
+        return;
+    }
+
+    console.log(data);
+
+            const proposalDetails = await daoContract.getProposal(proposalId);
+            console.log(proposalDetails, 'proposalDetails');
+
+            await redisClient.setEx(`dao_proposals:${proposalId}:data`, 7200, JSON.stringify({sm_data:proposalDetails,db_data:data}));
+
+            res.status(200).send({message:"success", status:200, data:{sm_data:proposalDetails,db_data:data}, error:null});
+
+            return;
+            }
+
+
+            res.status(200).send({message:"success", status:200, data:JSON.parse(redisStoredProposal), error:null});
+    }catch(err){
+        res.status(500).send({message:"error", status:500, data:null, error:err});
+    }
+}
+
+
 
 export {
     cancelProposal,
     getProposalVotes,
     getProposalState,
     getProposalDetails,
+    getEmbededProposalDetails
 }

@@ -29,7 +29,7 @@ const [isCustom, setIsCustom] = React.useState(false);
   return (
     <div className='max-w-[97.5rem] p-3 w-full mx-auto'>
 
-<div onClick={()=>{console.log(userVotes,userVotedProposalsCount)}} className="flex flex-col gap-1">
+<div  className="flex flex-col gap-1">
 <p className='text-white text-2xl font-semibold'>Member's Statistics </p>
 <p className='text-gray-500 text-sm'> Here's a summary of your stats in the DAO so far.</p>
 </div>
@@ -39,16 +39,17 @@ const [isCustom, setIsCustom] = React.useState(false);
   <Button onClick={()=>{setIsCustom(true)}} className={`cursor-pointer ${isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Custom</Button>
   <Button onClick={()=>{setIsCustom(false)}} className={`cursor-pointer ${!isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Standard</Button>
 </div>
+{userVotes && userVotedProposalsCount && (userVotes as any[]).length > 0 &&  (userVotedProposalsCount as any) && Number((userVotedProposalsCount as any)) > 0 &&
 <div className="flex flex-col md:flex-row gap-4 w-full items-center justify-center py-2">
 
-{userVotes && userVotedProposalsCount && (userVotes as any[]) && (userVotedProposalsCount as any) && <VotingsParticipatedChart proposals={(userVotes as any[])}/>}
+ <VotingsParticipatedChart proposals={(userVotes as any[])}/>
 
 
-{userVotes && userVotedProposalsCount && (userVotes as any[]) && (userVotedProposalsCount as any) && <VotesTypesCastedChart isCustom={isCustom} proposals={(userVotes as any[])}  />}
-
-
+ <VotesTypesCastedChart isCustom={isCustom} proposals={(userVotes as any[])}  />
 
 </div>
+}
+
 
     </div>
   )

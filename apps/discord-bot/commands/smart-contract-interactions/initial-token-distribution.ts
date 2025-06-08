@@ -20,8 +20,6 @@ async execute(interaction:any){
     if(Number(checkAbilityResponseJson.tokenAmount) > 0){
         return await interaction.reply({content:`You already have ${Number(checkAbilityResponseJson.tokenAmount)} tokens, you can use them to vote on proposals, create proposals and more !`, flags:MessageFlags.Ephemeral});
     }
-    
-
 
 const customObject:{
     PSR:number,

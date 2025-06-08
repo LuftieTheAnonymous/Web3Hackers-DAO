@@ -21,8 +21,18 @@ try{
    const proposalId = interaction.options.getString('proposal-id');
     const member = interaction.options.getUser('member');
 
+    if(!proposalId || (proposalId && !proposalId.startsWith('0x') && proposalId.length !== 42)){
+        await interaction.reply({content:`Invalid proposal id.`, flags:MessageFlags.Ephemeral });
+        return;
+    }
 
-    const proposalRequest = await fetch(`http://localhost:2137/governance/get_proposal_details/${proposalId}`);
+
+    const proposalRequest = await fetch(`http://localhost:2137/governance/get_proposal_details/${proposalId}`, {
+        method: 'GET',
+        headers: {
+            'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string,
+        },
+    });
 
     const proposalResponse = await proposalRequest.json();
 

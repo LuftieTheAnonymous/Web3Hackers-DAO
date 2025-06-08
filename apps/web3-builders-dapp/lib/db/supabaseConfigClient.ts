@@ -1,11 +1,12 @@
-import { createBrowserClient } from "@supabase/ssr"; // or @supabase/supabase-js directly
+
+import { createClient } from "@supabase/supabase-js";
 
  const createSupabaseClient = () => {
   const token = typeof window !== "undefined" ? localStorage.getItem("supabase_jwt") : null;
 
 
   return token ?
-  createBrowserClient(
+  createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
      process.env.NEXT_PUBLIC_API_KEY as string,
       {
@@ -15,7 +16,7 @@ import { createBrowserClient } from "@supabase/ssr"; // or @supabase/supabase-js
         },
       },
     }
-  ):  createBrowserClient(
+  ):  createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
      process.env.NEXT_PUBLIC_API_KEY as string
   );

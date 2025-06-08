@@ -4,8 +4,8 @@ import { daoContract, proposalStates } from "../config/ethersConfig.js";
 dotenv.config();
 
 export function DAO_Discord_elligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
-    console.log(req.headers['x-backend-eligibility']);
-    if(req.headers['x-backend-eligibility'] !== process.env.DISCORD_BOT_INTERNAL_SECRET) {
+    if(!req.headers['x-backend-eligibility'] ||  req.headers['x-backend-eligibility'] !== process.env.DISCORD_BOT_INTERNAL_SECRET) {
+        console.log('error');
         res.status(403).json({error:"Forbidden", message:"You are not allowed to access this resource.", status:403});
     }
 
