@@ -322,7 +322,7 @@ onError: (error) => {
   });
 }} className={`hover:bg-(--hacker-green-4) ${(delegateData as unknown as any)
    && Number(delegateData) === Number(0) && 'hidden'} hover:text-zinc-800 hover:scale-95 transition-all cursor-pointer`}>
-  Delegate Tokens !</Button>
+  Delegate Tokens</Button>
 
 
 

@@ -20,9 +20,9 @@ function VotingDataContainer({proposalId, isCustom}: Props) {
 
 
   return (
-  <div className="w-full flex  p-6 h-full  gap-8">
+  <div className="w-full flex flex-col lg:flex-row  p-6 h-full  gap-8">
 {proposalVotes && (proposalVotes as any[]) !== undefined ? <>
-<VotesCard proposalVotes={proposalVotes as any[]} proposalId={proposalId as `0x${string}`}/>
+<VotesCard proposalVotes={proposalVotes as any[]} />
 
 
 

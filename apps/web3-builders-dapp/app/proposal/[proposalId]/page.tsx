@@ -3,7 +3,7 @@ import { supabase } from "@/lib/db/supabaseConfigClient";
 
 
 
-async function ProposalPage({params}: {params: {proposalId: string}}) {
+async function ProposalPage({ params }: { params: { proposalId: string } }) {
   const {proposalId}= await params;
 
 const {data}=await supabase.from('dao_proposals').select('*, dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*)').eq('proposal_id', proposalId).single();

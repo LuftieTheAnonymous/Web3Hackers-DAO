@@ -14,9 +14,7 @@ type Props = {
 }
 
 function NotificationTile({notificationMemberData}: Props) {
-
-
-
+   
    const {objectData}=useRealtimeDocument({initialObj:notificationMemberData, tableName: 'notification_settings'});
 const [defaultNotificationSettings, setDefaultNotificationSettings] = React.useState<Record<string, boolean>>({
       notifyOnNewProposals: objectData && objectData.notifyOnNewProposals !== undefined ? objectData.notifyOnNewProposals : false,

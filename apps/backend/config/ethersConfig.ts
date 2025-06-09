@@ -1,7 +1,7 @@
 import {Contract, ethers} from "ethers";
 import dotenv from "dotenv";
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from "../contracts/governor/config";
-import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from "../contracts/token/config";
+import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from "../contracts/governor/config.js";
+import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from "../contracts/token/config.js";
 
 dotenv.config();
 

@@ -4,11 +4,9 @@ import { supabase } from '@/lib/db/supabaseConfigClient'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-type Props = {
-  params:{profileId:string}
-}
 
-async function Page({params}: Props) {
+
+async function Page({ params }: { params: { profileId: string } }) {
 
 
   const {profileId} =  params;

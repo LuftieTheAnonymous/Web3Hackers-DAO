@@ -1,6 +1,7 @@
 'use client';
+import { readContract } from '@wagmi/core'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import DropdownBar from '../drop-down/DropdownBar'
 import ProposalElement from '@/components/proposal-item/ProposalElement'
 import useRealtimeDocuments from '@/hooks/useRealtimeDocuments'
@@ -12,16 +13,15 @@ import cryptoLottieAnimation from '@/public/gifs/Decentalized-Lottie.json';
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import { decodeEventLog } from 'viem';
 import { toast } from 'sonner';
+import { ethers } from 'ethers';
+import { config } from '@/lib/config';
 type Props = {
     proposals:any[]
 }
 
 function ProposalList({proposals}: Props) {
 const {address}=useAccount();
-    const {serverData,isLoading
-
-    }=useRealtimeDocuments({initialData:proposals,tableName:'dao_proposals',parameterOnChanges:'proposal_id'});
-
+    const {serverData,isLoading}=useRealtimeDocuments({initialData:proposals,tableName:'dao_proposals',parameterOnChanges:'proposal_id'});
 
     const {View} = useLottie({animationData: cryptoLottieAnimation, loop: true});
 

@@ -91,6 +91,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.176.0",
     "@types/web-push": "^3.6.4",
+    "pino-pretty": "^13.0.0",
     "serwist": "^9.0.14",
     "tailwindcss": "^4",
     "turbo": "^2.5.0",

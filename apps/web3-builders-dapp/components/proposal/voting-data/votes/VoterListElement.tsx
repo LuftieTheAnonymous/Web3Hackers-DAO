@@ -1,18 +1,20 @@
 import { Button } from '@/components/ui/button'
+
 import React from 'react'
 
 type Props = {
  voteData:any,
+ isMobile:boolean
 }
 
-function VoterListElement({voteData}: Props) {
+function VoterListElement({voteData,isMobile}: Props) {
   return (
         
         <div onClick={()=>{console.log(voteData)}} className="flex flex-col w-full gap-4 ">
       <div className="flex justify-between items-center bg-zinc-700 w-full p-4 rounded-lg h-16">
         <div className="flex items-center gap-2">
         <div className="flex flex-col gap-1">
-            <p className='text-(--hacker-green-4) text-sm'>{voteData.voter}</p>
+            <p className='text-(--hacker-green-4) text-sm'>{isMobile ? `${voteData.voter.slice(0, 4)}...${voteData.voter.slice(-4)}` : voteData.voter}</p>
             <p className='text-white text-xs'>
               Voted For: 
    <span

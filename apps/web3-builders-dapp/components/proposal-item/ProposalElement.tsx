@@ -11,6 +11,7 @@ import { formatDistanceStrict } from 'date-fns';
 import { ethers } from 'ethers';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {proposalId:`0x${string}`, proposalObj:any}
 
@@ -83,10 +84,12 @@ return;
     
     }
 
+    const searchParams= useSearchParams();
+
 
   return (
 <>
-{fullProposalObject && proposalObj && <div className={`bg-zinc-800 border shadow-sm ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'shadow-green-400' : 'shadow-gray-500'} flex flex-col ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} max-w-3xl  transition-all duration-700 hover:scale-95 hover:-translate-y-1 w-full rounded-lg h-96`}>
+{fullProposalObject && proposalObj && <div  className={`bg-zinc-800 ${searchParams.get('filterProperty') !== null && searchParams.get('filterValue') !== null && ((searchParams.get('filterProperty') === 'isCustom' && searchParams.get('filterValue') !== String((fullProposalObject as any).isCustom))  || (searchParams.get('filterProperty') === 'state' && Number(searchParams.get('filterValue'))) !== Number((fullProposalObject as any).state)) && 'hidden'} border shadow-sm ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'shadow-green-400' : 'shadow-gray-500'} flex flex-col ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} max-w-3xl  transition-all duration-700 hover:scale-95 hover:-translate-y-1 w-full rounded-lg h-96`}>
       <div className={`w-full border-b ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} `}>
       <div className="flex justify-between items-center px-3 py-2">
       <div onClick={()=>console.log(proposalObj)} className="flex items-center gap-1 text-white">
