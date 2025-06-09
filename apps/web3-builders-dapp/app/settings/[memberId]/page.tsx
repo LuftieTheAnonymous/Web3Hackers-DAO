@@ -15,11 +15,11 @@ async function Page({ params }: { params: { memberId: string } }) {
     const {data: userData}=await supabase.from('notification_settings').select('*').eq('userAddress', memberId).single();
   return (
     <div className='w-full h-full'>
-       <div className="mx-auto max-w-4xl w-full flex flex-col gap-4 py-6">
+       <div className="mx-auto max-w-4xl w-full flex flex-col gap-4 py-6 px-2">
 
        <p className='text-white text-2xl font-bold flex items-center gap-1'>Settings <SettingsIcon/> </p> 
         
-        <div className="flex w-full gap-8 items-center">
+        <div className="flex w-full gap-8 items-center flex-col lg:flex-row">
 
 <UserProfileTile intialDocument={data}/>
 
