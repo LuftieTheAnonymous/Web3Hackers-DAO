@@ -385,209 +385,224 @@ const goForward=useCallback(() => {
 }
 
 
- function FourthStepContent({control, setValue, watch, setError}: Props) {
+ function FourthStepContent({ control, setValue, watch, setError }: Props) {
   return (
     <div className='flex flex-col gap-4'>
 
-<FormField
-          control={control}
-          name={`proposalEndTime`}
-          render={({ field }) => (
-            <FormItem >
-              <FormLabel htmlFor="proposalEndTime" className='text-white text-base font-light'>Proposal End Time</FormLabel>
-              <FormControl>
-    <Popover>
+      {/* Proposal End Time Picker */}
+      <FormField
+        control={control}
+        name="proposalEndTime"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel
+              htmlFor="proposalEndTime"
+              className='text-white text-base font-light'
+            >
+              Proposal End Time
+            </FormLabel>
+
+            <FormControl>
+              <Popover>
                 <PopoverTrigger name='proposalEndTime' asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "max-w-64 w-full pl-3 text-left hover:bg-zinc-800 font-normal text-white bg-zinc-700 border-(--hacker-green-4) ",
-                      )}
-                    >
-                    {field.value ? new Date(field.value).toLocaleString() : 'Select Date'}
-                      <CalendarIcon className="ml-auto text-(--hacker-green-4) h-4 w-4 opacity-50" />
-                    </Button>
-          
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "max-w-64 w-full pl-3 text-left hover:bg-zinc-800 font-normal text-white bg-zinc-700 border-(--hacker-green-4)"
+                    )}
+                  >
+                    {field.value
+                      ? new Date(field.value).toLocaleString()
+                      : 'Select Date'}
+                    <CalendarIcon className="ml-auto text-(--hacker-green-4) h-4 w-4 opacity-50" />
+                  </Button>
                 </PopoverTrigger>
-                <PopoverContent  className="w-auto bg-zinc-700 p-0" align="start">
+
+                <PopoverContent className="w-auto bg-zinc-700 p-0" align="start">
                   <Calendar
-                  {...field}
+                    {...field}
                     mode="single"
-                  fromDate={new Date()} // From today
-                  
-                selected={field.value ? new Date(field.value) : undefined}
-                  classNames={{
-                    'day_selected': 'bg-(--hacker-green-4) rounded-md hover:text-zinc-800 py-1 px-2 self-center',
-                    'cell':'py-1 px-2 rounded-lg hover:bg-(--hacker-green-4) hover:text-zinc-800 transition-all duration-300 hover:scale-95 flex-1 h-8 ',
-                    'day':'w-full hover:text-white cursor-pointer',
-                  'table':' text-sm',
-                  'day_today':'bg-(--hacker-green-5) text-white rounded-md px-3 py-1',
-                  
-                    
-                  }}
-                    onSelect={(date: Date) => {
-                      if(!date) return
-                      setValue('proposalEndTime', date);
-                      console.log(field, date);
+                    fromDate={new Date()}
+                    selected={field.value ? new Date(field.value) : undefined}
+                    classNames={{
+                      day_selected: 'bg-(--hacker-green-4) rounded-md hover:text-zinc-800 py-1 px-2 self-center',
+                      cell: 'py-1 px-2 rounded-lg hover:bg-(--hacker-green-4) hover:text-zinc-800 transition-all duration-300 hover:scale-95 flex-1 h-8',
+                      day: 'w-full hover:text-white cursor-pointer',
+                      table: 'text-sm',
+                      day_today: 'bg-(--hacker-green-5) text-white rounded-md px-3 py-1',
                     }}
-                   
-                    
+                    onSelect={(date: Date) => {
+                      if (!date) return;
+
+                      const now = new Date();
+                      const proposedEnd = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+
+                      console.log("🕒 Now:", now);
+                      console.log("⌛ End:", proposedEnd);
+
+                      setValue('proposalEndTime', proposedEnd);
+                    }}
                   />
                 </PopoverContent>
               </Popover>
-                
+            </FormControl>
+
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Delay Input and Unit Picker */}
+      <div className="flex items-center gap-3">
+        <FormField
+          control={control}
+          name="proposalDelay"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className='text-white text-base font-light'>
+                Proposal Delay
+              </FormLabel>
+              <FormControl>
+                <div className="flex w-full gap-3 items-center">
+                  <Input
+                    min={0}
+                    {...field}
+                    id="proposalDelay"
+                    value={field.value ? Number(field.value) : 0}
+                    onChange={(e) => setValue('proposalDelay', Number(e.target.value))}
+                    placeholder='Amount of time units'
+                    type='number'
+                    className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none'
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-
-<div className="flex items-center gap-3">
-<FormField
+        <FormField
           control={control}
-          name={`proposalDelay`}
+          name="proposalDelayUnit"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className='text-white text-base font-light'>Proposal Delay</FormLabel>
+              <FormLabel className='text-white text-base font-light'>
+                Proposal Units
+              </FormLabel>
               <FormControl>
+                <Select
+                  {...field}
+                  value={String(field.value)}
+                  onValueChange={(value) => {
+                    const end = watch('proposalEndTime');
+                    const delay = Number(watch('proposalDelay')) * Number(value);
+                    const nowPlusDelay = Date.now() + delay;
+                    const diff = new Date(end).getTime() - nowPlusDelay;
 
-       <div className="flex w-full gap-3 items-center">
-    <Input min={0} {...field} id='customOptionName' value={
-      field.value ?
-      Number(field.value) : 0
-    } onChange={(e) => setValue('proposalDelay', Number(e.target.value))} placeholder='Amount of time units' type='number'
-    className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none '/>
-      
+                    if (diff < 1000 * 60 * 60 * 3) {
+                      setError('proposalEndTime', {
+                        message: 'Proposal voting period must be at least 3 hours from now',
+                      });
+                      toast.error('Proposal voting period must be at least 3 hours from now');
+                      return;
+                    }
+
+                    setValue('proposalDelayUnit', Number(value));
+                  }}
+                >
+                  <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
+                    <SelectValue placeholder="Time Unit" />
+                  </SelectTrigger>
+                  <SelectContent className='bg-zinc-800 border flex border-(--hacker-green-4)'>
+                    <SelectItem className='text-white' value='1'>Seconds</SelectItem>
+                    <SelectItem className='text-white' value='60'>Minutes</SelectItem>
+                    <SelectItem className='text-white' value='3600'>Hours</SelectItem>
+                    <SelectItem className='text-white' value='86400'>Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Timelock Period & Units (unchanged) */}
+      <div className="flex items-center gap-3">
+        <FormField
+          control={control}
+          name="timelockPeriod"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className='text-white text-base font-light'>
+                Proposal Timelock
+              </FormLabel>
+              <FormControl>
+                <div className="flex w-full gap-3 items-center">
+                  <Input
+                    min={0}
+                    {...field}
+                    id='timelockPeriod'
+                    value={field.value ? Number(field.value) : 0}
+                    onChange={(e) => setValue('timelockPeriod', Number(e.target.value))}
+                    placeholder='Amount of time units'
+                    type='number'
+                    className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none'
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="timelockUnit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className='text-white text-base font-light'>
+                Timelock Units
+              </FormLabel>
+              <FormControl>
+                <Select
+                  {...field}
+                  value={String(field.value)}
+                  onValueChange={(value) => {
+                    if (
+                      Number(watch('timelockPeriod')) * Number(value) >
+                      1000 * 60 * 60 * 24 * 7
+                    ) {
+                      setError('timelockPeriod', {
+                        message: 'Timelock period must be at most 7 days',
+                      });
+                      toast.error('Timelock period must be at most 7 days');
+                      return;
+                    }
+                    setValue('timelockUnit', Number(value));
+                  }}
+                >
+                  <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
+                    <SelectValue placeholder="Time Unit" />
+                  </SelectTrigger>
+                  <SelectContent className='bg-zinc-800 border flex border-(--hacker-green-4)'>
+                    <SelectItem className='text-white' value='1'>Seconds</SelectItem>
+                    <SelectItem className='text-white' value='60'>Minutes</SelectItem>
+                    <SelectItem className='text-white' value='3600'>Hours</SelectItem>
+                    <SelectItem className='text-white' value='86400'>Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
     </div>
-
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-
-<FormField
-          control={control}
-          name={`proposalDelayUnit`}
-          render={({ field }) => (
-            <FormItem>
- <FormLabel className='text-white text-base font-light'>Proposal Units</FormLabel>
-              <FormControl>
-       <Select {...field} value={String(field.value)} onValueChange={(value) => {
-        if(new Date(watch('proposalEndTime').getTime()).getTime() - new Date(new Date().getTime() + watch('proposalDelay') * Number(value)).getTime() < 1000 * 60 * 60 * 3){
-          setError('proposalEndTime', {message: 'Proposal voting period must be at least 3 hours from now'});
-          toast.error('Proposal voting period must be at least 3 hours from now');
-          return
-        }
-
-        setValue('proposalDelayUnit', Number(value));
-       }}>
-  <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
-    <SelectValue placeholder="Time Unit" />
-  </SelectTrigger>
-  <SelectContent className='bg-zinc-800 border flex  border-(--hacker-green-4)'>
-    <SelectItem className='text-white' value={'1'}>
-      Seconds
-      </SelectItem>
-      <SelectItem className='text-white' value={'60'}>
-      Minutes
-      </SelectItem>
-      <SelectItem className='text-white' value={'3600'}>
-      Hours
-      </SelectItem>
-
-      <SelectItem className='text-white' value={'86400'}>
-      Days
-      </SelectItem>
-  </SelectContent>
-</Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-
-</div>
-
-
-<div className="flex items-center gap-3">
-<FormField
-          control={control}
-          name={`timelockPeriod`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className='text-white text-base font-light'>Proposal Timelock</FormLabel>
-              <FormControl>
-
-       <div className="flex w-full gap-3 items-center">
-    <Input min={0} {...field} id='customOptionName' 
-     value={
-      field.value ?
-      Number(field.value) : 0
-    }
-    onChange={(e) => setValue('timelockPeriod', Number(e.target.value))} placeholder='Amount of time units' type='number'
-    className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none '/>
-      
-    </div>
-
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-
-<FormField
-          control={control}
-          name={`timelockUnit`}
-          render={({ field }) => (
-            <FormItem>
- <FormLabel className='text-white text-base font-light'>Timelock Units</FormLabel>
-              <FormControl>
-       <Select {...field} value={String(field.value)} onValueChange={(value) => {
-        if(watch('timelockPeriod') * Number(value) > 1000 * 60 * 60 * 24 * 7){
-          setError('timelockPeriod', {message: 'Timelock period must be at most 7 days'});
-          toast.error('Timelock period must be at most 7 days');
-          return
-        }
-        setValue('timelockUnit', Number(value))
-       }}>
-  <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
-    <SelectValue placeholder="Time Unit" />
-  </SelectTrigger>
-  <SelectContent className='bg-zinc-800 border flex  border-(--hacker-green-4)'>
-    <SelectItem className='text-white' value={'1'}>
-      Seconds
-      </SelectItem>
-      <SelectItem className='text-white' value={'60'}>
-      Minutes
-      </SelectItem>
-      <SelectItem className='text-white' value={'3600'}>
-      Hours
-      </SelectItem>
-
-      <SelectItem className='text-white' value={'86400'}>
-      Days
-      </SelectItem>
-  </SelectContent>
-</Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-
-</div>
-
-
-
-    </div>
-  )
+  );
 }
+
 
 
 interface StepProps{

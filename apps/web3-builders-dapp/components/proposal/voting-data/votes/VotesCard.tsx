@@ -3,12 +3,10 @@
 import { useIsMobile } from '@/hooks/use-mobile'
 import React from 'react'
 import VoterListElement from './VoterListElement';
-import { useReadContract } from 'wagmi';
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
+
 type Props = { proposalVotes?: any[]};
 
 function VotesCard({ proposalVotes}: Props) {
-
 
   const isMobile = useIsMobile();
   return (

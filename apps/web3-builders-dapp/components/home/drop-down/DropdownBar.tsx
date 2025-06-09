@@ -67,6 +67,12 @@ const setFilterParam = useCallback((param: { filterProperty: string, filterValue
         <DropdownMenuItem onClick={()=>setFilterParam({filterProperty:'state', filterValue:6})} className='cursor-pointer'>
      Executed Voting 
     </DropdownMenuItem>
+          <DropdownMenuItem onClick={()=>setFilterParam({filterProperty:'isCustom', filterValue:'true'})} className='cursor-pointer'>
+     Custom Voting 
+    </DropdownMenuItem>
+          <DropdownMenuItem onClick={()=>setFilterParam({filterProperty:'isCustom', filterValue:'false'})} className='cursor-pointer'>
+     Standard Voting 
+    </DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>
 

@@ -87,7 +87,7 @@ useAccountEffect({
 <div className="flex items-end gap-2">
   <div className="hidden md:block">
 
-<ConnectKitButton  />
+<ConnectKitButton    />
   </div>
 <SidebarTrigger className='hover:bg-(--hacker-green-4) cursor-pointer bg-zinc-800 text-white'/>
 </div>

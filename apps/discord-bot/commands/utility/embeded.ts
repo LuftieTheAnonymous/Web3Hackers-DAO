@@ -30,7 +30,7 @@ module.exports = {
     console.log(proposalEmbedDetails);
 
     if(!proposalEmbedDetails || proposalEmbedDetails.error){
-        await interaction.editReply({content:proposalEmbedDetails.error });
+        await interaction.editReply({content:proposalEmbedDetails.error.message });
         return;
     }
     

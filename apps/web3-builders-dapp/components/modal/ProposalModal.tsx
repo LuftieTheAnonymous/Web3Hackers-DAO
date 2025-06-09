@@ -257,16 +257,9 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     throw new Error(voteOptionObjs.error.message);
   }
 }
-
-
         }
       },
     });
-
-
-    
-
-    
  }catch(err){
   console.log(err);
  }
@@ -286,7 +279,7 @@ const {
     enabled:typeof blockNumber === 'bigint',
   },
 
-  args: [address, blockNumber], 
+  args: [address, blockNumber],
 });
 
 
@@ -300,7 +293,7 @@ return (
     <DialogHeader>
       <DialogTitle className='text-white'>DAO Proposal</DialogTitle>
       <DialogDescription>
-        Make a proposal to the DAO, and vote for it to be implemented in the future. 
+        Make a proposal to the DAO, and vote for it to be implemented in the future.
       </DialogDescription>
 
 
