@@ -11,7 +11,7 @@ type Props = {
 async function Page({params}: Props) {
 
 
-  const {profileId} = await params;
+  const {profileId} =  params;
 const { data, error } = await supabase
   .from('dao_members')
   .select('*, dao_proposals(*)')
