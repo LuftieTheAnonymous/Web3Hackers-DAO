@@ -122,7 +122,7 @@ return;
       <Link href={`/proposal/${(fullProposalObject as any).id}`} className="w-full h-full oveflow-y-auto px-4 flex flex-col gap-3 py-2 text-white text-sm overflow-x-hidden">
         <p className=' font-bold text-base'>{(fullProposalObject as any).description} </p>
    
-{proposalObj && <p>{proposalObj.proposal_description}</p>}
+{proposalObj && <p className='text-sm md:text-base'>{proposalObj.proposal_description}</p>}
      <div className="w-full flex flex-wrap gap-4 items-center">
      {proposalObj
      && proposalObj.calldata_objects
@@ -137,13 +137,13 @@ return;
 (<div className="flex items-center gap-8 px-1 overflow-x-auto">
 
 <div  className="flex ml-3 gap-2 items-center">
-<div className='w-8 h-8 bg-(--hacker-green-4) rounded-full flex justify-center items-center'>
-  <span className='text-xs text-zinc-800'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[0]))).toFixed(0)}%</span>
+<div className='w-6 h-6 sm:w-8 sm:h-8 bg-(--hacker-green-4) rounded-full flex justify-center items-center'>
+  <span className='text-[8px] sm:text-xs text-zinc-800'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[0]))).toFixed(0)}%</span>
 </div>
 
 <button onClick={()=>handleVoteClick(0)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all text-(--hacker-green-4)'>
-    <Check />
-    <span className='text-sm'>
+   
+    <span className='text-xs sm:text-sm'>
     For
     </span>
   </button>
@@ -151,43 +151,43 @@ return;
 </div>
 
 <div className="flex gap-1 items-center">
-<div className='w-8 h-8 bg-red-500 rounded-full flex justify-center items-center'>
-  <span className='text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[2]))).toFixed(0)}%</span>
+<div className='w-6 h-6 sm:w-8 sm:h-8 bg-red-500 rounded-full flex justify-center items-center'>
+  <span className='text-[8px] sm:text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[2]))).toFixed(0)}%</span>
 </div>
 
 
 
-  <button onClick={()=>handleVoteClick(1)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-red-500'>
-  <X/>
-  <span className='text-sm'>
+  <button onClick={()=>handleVoteClick(2)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-red-500'>
+
+  <span className='text-xs sm:text-sm'>
     Against
   </span>
   </button>
 </div>
 
 <div className="flex gap-2 items-center">
-<div className='w-8 h-8  bg-blue-500 rounded-full overflow-hidden flex justify-center items-center'>
-  <span className='text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[1]))).toFixed(0)}%</span>
+<div className='w-6 h-6 sm:w-8 sm:h-8  bg-blue-500 rounded-full overflow-hidden flex justify-center items-center'>
+  <span className='text-[8px] sm:text-xs text-white'>{proposalVotes as BigInt[] && convertAmountOfTokensToPercent(Math.floor(Number((proposalVotes as BigInt[])[1]))).toFixed(0)}%</span>
 </div>
 
 
 
-  <button onClick={()=>handleVoteClick(2)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-blue-500'>
-    <InfoIcon/>
-    <span className='text-sm'>
+  <button onClick={()=>handleVoteClick(1)} className='flex items-center cursor-pointer gap-1 hover:scale-95 transition-all  text-blue-500'>
+  
+    <span className='text-xs sm:text-sm'>
       Abstain
     </span>
   </button>
 </div>
 
 </div>) : <div className="flex items-center gap-8 text-sm text-white px-3 overflow-x-auto">
-<p>This is a <span className='text-(--hacker-green-4)'>custom</span> proposal, click the proposal content to see options.</p>
+<p>This is a <span className='text-(--hacker-green-4)'>custom proposal</span>, click the proposal content to see options.</p>
 </div>
         }
 
         <div className="flex gap-2 pr-4 items-center">
          <p className='text-sm flex items-center gap-1 text-white'>
-Urgency:
+<span className='hidden md:block'>Urgency:</span>
            {fullProposalObject && (fullProposalObject as any).urgencyLevel === 0 ? <LucideBatteryLow className=' text-red-500' /> : (fullProposalObject as any).urgencyLevel === 1 ? <LucideBatteryMedium className=' text-yellow-400' />  : <LucideBatteryFull className='text-(--hacker-green-4)' />}
          </p>
         </div>

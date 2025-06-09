@@ -29,7 +29,7 @@ function ProposalCard({}: Props) {
 
 
   return (
-    <div className={`w-full h-full  ${(address && !currentUser && !isLoading) ? 'flex flex-col gap-6 justify-center items-center h-screen' : 'h-full'}`}>
+    <div className={`w-full h-full px-2  ${(address && !currentUser && !isLoading) ? 'flex flex-col gap-6 justify-center items-center h-screen' : 'h-full'}`}>
 {address && currentUser && !isLoading ?    <div className="max-w-2xl my-6  drop-shadow-green-500 hover:-translate-y-1 transition-all duration-500 drop-shadow-sm mx-auto rounded-lg flex flex-col gap-2  w-full h-80 bg-zinc-800">
     <div className="flex justify-between items-center px-3 py-2 border-b border-(--hacker-green-4)">
       <div className="flex items-center gap-1 text-white">

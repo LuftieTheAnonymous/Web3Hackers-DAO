@@ -39,7 +39,7 @@ function VotesTypesCastedChart({proposals, isCustom}: Props) {
     return (
 <div className='flex flex-col gap-2 w-full'>
 
-    <div className="bg-zinc-800 mt-3 p-4 flex flex-col  text-white border-(--hacker-green-4) border  rounded-lg max-w-2xl h-80 w-full">
+    <div className="bg-zinc-800 p-4 flex flex-col  text-white border-(--hacker-green-4) border  rounded-lg max-w-2xl h-80 w-full">
 <p className='text-lg font-bold'>Types Of Casted Votes</p>
 
 <ChartContainer config={isCustom ? customVotingOption : standardVotingOption} className="w-full h-64">

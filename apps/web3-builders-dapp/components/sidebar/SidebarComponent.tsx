@@ -62,8 +62,8 @@ const items = [
 
   return (
     <>
-        <Sidebar>
-        <SidebarContent className='text-white flex flex-col justify-between py-16 md:pt-0 bg-zinc-800'>
+        <Sidebar variant='sidebar'>
+        <SidebarContent className='text-white flex flex-col justify-between  py-16 md:pt-0 bg-zinc-800'>
       
           <SidebarGroup className='flex flex-col gap-2'>
             <SidebarGroupContent>

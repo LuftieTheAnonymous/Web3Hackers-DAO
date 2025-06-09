@@ -6,6 +6,8 @@ import MemberStats from '@/components/profile/MemberStats'
 import MemberTile from '@/components/profile/MemberTile'
 import { Button } from '@/components/ui/button'
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useSidebar } from '@/components/ui/sidebar';
 
 
 type Props<T> = {
@@ -17,12 +19,14 @@ type Props<T> = {
 function ProfilePageContainer<T>({profileData,  walletAddress
 }: Props<T>) {
 
+const {open}=useSidebar();
+
     const {objectData}=useRealtimeDocument({initialObj:profileData,tableName:'dao_members'});
 
   return (
      <div className='w-full h-full'>
-          <div className=" max-w-6xl w-full mx-auto flex-col lg:flex-row gap-6 flex justify-between items-center py-6 px-4
-           ">
+          <div className={` max-w-6xl w-full mx-auto ${open ? 'flex-col xl:flex-row' : 'flex-col lg:flex-row'}  gap-6 flex justify-between items-center py-6 px-4
+           `}>
     <MemberTile objectData={objectData}/>
    <MemberDetails objectData={objectData} walletAddress={walletAddress}
    />
@@ -34,7 +38,9 @@ function ProfilePageContainer<T>({profileData,  walletAddress
      <Button className='bg-zinc-800 cursor-pointer hover:bg-(--hacker-green-4) hover:text-zinc-800 hover:scale-90'>Proposals</Button>
  
    </div>
-          <MemberStats walletAddress={walletAddress as `0x${string}`}/>
+          <MemberStats
+          isOpen={open}
+          walletAddress={walletAddress as `0x${string}`}/>
           </div>
     </div>
   )

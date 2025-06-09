@@ -312,6 +312,10 @@ animation: first-section-text 1s ease-in-out forwards;
 
 }
 
+body{
+  overflow-x: hidden;
+}
+
 @layer base {
 
   body {
