@@ -1,21 +1,20 @@
-import  jwt  from 'jsonwebtoken';
-import {  executeGovenorTokenEvents } from "./event-listeners/GovTokenEventListener.js";
-import { executeGovenorContractEvents } from "./event-listeners/GovenorEventListener.js";
-import govTokenRouter from "./routes/GovTokenRouter.js";
-import governanceRouter from "./routes/GovernanceRouter.js";
-import membersRouter from "./routes/MembersRouter.js";
-import activityRouter from "./routes/ActivityRouter.js";
-import { NextFunction, Request, Response } from "express";
+
+import {  executeGovenorTokenEvents } from "./event-listeners/GovTokenEventListener.ts";
+import { executeGovenorContractEvents } from "./event-listeners/GovenorEventListener.ts";
+import govTokenRouter from "./routes/GovTokenRouter.ts";
+import governanceRouter from "./routes/GovernanceRouter.ts";
+import membersRouter from "./routes/MembersRouter.ts";
+import activityRouter from "./routes/ActivityRouter.ts";
 import dotenv from 'dotenv';
 import cors from 'cors';
 import express from 'express';
 import http from "http";
 import helmet from 'helmet';
-import redisClient  from "./redis/set-up.js";
-import logger from "./config/winstonConfig.js";
-import './redis/bullmq/main.js';
-import './redis/bullmq/worker.js';
-import './redis/bullmq/queueEvents.js';
+import redisClient  from "./redis/set-up.ts";
+import logger from "./config/winstonConfig.ts";
+import './redis/bullmq/main.ts';
+import './redis/bullmq/worker.ts';
+import './redis/bullmq/queueEvents.ts';
 const app = express();
 dotenv.config();
 

@@ -18,17 +18,19 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
       try {
         const proposal = await daoContract.getProposal(event.proposal_id);
 
-        const deadline = Number(proposal.endBlockTimestamp) * 1000 + Number(proposal.timelock);
+        const deadline = Number(proposal.startBlockTimestamp) * 1000;
 
 
         if (new Date().getTime() >= deadline && Number(proposal.state) === 0) {
-          const tx = await daoContract.activateProposal(proposal.id,{
+          const tx = await daoContract.activateProposal(proposal.id, {
               maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
   maxFeePerGas: ethers.parseUnits("250", "gwei"),
           });
           const receipt = await tx.wait();
           return { success: true, proposalId: proposal.id, receipt };
         } 
+
+       
       } catch (err) {
         console.error(`Error activating proposal ${event.proposal_id}:`, err);
         return { success: false, proposalId: event.proposal_id, error: err };

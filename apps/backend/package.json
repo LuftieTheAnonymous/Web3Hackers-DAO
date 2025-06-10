@@ -6,10 +6,11 @@
   "author": "Luftjunkie",
   "main": "index.ts",
   "type": "module",
+  "module": "nodenext",
   "scripts": {
     "test": "jest",
-    "start": "tsx index.ts",
-    "dev": "tsx index.ts"
+    "start": "tsx  index.ts",
+    "dev": "tsx  index.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
@@ -27,7 +28,6 @@
     "node-cache-manager": "^1.2.0",
     "node-cron": "^3.0.3",
     "node-redis": "^0.1.7",
-    "nodemon": "^3.1.10",
     "redis": "^4.7.1",
     "socket.io": "^4.8.1",
     "supabase": "^2.23.4",
@@ -50,6 +50,7 @@
     "eslint-plugin-no-loops": "^0.4.0",
     "express": "^5.1.0",
     "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.4",
     "typescript": "^5.8.2"

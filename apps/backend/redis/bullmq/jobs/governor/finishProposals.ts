@@ -1,6 +1,7 @@
 import { daoContract, provider } from "../../../../config/ethersConfig.js";
 import { ProposalEventArgs } from "../../../../controllers/GovernanceController.js";
 import retry from 'async-retry';
+import pLimit from 'p-limit';
 
 export const finishProposals= async () => {
     try{
@@ -10,33 +11,39 @@ export const finishProposals= async () => {
 
      const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
 
- const receipts =    events.map(async (event) => {
-      return  await retry(async ()=>{
-            return Promise.resolve(async()=>{
+     const limit = pLimit(5);
+
+ const receipts =  events.map(async (event) => {
+        console.log((event as ProposalEventArgs).args[0]);
+    return limit(async ()=>{
+              return  await retry(async ()=>{
+try{
+         console.log((event as ProposalEventArgs).args[0]);
            const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
-        console.log(proposal);
-        if(Number(proposal.state) === 1 && new Date(Number(proposal.endBlockTimestamp) * 1000).getTime() <= new Date().getTime()){
+        if(Number(proposal.state) === 1 && new Date((Number(proposal.endBlockTimestamp) * 1000) + Number(proposal.timelock)).getTime() <= new Date().getTime()){
             const tx = await daoContract.succeedProposal(proposal.id);
     
-    
             const txReceipt = await tx.wait();
-return txReceipt
+        return { success: true, proposalId: proposal.id, receipt:txReceipt };
         }
-     })
-        },{
+}catch(err){
+    console.log(err);
+    return { success: false, proposalId:(event as ProposalEventArgs).args[0] , receipt: null };
+}
+    }, {
             retries: 5,
             maxTimeout: 1 * 1000 * 3600, // 1 hour
             onRetry(err, attempt) {
                 console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
             }
         })
-        
 
-
-   
+        })
     });
 
-    const receiptsResults = await Promise.all(receipts);
+    console.log(receipts, "receipts");
+
+    const receiptsResults = await Promise.allSettled(receipts);
 
     console.log(receiptsResults, "finished proposals");
     if(!receiptsResults || receiptsResults.length === 0){

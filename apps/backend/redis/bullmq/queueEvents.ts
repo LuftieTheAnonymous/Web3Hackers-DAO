@@ -7,3 +7,4 @@ updateQueueEvents.on('progress', (job) => console.info(`Job ${job.jobId} in prog
 updateQueueEvents.on('completed', (job) => console.info(`Job ${job.jobId} completed`));
 updateQueueEvents.on('error', (err) => console.error('Worker error', err));
 updateQueueEvents.on('failed', (job, err) => console.error(`Job ${job.jobId} failed`, err));
+
