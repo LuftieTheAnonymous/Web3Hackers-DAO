@@ -14,7 +14,7 @@ try{
 return  Promise.resolve(async()=>{
             const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
         console.log(proposal);
-        if(Number(proposal[6]) === 4){
+        if(Number(proposal.state) === 4){
             const tx = await daoContract.queueProposal((event as ProposalEventArgs).args[0]);
             console.log(tx);
     
@@ -33,7 +33,7 @@ return  Promise.resolve(async()=>{
     });
 
     const receiptsResults = await Promise.all(receipts);
-    console.log(receiptsResults);
+    console.log(receiptsResults, "Queue Proposals");
 
     if(!receiptsResults || receiptsResults.length === 0){
          return {data:null, error:"No proposals to queue", message:"error", status:404};

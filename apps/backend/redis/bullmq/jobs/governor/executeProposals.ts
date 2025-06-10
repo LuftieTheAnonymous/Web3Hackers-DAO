@@ -17,13 +17,13 @@ const receipts =events.map(async (event) => {
      return  await retry(async ()=>{
               return Promise.resolve((async()=>{
   const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]); 
-                if(Number(proposal[6]) === 5){
+                if(Number(proposal.state) === 5){
                     const tx = await daoContract.executeProposal((event as ProposalEventArgs).args[0]);
                     console.log(tx);
             
                     const txReceipt = await tx.wait();
-                    console.log(txReceipt);
-            
+
+                    return txReceipt
                 }
               }))
             }, {
@@ -36,7 +36,7 @@ const receipts =events.map(async (event) => {
         });
 
         const receiptsResults = await Promise.all(receipts);
-        console.log(receiptsResults);
+        console.log(receiptsResults, "executed proposals");
 
         if(!receiptsResults || receiptsResults.length === 0){
              return {data:null, error:"No proposals to execute", message:"error", status:404};

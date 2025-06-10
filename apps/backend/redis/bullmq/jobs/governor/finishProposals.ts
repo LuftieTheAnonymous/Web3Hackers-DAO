@@ -15,9 +15,9 @@ export const finishProposals= async () => {
             return Promise.resolve(async()=>{
            const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
         console.log(proposal);
-        if(Number(proposal[6]) === 1 && new Date(Number(proposal[4]) * 1000).getTime() <= new Date().getTime()){
-            const tx = await daoContract.finishProposal((event as ProposalEventArgs).args[0]);
-            console.log(tx);
+        if(Number(proposal.state) === 1 && new Date(Number(proposal.endBlockTimestamp) * 1000).getTime() <= new Date().getTime()){
+            const tx = await daoContract.succeedProposal(proposal.id);
+    
     
             const txReceipt = await tx.wait();
 return txReceipt
@@ -38,7 +38,7 @@ return txReceipt
 
     const receiptsResults = await Promise.all(receipts);
 
-    console.log(receiptsResults);
+    console.log(receiptsResults, "finished proposals");
     if(!receiptsResults || receiptsResults.length === 0){
 return {data:null, error:"No proposals to finish", message:"error", status:404};
     }
