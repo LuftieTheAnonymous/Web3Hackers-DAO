@@ -4,10 +4,10 @@ import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import SidebarComponent from "@/components/sidebar/SidebarComponent";
-import ReduxProvider from "@/lib/providers/ReduxProvider";
 import WagmiSetupProvider
 from "@/lib/providers/WagmiSetupProvider";
 import { Toaster } from '@/components/ui/sonner';
+import ProvidersWrapper from '@/lib/providers/ProvidersWrapper';
 
 
 const poppins = Poppins({
@@ -43,15 +43,7 @@ export default function RootLayout({
         className={`${poppins.variable} ${geistMono.variable} w-full h-full bg-[#0D0D0D]  antialiased`}
       >
 
-        <WagmiSetupProvider>
-
-        <ReduxProvider>
-
- 
-
-  <SidebarProvider>
-
-
+<ProvidersWrapper>
     <SidebarComponent />
 
   <div className="flex flex-col w-full h-full gap-2">
@@ -59,15 +51,10 @@ export default function RootLayout({
 {children}
 <Toaster className='bg-zinc-800 border border-(--hacker-green-4)' closeButton />
   </div>
+</ProvidersWrapper>
 
 
-  </SidebarProvider>
-      
 
-
-</ReduxProvider>
-
-</WagmiSetupProvider>
       </body>
 
     </html>

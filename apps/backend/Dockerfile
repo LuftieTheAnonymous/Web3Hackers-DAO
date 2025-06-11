@@ -27,6 +27,6 @@ COPY . .
 # Expose the app port
 EXPOSE 2137
 
-CMD ["nodemon", "index.ts"]
+CMD ["npx","tsx", "index.ts"]
 
 

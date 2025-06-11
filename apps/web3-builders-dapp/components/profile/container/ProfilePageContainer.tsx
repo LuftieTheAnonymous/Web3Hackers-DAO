@@ -6,8 +6,9 @@ import MemberStats from '@/components/profile/MemberStats'
 import MemberTile from '@/components/profile/MemberTile'
 import { Button } from '@/components/ui/button'
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
-import { useIsMobile } from '@/hooks/use-mobile';
+
 import { useSidebar } from '@/components/ui/sidebar';
+import { notFound } from 'next/navigation';
 
 
 type Props<T> = {
@@ -22,6 +23,10 @@ function ProfilePageContainer<T>({profileData,  walletAddress
 const {open}=useSidebar();
 
     const {objectData}=useRealtimeDocument({initialObj:profileData,tableName:'dao_members'});
+
+    if(!profileData){
+      notFound();
+    }
 
   return (
      <div className='w-full h-full'>

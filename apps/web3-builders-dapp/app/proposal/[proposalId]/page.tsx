@@ -1,6 +1,5 @@
 import ProposalContainer from "@/components/proposal/ProposalContainer";
 import { supabase } from "@/lib/db/supabaseConfigClient";
-import { notFound } from "next/navigation";
 
 
 
@@ -12,9 +11,6 @@ const {data}=await supabase.from('dao_proposals').select('*, dao_members:dao_mem
   
 const {data:commentsData}=await supabase.from('dao_voting_comments').select('*, dao_members:dao_members(*)').eq('proposal_id', proposalId);
 
-if(!data){
-  notFound();
-}
 
 
   return (

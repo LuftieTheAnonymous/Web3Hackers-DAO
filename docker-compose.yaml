@@ -10,7 +10,6 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-    
 
   backend:
     build:
@@ -21,11 +20,19 @@ services:
       - "2137:2137"
     environment:
       - NODE_ENV=production
-    
-    discord-bot:
-      build:
-        context: /apps/discord-bot
-        dockerfile: Dockerfile
-      command: ["npm", "run", "dev"]
-      environment:
-        - NODE_ENV=production 
+
+  discord-bot:
+    build:
+      context: /apps/discord-bot
+      dockerfile: Dockerfile
+    command: ["npm", "run", "dev"]
+    environment:
+      - NODE_ENV=production
+
+  smart-contracts:
+    build:
+      context: /apps/dao-contracts
+      dockerfile: Dockerfile
+    command: ["anvil"]
+    environment:
+      - FOUNDRY_DISABLE_NIGHTLY_WARNING=1

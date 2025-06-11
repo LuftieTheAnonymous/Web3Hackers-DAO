@@ -24,6 +24,7 @@ import { VoteIcon } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import VotingStandardModal from './voting-data/VotingStandardModal';
 import { decodeEventLog } from 'viem';
+import { notFound } from 'next/navigation';
 
 
 type Props<T, U> = {
@@ -46,6 +47,9 @@ const {writeContract}=useWriteContract({
 
 });
 
+if(!proposalData){
+  notFound();
+}
 
     const {data:proposalOnchainData, error}=useReadContract({
       abi: governorContractAbi,
