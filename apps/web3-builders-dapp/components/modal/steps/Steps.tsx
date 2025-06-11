@@ -1,16 +1,21 @@
-import React, { useCallback, useState } from 'react'
+'use client';
+
+import React, { use, useCallback, useState } from 'react'
 import { Input } from '../../ui/input'
 import { Textarea } from '../../ui/textarea'
 import { Button } from '../../ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import OptionToCall from './custom/OptionToCall'
 import { Control, FieldValues, FormState, useFieldArray, UseFormClearErrors, useFormContext, UseFormGetValues, UseFormRegister, UseFormSetError, UseFormSetValue, UseFormWatch, UseFromSubscribe } from 'react-hook-form'
-import { Calendar } from '@/components/ui/calendar'
+import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ArrowLeft, ArrowRight, CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/db/supabaseConfigClient'
+import Image from 'next/image'
+
 
 
 type Props = {
@@ -120,9 +125,24 @@ setValue('isCustom', value);
 
 const {fields, append} = useFieldArray({name: 'functionsCalldatas', control});
 
-
+const [members, setMembers]=useState<any[]>([]);
+const [isLoading, setIsLoading] = useState(false);
 
 const [callDataIndex, setCallDataIndex] = React.useState(0);
+
+const openChangeSetMembers=async ()=>{
+  setIsLoading(true);
+const {data}= await supabase.from('dao_members').select('*');
+
+if(data && members.length === 0){
+  setMembers(data);
+}
+
+setIsLoading(false);
+
+
+}
+
 
   return (
     <>
@@ -217,8 +237,31 @@ callDataIndex===index && <div key={field.id}>
                 <FormItem className='py-2'>
                   <FormLabel className='text-white text-base font-light'>Destination Address</FormLabel>
                   <FormControl>
-    <Input {...field} id='userAddr' placeholder='Enter the user address'
-    className='text-white border border-(--hacker-green-4) outline-none '/>
+        <Select 
+        onOpenChange={openChangeSetMembers}
+ onValueChange={
+  (value) => {
+    setValue(`functionsCalldatas.${index}.destinationAddress`, value);
+  }
+ }
+ {...field}
+ >
+  <SelectTrigger className="w-full text-white border border-(--hacker-green-4)">
+    <SelectValue placeholder="Proposal Function" />
+  </SelectTrigger>
+  <SelectContent className='bg-zinc-800 border flex  border-(--hacker-green-4)'>
+
+{isLoading && <p className='text-white'>Loading...</p>}
+
+{!isLoading && members.map((member) => (
+  <SelectItem className='text-white' value={member.userWalletAddress}>
+    <Image src={member.photoURL} alt={member.nickname} className='w-6 h-6 rounded-full' width={50} height={50}/>
+
+    <p>{member.nickname}</p>
+  </SelectItem>
+))}
+  </SelectContent>
+</Select>
                     
                   </FormControl>
                   <FormMessage />
@@ -271,8 +314,7 @@ interface ThirdStepContentProps extends Props {
   
 }
 
- function ThirdStepContent({isCustom
- , control, watch
+ function ThirdStepContent({isCustom,control, watch
  }: ThirdStepContentProps) {
 
 
@@ -420,9 +462,9 @@ const goForward=useCallback(() => {
 
                 <PopoverContent className="w-auto bg-zinc-700 p-0" align="start">
                   <Calendar
-                    {...field}
-                    mode="single"
-                    fromDate={new Date()}
+                  mode="single"
+              {...field}
+              required
                     selected={field.value ? new Date(field.value) : undefined}
                     classNames={{
                       day_selected: 'bg-(--hacker-green-4) rounded-md hover:text-zinc-800 py-1 px-2 self-center',
@@ -434,13 +476,7 @@ const goForward=useCallback(() => {
                     onSelect={(date: Date) => {
                       if (!date) return;
 
-                      const now = new Date();
-                      const proposedEnd = new Date(now.getTime() + 4 * 60 * 60 * 1000);
-
-                      console.log("🕒 Now:", now);
-                      console.log("⌛ End:", proposedEnd);
-
-                      setValue('proposalEndTime', proposedEnd);
+                      setValue('proposalEndTime', date);
                     }}
                   />
                 </PopoverContent>
@@ -452,12 +488,92 @@ const goForward=useCallback(() => {
         )}
       />
 
+       <div className="flex items-center gap-3">
+        <FormField
+          control={control}
+          name="proposalEndtimeHour"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className='text-white text-sm font-light'>
+               Proposal Time (Hours)
+              </FormLabel>
+              <FormControl>
+         
+                  <Input
+                    min={0}
+                    max={23}
+                    {...field}
+                    onChange={(e) => {
+                     if(watch('proposalEndTime')){
+                         setValue('proposalEndtimeHour', Number(e.target.value));
+                      setValue('proposalEndTime', new Date(watch('proposalEndTime').setHours(watch('proposalEndtimeHour'))));
+                    return; 
+                    }
+                    toast.error('Please select a date first !');
+                    }}
+                    placeholder='Amount of time units'
+                    type='number'
+                    className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none'
+                  />
+                </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+            <FormField
+          control={control}
+          name="proposalEndtimeMinutes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className='text-white text-sm font-light'>
+                Proposal Time (Minutes)
+              </FormLabel>
+              <FormControl>
+         
+                  <Input
+                    min={0}
+                    max={59}
+                    {...field}
+                    onChange={(e) =>{
+                    if(watch('proposalEndTime')){
+                         setValue('proposalEndtimeMinutes', Number(e.target.value));
+                      setValue('proposalEndTime', new Date(watch('proposalEndTime').setMinutes(watch('proposalEndtimeMinutes'))));
+                    return; 
+                    }
+                    toast.error('Please select a date and hour first !');
+                    }}
+                    placeholder='Amount of time units'
+                    type='number'
+                    className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none'
+                  />
+                </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+      
+      </div>
+
       {/* Delay Input and Unit Picker */}
       <div className="flex items-center gap-3">
         <FormField
           control={control}
           name="proposalDelay"
-          render={({ field }) => (
+          render={({ field }) => {
+
+ const endTime = watch('proposalEndTime')?.getTime?.();
+    const delayUnit = watch('proposalDelayUnit') || 1;
+
+    let maxDelay = 0;
+
+    if (endTime && !isNaN(endTime)) {
+      const now = Date.now();
+      const diffInSeconds = (endTime - now) / 1000;
+      maxDelay = Math.floor((diffInSeconds * 0.2) / delayUnit); // 20% cap, converted to selected unit
+    }
+   return     (
             <FormItem>
               <FormLabel className='text-white text-base font-light'>
                 Proposal Delay
@@ -466,10 +582,24 @@ const goForward=useCallback(() => {
                 <div className="flex w-full gap-3 items-center">
                   <Input
                     min={0}
+                    max={maxDelay}
                     {...field}
                     id="proposalDelay"
                     value={field.value ? Number(field.value) : 0}
-                    onChange={(e) => setValue('proposalDelay', Number(e.target.value))}
+                    
+                    onChange={(e) =>{
+                  if(!isNaN(watch('proposalEndTime'))){
+                          const val = Number(e.target.value);
+                if (val <= maxDelay) {
+                  setValue('proposalDelay', val)
+                }
+                else{
+                  toast.error(`Proposal delay can't exceed ${maxDelay} ${delayUnit === '1' ? 'seconds' : delayUnit === '60' ? 'minutes' : delayUnit === '3600' ? 'hours' : 'days'}`);
+              setError('proposalDelay', { message: `Proposal delay can't exceed ${maxDelay} ${delayUnit === '1' ? 'seconds' : delayUnit === '60' ? 'minutes' : delayUnit === '3600' ? 'hours' : 'days'}` });
+                  return
+                };
+                  }
+                    }}
                     placeholder='Amount of time units'
                     type='number'
                     className='text-white border border-(--hacker-green-4) max-w-64 w-full outline-none'
@@ -478,7 +608,11 @@ const goForward=useCallback(() => {
               </FormControl>
               <FormMessage />
             </FormItem>
-          )}
+          )
+
+          }
+            
+    }
         />
 
         <FormField
@@ -494,21 +628,21 @@ const goForward=useCallback(() => {
                   {...field}
                   value={String(field.value)}
                   onValueChange={(value) => {
-                    const end = watch('proposalEndTime');
-                    const delay = Number(watch('proposalDelay')) * Number(value);
-                    const nowPlusDelay = Date.now() + delay;
-                    const diff = new Date(end).getTime() - nowPlusDelay;
+  const unit = Number(value);
+  setValue('proposalDelayUnit', unit);
 
-                    if (diff < 1000 * 60 * 60 * 3) {
-                      setError('proposalEndTime', {
-                        message: 'Proposal voting period must be at least 3 hours from now',
-                      });
-                      toast.error('Proposal voting period must be at least 3 hours from now');
-                      return;
-                    }
+  const endTime = watch('proposalEndTime')?.getTime?.();
+  if (endTime && !isNaN(endTime)) {
+    const now = Date.now();
+    const diffInSeconds = (endTime - now) / 1000;
+    const maxDelay = Math.floor((diffInSeconds * 0.2) / unit);
+    const currentValue = watch('proposalDelay');
 
-                    setValue('proposalDelayUnit', Number(value));
-                  }}
+    if (currentValue > maxDelay) {
+      setValue('proposalDelay', maxDelay);
+    }
+  }
+}}
                 >
                   <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
                     <SelectValue placeholder="Time Unit" />
@@ -532,7 +666,21 @@ const goForward=useCallback(() => {
         <FormField
           control={control}
           name="timelockPeriod"
-          render={({ field }) => (
+          render={({ field }) => {
+
+             const endTime = watch('proposalEndTime')?.getTime();
+    const delayUnit = watch('timelockUnit') || 1;
+
+    let maxTimelock = 0;
+
+    if (endTime && !isNaN(endTime)) {
+      const now = Date.now();
+      const diffInSeconds = (endTime - now) / 1000;
+      maxTimelock = Math.floor((diffInSeconds * 0.2) / Number(delayUnit)); // 20% cap, converted to selected unit
+    }
+
+
+            return (
             <FormItem>
               <FormLabel className='text-white text-base font-light'>
                 Proposal Timelock
@@ -541,6 +689,7 @@ const goForward=useCallback(() => {
                 <div className="flex w-full gap-3 items-center">
                   <Input
                     min={0}
+                    max={maxTimelock}
                     {...field}
                     id='timelockPeriod'
                     value={field.value ? Number(field.value) : 0}
@@ -553,7 +702,8 @@ const goForward=useCallback(() => {
               </FormControl>
               <FormMessage />
             </FormItem>
-          )}
+          )
+          }}
         />
 
         <FormField
@@ -568,19 +718,22 @@ const goForward=useCallback(() => {
                 <Select
                   {...field}
                   value={String(field.value)}
-                  onValueChange={(value) => {
-                    if (
-                      Number(watch('timelockPeriod')) * Number(value) >
-                      1000 * 60 * 60 * 24 * 7
-                    ) {
-                      setError('timelockPeriod', {
-                        message: 'Timelock period must be at most 7 days',
-                      });
-                      toast.error('Timelock period must be at most 7 days');
-                      return;
-                    }
-                    setValue('timelockUnit', Number(value));
-                  }}
+                 onValueChange={(value) => {
+  const unit = Number(value);
+  setValue('timelockUnit', unit);
+
+  const endTime = watch('proposalEndTime')?.getTime();
+  if (endTime && !isNaN(endTime)) {
+    const now = Date.now();
+    const diffInSeconds = (endTime - now) / 1000;
+    const maxTimelock = Math.floor((diffInSeconds * 0.2) / unit);
+    const currentValue = watch('timelockPeriod');
+
+    if (currentValue > maxTimelock) {
+      setValue('timelockPeriod', maxTimelock);
+    }
+  }
+}}
                 >
                   <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
                     <SelectValue placeholder="Time Unit" />
@@ -620,7 +773,7 @@ function SummaryStep({getValues}:Props){
         </div>
 
         <div className="w-full flex justify-between items-center px-3 py-2 gap-2">
-          <p className='text-white'>Ugency Level</p>
+          <p className='text-white'>Urgency Level</p>
           <p className='text-(--hacker-green-4)'>{Number(getValues('urgencyLevel'))}</p>
         </div>
 

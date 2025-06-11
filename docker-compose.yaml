@@ -21,14 +21,6 @@ services:
       - "2137:2137"
     environment:
       - NODE_ENV=production
-
-    cron-jobs:
-      build:
-        context: /apps/cron-jobs
-        dockerfile: Dockerfile
-      command: ["npm", "run", "dev"]
-      environment:
-        - NODE_ENV=production
     
     discord-bot:
       build:

@@ -9,8 +9,8 @@
   "module": "nodenext",
   "scripts": {
     "test": "jest",
-    "start": "tsx  index.ts",
-    "dev": "tsx  index.ts"
+    "start": "tsx index.ts",
+    "dev": "tsx index.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",

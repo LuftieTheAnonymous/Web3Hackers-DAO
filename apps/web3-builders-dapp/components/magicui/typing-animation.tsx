@@ -1,7 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion, MotionProps } from "framer-motion";
+import { motion, MotionProps,
+
+  
+} from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 interface TypingAnimationProps extends MotionProps {
@@ -22,15 +25,7 @@ export function TypingAnimation({
   startOnView = false,
   ...props
 }: TypingAnimationProps) {
-  const MotionComponent = motion.div({
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
-    transition: { duration },
-    whileInView: { opacity: 1 },
-
-  }); 
-  
+  const MotionComponent = motion(Component);
 
   const [displayedText, setDisplayedText] = useState<string>("");
   const [started, setStarted] = useState(false);
@@ -88,6 +83,11 @@ export function TypingAnimation({
         "text-4xl font-bold leading-[5rem] tracking-[-0.02em]",
         className,
       )}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration }}
+      whileInView={{ opacity: 1 }}
       {...props}
     >
       {displayedText}

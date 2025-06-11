@@ -6,10 +6,10 @@ import React from 'react'
 
 
 
-async function Page({ params }: { params: { profileId: string } }) {
+async function Page({ params }: { params: Promise<any> }) {
 
 
-  const {profileId} =  params;
+  const {profileId} = await params;
 const { data, error } = await supabase
   .from('dao_members')
   .select('*, dao_proposals(*)')

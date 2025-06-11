@@ -12,6 +12,7 @@ import { ethers } from 'ethers';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useSearchParams } from 'next/navigation';
+import { MdCancel, MdOutlinePendingActions, MdPending } from 'react-icons/md';
 
 type Props = {proposalId:`0x${string}`, proposalObj:any}
 
@@ -87,9 +88,96 @@ return;
     const searchParams= useSearchParams();
 
 
+    const stateComponent=(state:number)=>{
+      switch(state){
+        case 0:
+          return <p className='text-sm text-white flex gap-2 items-center'>
+
+
+             <MdOutlinePendingActions
+className='text-(--hacker-green-4)'
+/>
+Pending...
+(
+    {
+    new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime() >= new Date().getTime() &&
+      <span
+  className='text-sm text-(--hacker-green-4)'
+  >
+   {`Starts in ${formatDistanceStrict(new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000), new Date())}`}
+  </span>
+   }
+  {new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime()<=new Date().getTime() &&
+<p>Should have started:<span
+  className='text-sm text-red-500'
+  >{' '}
+  
+   {`${formatDistanceStrict(new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000), new Date())}`} ago
+  </span>
+</p> 
+
+   }
+
+)
+  </p>
+ 
+ case 1: 
+  return  <p className={`${new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-gray-700'}   text-xs`}>
+    {new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() && '🔓 Open'}
+    {' '}
+    <span className='
+    text-white
+    '>
+       {fullProposalObject as any && `${formatDistanceStrict(new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000), new Date())}`}
+    </span>
+   </p>
+  case 2:
+    return <p
+    className='flex gap-2 items-center text-sm text-white'
+    >
+      Canceled 
+      <MdCancel className='text-red-700' />
+    </p>
+  
+  case 3:
+    return <p
+    className='flex gap-2 items-center text-sm text-white'
+    >
+      Defeated
+         <MdCancel className='text-red-700 text-lg'/>
+    </p>
+
+    case 4:
+      return <p
+      className='flex gap-2 items-center text-sm text-white'
+      >
+        Succeeded
+         <Check className='text-green-700' />
+      </p>
+
+      case 5:
+        return <p
+        className='flex gap-2 items-center text-sm text-white'>
+          Queued
+          🔒
+        </p>
+      
+      case 6: 
+      return <p
+      className='flex gap-2 items-center text-sm text-white'
+      >
+        Executed
+         <Check className='text-green-700' />
+      </p>
+
+      }
+
+    }
+
   return (
 <>
-{fullProposalObject && proposalObj && <div onClick={() => console.log((fullProposalObject as any))}  className={`bg-zinc-800 ${searchParams.get('filterProperty') !== null && searchParams.get('filterValue') !== null && ((searchParams.get('filterProperty') === 'isCustom' && searchParams.get('filterValue') !== String((fullProposalObject as any).isCustom))  || (searchParams.get('filterProperty') === 'state' && Number(searchParams.get('filterValue'))) !== Number((fullProposalObject as any).state)) && 'hidden'} border shadow-sm ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'shadow-green-400' : 'shadow-gray-500'} flex flex-col ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} max-w-3xl  transition-all duration-700 hover:scale-95 hover:-translate-y-1 w-full rounded-lg h-96`}>
+{fullProposalObject && proposalObj && <div onClick={() => console.log((fullProposalObject as any))}  className={`bg-zinc-800 ${searchParams.get('filterProperty') !== null && searchParams.get('filterValue') !== null && ((searchParams.get('filterProperty') === 'isCustom' && searchParams.get('filterValue') !== String((fullProposalObject as any).isCustom))  || (searchParams.get('filterProperty') === 'state' && Number(searchParams.get('filterValue'))) !== Number((fullProposalObject as any).state)) && 'hidden'} border shadow-sm ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'shadow-green-400' : (fullProposalObject as any).state === 2 ||  (fullProposalObject as any).state === 3 ? 'shadow-red-500' : ' shadow-gray-500'} flex flex-col ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : (fullProposalObject as any).state === 2 ||  (fullProposalObject as any).state === 3 ? 'border-red-500' : 'border-gray-500'
+  } max-w-3xl  transition-all duration-700 hover:scale-95 hover:-translate-y-1 w-full rounded-lg h-96`}>
       <div className={`w-full border-b ${fullProposalObject && (fullProposalObject as any).state === 1 ? 'border-(--hacker-green-4)' : 'border-gray-500'} `}>
       <div className="flex justify-between items-center px-3 py-2">
       <div onClick={()=>console.log(proposalObj)} className="flex items-center gap-1 text-white">
@@ -97,26 +185,12 @@ return;
         <p className='text-sm'>@{proposalObj && proposalObj.dao_members &&  proposalObj.dao_members.nickname}</p>
       </div>
 
-<div className="flex items-center gap-2">
-<p className=' text-xs  text-white'>
-  {fullProposalObject as any && (fullProposalObject as any).state === 1 && (fullProposalObject as any) && new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() && '🔓 Open'}
-  {fullProposalObject as any && (fullProposalObject as any).state === 2 && '❌ Cancelled'}
-  {fullProposalObject as any && (fullProposalObject as any).state === 6 && '🔒 Queued'}
-  {fullProposalObject as any && (fullProposalObject as any).state === 4 && '✅ Succeeded'}
-</p>
 
-{fullProposalObject && (fullProposalObject as any).state === 0 && fullProposalObject && <p className='text-sm text-white'>
-<span className={`${fullProposalObject && new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-red-700'}   text-xs}`}>  {fullProposalObject as any && `${formatDistanceStrict(new Date(), new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000))}`}</span> 
-{new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? ' until voting starts' : ' since voting started'}
-  </p>}
-
-{fullProposalObject && (fullProposalObject as any).state === 1 &&
-      <p className={`${new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-gray-700'}   text-xs`}>{fullProposalObject as any && `${formatDistanceStrict(new Date(Number(((fullProposalObject as any).endBlockTimestamp)) * 1000), new Date())}`}</p>
-}
+  {
+    (fullProposalObject as any) &&  stateComponent(Number((fullProposalObject as any).state))
+  }
 
 
-
-</div>
     </div>
       </div>
       <Link href={`/proposal/${(fullProposalObject as any).id}`} className="w-full h-full oveflow-y-auto px-4 flex flex-col gap-3 py-2 text-white text-sm overflow-x-hidden">
@@ -132,7 +206,9 @@ return;
         
      </div>
       </Link>
-      <div className="border-t border-(--hacker-green-4) py-3 flex justify-between items-center">
+      <div className="border-t
+      border-gray-500
+      py-3 flex justify-between items-center">
         {!(fullProposalObject as any).isCustom ?
 (<div className="flex items-center gap-8 px-1 overflow-x-auto">
 
@@ -186,6 +262,7 @@ return;
         }
 
         <div className="flex gap-2 pr-4 items-center">
+          
          <p className='text-sm flex items-center gap-1 text-white'>
 <span className='hidden md:block'>Urgency:</span>
            {fullProposalObject && (fullProposalObject as any).urgencyLevel === 0 ? <LucideBatteryLow className=' text-red-500' /> : (fullProposalObject as any).urgencyLevel === 1 ? <LucideBatteryMedium className=' text-yellow-400' />  : <LucideBatteryFull className='text-(--hacker-green-4)' />}

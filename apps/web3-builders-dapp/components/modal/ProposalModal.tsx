@@ -41,6 +41,10 @@ tokenAmount:z.bigint({'message':'Token Amount must be a number'}),
 })),
 
 proposalEndTime: z.date({'message':'proposalEndTime must be a date'}),
+proposalEndtimeHour: z.number({'message':'The proposal end time hour must be a number'}),
+proposalEndTimeMinutes: z.number({'message':'The proposal end time minutes must be a number'}),
+
+
 proposalDelay: z.number({'message':'proposalDelay must be a number'}),
 proposalDelayUnit: z.number({'message':'proposalDelayUnit must be a number'}),
 
@@ -199,6 +203,8 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
 
         if(proposalSet){
 
+          console.log(values);
+
           const proposalObj = await supabase.from('dao_proposals').insert([{
             proposal_id: id,
             proposer_id: proposer,
@@ -211,6 +217,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
           }]);
 
           if(proposalObj.error) {
+            console.log(proposalObj.error);
              toast.error(proposalObj.error.message);
             throw new Error(proposalObj.error.message);
           }
@@ -235,6 +242,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
          const calldataObjs = await supabase.from('calldata_objects').insert(calldataRows); 
 
          if(calldataObjs.error) {
+          console.log(calldataObjs.error);
           toast.error(calldataObjs.error.message);
             throw new Error(calldataObjs.error.message);
           }
@@ -253,6 +261,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
   const voteOptionObjs = await supabase.from('dao_vote_options').insert(voteOptionRows);
 
   if(voteOptionObjs.error) {
+    console.log(voteOptionObjs.error);
     toast.error(voteOptionObjs.error.message);
     throw new Error(voteOptionObjs.error.message);
   }

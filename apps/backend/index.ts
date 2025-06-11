@@ -15,6 +15,7 @@ import logger from "./config/winstonConfig.ts";
 import './redis/bullmq/main.ts';
 import './redis/bullmq/worker.ts';
 import './redis/bullmq/queueEvents.ts';
+import { smartContractsInteracionQueue } from "./redis/bullmq/main.ts";
 const app = express();
 dotenv.config();
 

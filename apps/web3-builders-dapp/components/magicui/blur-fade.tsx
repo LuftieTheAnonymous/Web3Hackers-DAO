@@ -6,7 +6,7 @@ import {
   useInView,
   Variants,
   MotionProps,
-} from "framer-motion";
+} from 'motion/react';
 import { useRef } from "react";
 
 type MarginType = string | number;
@@ -40,8 +40,11 @@ export function BlurFade({
   blur = "6px",
   ...props
 }: BlurFadeProps) {
-  const ref = useRef<Element>(null);
-  const inViewResult = useInView(ref, { once: true, margin: inViewMargin });
+  const ref = useRef<
+  HTMLDivElement
+  >(null);
+  const inViewResult = useInView(ref, { once: true
+   });
   const isInView = !inView || inViewResult;
   const defaultVariants: Variants = {
     hidden: {

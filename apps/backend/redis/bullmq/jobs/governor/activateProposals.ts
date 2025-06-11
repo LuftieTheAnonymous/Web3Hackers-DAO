@@ -20,15 +20,19 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
 
         const deadline = Number(proposal.startBlockTimestamp) * 1000;
 
+        const isNotOpenYet = new Date().getTime() >= deadline && Number(proposal.state) === 0
 
-        if (new Date().getTime() >= deadline && Number(proposal.state) === 0) {
+
+        if (isNotOpenYet) {
           const tx = await daoContract.activateProposal(proposal.id, {
               maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
-  maxFeePerGas: ethers.parseUnits("250", "gwei"),
+  maxFeePerGas: ethers.parseUnits("100000", "gwei"),
           });
           const receipt = await tx.wait();
           return { success: true, proposalId: proposal.id, receipt };
         } 
+
+        return { success: false, proposalId: proposal.id, message: "Proposal already activated or not ready", isNotOpenYet };
 
        
       } catch (err) {

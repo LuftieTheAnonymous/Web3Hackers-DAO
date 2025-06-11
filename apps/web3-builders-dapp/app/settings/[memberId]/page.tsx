@@ -8,7 +8,9 @@ import React from 'react'
 
 
 
-async function Page({ params }: { params: { memberId: string } }) {
+async function Page({ params }: { params:
+  Promise<any>
+ }) {
 
     const {memberId}=  await params;
     const {data}=await supabase.from('dao_members').select('*').eq('userWalletAddress', memberId).single();

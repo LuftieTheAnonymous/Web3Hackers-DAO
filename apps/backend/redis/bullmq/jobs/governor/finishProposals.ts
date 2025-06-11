@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { daoContract, provider } from "../../../../config/ethersConfig.js";
 import { ProposalEventArgs } from "../../../../controllers/GovernanceController.js";
 import retry from 'async-retry';
@@ -11,24 +12,58 @@ export const finishProposals= async () => {
 
      const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
 
+     console.log(events.map((event) => (event as ProposalEventArgs).args[0])
+        ,'events to finish');
+
      const limit = pLimit(5);
 
+const list= events.map(async (event) =>{
+        const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
+     return {
+        proposal,
+        isReadyToFinish: (Number(proposal.endBlockTimestamp) * 1000) <= new Date().getTime(),
+        isReadyToExecuteSucceed: (Number(proposal.endBlockTimestamp) * 1000) <= new Date().getTime() && Number(proposal.state) === 1,
+        
+ }
+     });
+
+     const results=Promise.allSettled(list);
+
+     console.log(results,'events to finish');
+
  const receipts =  events.map(async (event) => {
-        console.log((event as ProposalEventArgs).args[0]);
     return limit(async ()=>{
               return  await retry(async ()=>{
 try{
-         console.log((event as ProposalEventArgs).args[0]);
-           const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
-        if(Number(proposal.state) === 1 && new Date((Number(proposal.endBlockTimestamp) * 1000) + Number(proposal.timelock)).getTime() <= new Date().getTime()){
-            const tx = await daoContract.succeedProposal(proposal.id);
+    const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
+    const statement= (Number(proposal[4]) * 1000) <= new Date().getTime() && Number(proposal[6]) === 1;
+        if(statement){
+            const tx = await daoContract.succeedProposal((event as ProposalEventArgs).args[0],{
+                maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
+  maxFeePerGas: ethers.parseUnits("100000", "gwei"),
+            });
     
             const txReceipt = await tx.wait();
-        return { success: true, proposalId: proposal.id, receipt:txReceipt };
+        
+        return { success: true, 
+                  proposal,
+            isReadyToExecuteSucceed:statement, proposalId: proposal.id, receipt:txReceipt };
         }
+
+        return { success: false,
+            state:proposal.state,
+            proposalEndTimestamp:Number(proposal.endBlockTimestamp) * 1000,
+            runDate: new Date().getTime(),
+            isRunDate: new Date().getTime() >=
+            Number(proposal.endBlockTimestamp) * 1000,
+            isReadyToExecuteSucceed:statement, proposalId: proposal.id, receipt: null };
 }catch(err){
     console.log(err);
-    return { success: false, proposalId:(event as ProposalEventArgs).args[0] , receipt: null };
+    return { success: false,
+     error:err,
+        isReadyToExecuteSucceed:false, proposalId:(event as ProposalEventArgs).args[0] , receipt: null 
+   
+    };
 }
     }, {
             retries: 5,
@@ -41,7 +76,7 @@ try{
         })
     });
 
-    console.log(receipts, "receipts");
+    console.log(receipts, "receipts to finish");
 
     const receiptsResults = await Promise.allSettled(receipts);
 

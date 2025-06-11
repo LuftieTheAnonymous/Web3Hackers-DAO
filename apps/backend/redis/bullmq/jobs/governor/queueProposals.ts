@@ -2,6 +2,7 @@ import { daoContract, provider } from "../../../../config/ethersConfig.js";
 import retry from 'async-retry';
 import { ProposalEventArgs } from "../../../../controllers/GovernanceController.js";
 import pLimit from 'p-limit';
+import { ethers } from "ethers";
 
 export const queueProposals = async () => {
 try{
@@ -9,22 +10,26 @@ try{
      const filters = daoContract.filters.ProposalSucceeded();
 
      const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
-
+console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to queue');
      const limit = pLimit(5);
  const receipts =    events.map(async (event) => {
     return limit(async ()=>{
 return await retry(async ()=>{
 try{
            const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
-        console.log(proposal);
+        console.log(proposal, "Proposal to queue");
         if(Number(proposal.state) === 4){
-            const tx = await daoContract.queueProposal((event as ProposalEventArgs).args[0]);
-            console.log(tx);
+            const tx = await daoContract.queueProposal((event as ProposalEventArgs).args[0], {
+maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
+  maxFeePerGas: ethers.parseUnits("100000", "gwei"),
+ });
     
             const txReceipt = await tx.wait();
             return { success: true, proposalId: proposal.id, receipt:txReceipt};
           
         }
+
+        return { success: false, proposalId:(event as ProposalEventArgs).args[0] , receipt: null };
 }catch(err){
     console.log(err);
     return { success: false, proposalId:(event as ProposalEventArgs).args[0] , receipt: null };
@@ -40,6 +45,8 @@ try{
 
     })
     });
+
+    console.log(receipts, "Receipts to be queued");
 
     const receiptsResults = await Promise.all(receipts);
     console.log(receiptsResults, "Queue Proposals");
