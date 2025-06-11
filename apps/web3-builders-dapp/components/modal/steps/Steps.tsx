@@ -246,8 +246,8 @@ callDataIndex===index && <div key={field.id}>
  }
  {...field}
  >
-  <SelectTrigger className="w-full text-white border border-(--hacker-green-4)">
-    <SelectValue placeholder="Proposal Function" />
+  <SelectTrigger  className="w-full text-white border border-(--hacker-green-4)">
+    <SelectValue placeholder="Proposal Receiver" />
   </SelectTrigger>
   <SelectContent className='bg-zinc-800 border flex  border-(--hacker-green-4)'>
 
@@ -473,7 +473,7 @@ const goForward=useCallback(() => {
                       table: 'text-sm',
                       day_today: 'bg-(--hacker-green-5) text-white rounded-md px-3 py-1',
                     }}
-                    onSelect={(date: Date) => {
+                  onDayClick={(date: Date) => {
                       if (!date) return;
 
                       setValue('proposalEndTime', date);

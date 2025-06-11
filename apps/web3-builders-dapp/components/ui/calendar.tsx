@@ -6,10 +6,15 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
-import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
+import {  DateRange, DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+
+type CalendarProps =
+  | (Omit<React.ComponentProps<typeof DayPicker>, "mode"> & { mode?: "single"; buttonVariant?: React.ComponentProps<typeof Button>["variant"] })
+  | (Omit<React.ComponentProps<typeof DayPicker>, "mode"> & { mode: "multiple"; buttonVariant?: React.ComponentProps<typeof Button>["variant"] })
+  | (Omit<React.ComponentProps<typeof DayPicker>, "mode"> & { mode: "range"; buttonVariant?: React.ComponentProps<typeof Button>["variant"] });
 
 function Calendar({
   className,
@@ -17,30 +22,20 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
-  formatters,
+  mode = "single",
   components,
-  mode,
-  required,
-  modifiersClassNames,
-  style,
-  styles,
-  modifiersStyles,
-  id,
+  formatters,
+  selected,
+
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-}) {
+}: CalendarProps & { selected?: any }) {
   const defaultClassNames = getDefaultClassNames()
 
+  // Ensure 'selected' is always passed if required by the mode
   return (
     <DayPicker
-      showOutsideDays={showOutsideDays}
-      modifiersClassNames={modifiersClassNames}
-      style={style}
-      styles={styles}
-modifiersStyles={modifiersStyles}
-      id={id}
-      defaultMonth={props.defaultMonth}
+      mode={mode}
+      selected={selected}
       {...props}
       className={cn(
         "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
@@ -48,8 +43,6 @@ modifiersStyles={modifiersStyles}
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
       )}
-    mode={mode}
-    required={required}
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>

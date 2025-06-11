@@ -78,10 +78,12 @@ if (!redisClient.isOpen) await redisClient.connect();
 await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
 
-server.listen(2137, async () => {
-    logger.info('Server started on port 2137', {
+export const runningPort=process.env.NODE_ENV !=='production' ? process.env.DEV_RUNNING_PORT : process.env.PRODUCTION_RUNNING_PORT;
+
+server.listen(runningPort, async () => {
+    logger.info(`Server started on port ${runningPort}`, {
         timestamp: new Date().toISOString(),
-        port: 2137,
+        port: runningPort,
     });
 
     

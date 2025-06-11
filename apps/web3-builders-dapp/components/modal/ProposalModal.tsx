@@ -96,6 +96,7 @@ const {data:receipt, isError, error, isLoading, isSuccess, isPending}=useWaitFor
     'eventName': 'ProposalCreated',
     'onLogs': async (logs) => {
       console.log(logs, 'proposal created logs');
+      toast.success('Proposal created successfully !');
     }
   })
 
