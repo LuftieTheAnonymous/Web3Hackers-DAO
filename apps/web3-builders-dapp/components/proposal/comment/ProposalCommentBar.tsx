@@ -65,7 +65,7 @@ function ProposalCommentBar({state, proposalData, proposalId}: Props) {
 </div>
 
 
-  <CommentList state={state} commentsData={proposalData ?? []} />
+  <CommentList state={state} commentsData={proposalData} />
 
 </div>
 <Form {...methods}>

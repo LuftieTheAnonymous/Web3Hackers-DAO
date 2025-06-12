@@ -20,10 +20,10 @@ function VotingDataContainer({proposalId, isCustom}: Props) {
 
 
   return (
-  <div className='w-full mx-auto flex flex-col gap-2 p-2'>
-  <p className='text-white'>Proposal Statistics/Data</p>
+  <div className='w-full  flex flex-col gap-2 px-4'>
+  <p className='text-white text-xl font-bold'>Proposal Statistics/Data</p>
   
-  <div className="w-full flex flex-col lg:flex-row p-2 h-full  gap-8">
+  <div className="w-full flex flex-col lg:flex-row py-2 h-full  gap-8">
 {proposalVotes && (proposalVotes as any[]) !== undefined ? <>
 <VotesCard proposalVotes={proposalVotes as any[]} />
 
