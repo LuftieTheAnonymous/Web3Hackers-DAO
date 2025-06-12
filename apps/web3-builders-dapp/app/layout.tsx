@@ -47,7 +47,7 @@ export default function RootLayout({
   <div className="flex flex-col w-full h-full gap-2">
 <Navbar/>
 {children}
-<Toaster className='bg-zinc-800 border border-(--hacker-green-4)' closeButton />
+<Toaster theme={'system'}  closeButton />
   </div>
 </ProvidersWrapper>
 

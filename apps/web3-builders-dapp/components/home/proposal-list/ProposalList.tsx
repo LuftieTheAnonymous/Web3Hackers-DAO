@@ -43,7 +43,9 @@ const {address}=useAccount();
     
           console.log('Decoded ProposalVoted log:', decoded);
           if(decoded && decoded.args && decoded.args.find((log) =>  (log as any).voter === address)){
-            toast.success('Your vote has been cast successfully!');
+            toast.success('Your vote has been cast successfully!', {
+            classNames:{'toast':'bg-zinc-800 text-white'}
+            });
           }
         }catch(e){
           console.error('Error decoding ProposalVoted log:', e);

@@ -80,7 +80,7 @@ const {address}=useAccount();
      castVote(voteOption);
 return;
     }
-        toast.error('You can only vote when the proposal is open for voting.');
+        toast.error('You can only vote when the proposal is open for voting.', {    classNames:{'default':'bg-zinc-800' }});
     
     
     }

@@ -27,15 +27,15 @@ import { decodeEventLog } from 'viem';
 import { notFound } from 'next/navigation';
 
 
-type Props<T, U> = {
+type Props<T> = {
     proposalData: T,
-    commentsData:U[],
+    commentsData:any[],
     proposalId: string
 }
 
 function ProposalContainer<T, U>({
 proposalData, commentsData, proposalId
-}: Props<T, U>) {
+}: Props<T>) {
 
   const [isReason, setIsReason] = useState<boolean>(false);
   const [reason, setReason] = useState<string>('');
@@ -120,14 +120,14 @@ if(!proposalData){
       <div className="w-10 h-10 rounded-full bg-zinc-600">
             {proposalObj && (proposalObj as any).dao_members.photoURL && <Image alt={'avatar'} src={(proposalObj as any).dao_members.photoURL} width={32} height={32} className='rounded-full w-full h-full'/>}
       </div>
-      <p className='text-(--hacker-green-4)' >@{proposalObj && (proposalObj as any).dao_members.nickname}</p>
+      <p className='text-(--hacker-green-4)'>@{proposalObj && (proposalObj as any).dao_members.nickname}</p>
     </div>
     
     <div className="flex items-center gap-2">
      {proposalOnchainData as any && Number((proposalOnchainData as any).state) !== 1 && 
      new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000).getTime() - new Date().getTime() >= 0 
-     &&      <p className='text-white text-sm'>
-     <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))} </span>
+     &&   <p className='text-white text-sm'>
+     <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))}</span>
      to start
      </p>
      } 
@@ -218,7 +218,7 @@ castVoteFunction={()=>handleStandardProposalVote(2)}
     </div>
     
     
-{serverData && proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={serverData} state={state}/>}
+{serverData && proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={commentsData} state={state}/>}
     
 
 
