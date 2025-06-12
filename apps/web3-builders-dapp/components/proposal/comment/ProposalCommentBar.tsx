@@ -38,11 +38,11 @@ function ProposalCommentBar({state, proposalData, proposalId}: Props) {
 
   const insertNewComment=async (values:{message: string})=>{
     try{
-    const {data:success, error}=  await supabase.from('dao_voting_comments').insert([{
+    const {data:success, error}=  await supabase.from('dao_voting_comments').insert({
         proposal_id: proposalId,
         message: values.message,
         user_wallet_id: address,
-      }]);
+      }).single();
 
       if(!error){
         methods.reset();
@@ -69,7 +69,7 @@ function ProposalCommentBar({state, proposalData, proposalId}: Props) {
 
 </div>
 <Form {...methods}>
-  <form onSubmit={methods.handleSubmit(insertNewComment, error=>console.log(error))} className="bg-zinc-900 h-16 w-full rounded-b-lg flex items-center border-t border-(--hacker-green-4) px-2">
+  <form onSubmit={methods.handleSubmit(insertNewComment, error=>{toast.error(`${error.message?.message}`)})} className="bg-zinc-900 h-16 w-full rounded-b-lg flex items-center border-t border-(--hacker-green-4) px-2">
     <div className="flex w-full justify-between items-center gap-2 px-2">
       <Input {...methods.register('message', {
         required: true,

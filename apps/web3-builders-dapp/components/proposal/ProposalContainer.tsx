@@ -41,7 +41,6 @@ proposalData, commentsData, proposalId
   const [reason, setReason] = useState<string>('');
 
     const {objectData:proposalObj}=useRealtimeDocument({'tableName':'dao_proposals', initialObj: proposalData});
-    const {serverData}=useRealtimeDocuments({initialData:commentsData,tableName:'dao_voting_comments',parameterOnChanges:'proposal_id'});
 const {address}=useAccount();
 const {writeContract}=useWriteContract({
 
@@ -218,7 +217,7 @@ castVoteFunction={()=>handleStandardProposalVote(2)}
     </div>
     
     
-{serverData && proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={commentsData} state={state}/>}
+{proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={commentsData} state={state}/>}
     
 
 
