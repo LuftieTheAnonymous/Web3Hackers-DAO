@@ -59,7 +59,7 @@ useAccountEffect({
     z-[9999]
     '>
 
-<div className="flex  items-center justify-between gap-2 w-full max-w-7xl">
+<div className="flex items-center justify-between gap-2 w-full max-w-7xl">
         <Link href={'/'} className=' @min-xs:text-xl lg:text-2xl text-(--hacker-green-4) font-bold'>Web3 Builders DAO</Link>
 
 

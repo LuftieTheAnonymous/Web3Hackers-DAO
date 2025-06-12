@@ -108,10 +108,10 @@ if(!proposalData){
     }
 
 
-    const {state, isMobile}=useSidebar();
+    const {state}=useSidebar();
   return (
   <>
-    <div className={`mx-auto w-full max-w-[90rem] flex flex-col ${state === 'expanded' ? 'sm:flex-col xl:flex-row': 'lg:flex-row'} p-2 gap-6  lg:py-8 justify-between`}>
+    <div className={`mx-auto w-full max-w-[90rem] flex flex-col  ${state === 'expanded' ? ' xl:flex-row': 'lg:flex-row'} p-2 gap-6  lg:py-8 justify-between`}>
     
     <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto ">
     <div className="w-full bg-zinc-800 max-sm:max-h-80 h-full min-h-96 lg:min-h-[28rem] max-h-[32rem] border-(--hacker-green-4) overflow-y-auto  rounded-lg">
@@ -224,9 +224,9 @@ castVoteFunction={()=>handleStandardProposalVote(2)}
 
 
     </div>
+<VotingDataContainer isCustom={proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom} proposalId={proposalId as `0x${string}`}/>
 
   
-<VotingDataContainer isCustom={proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom} proposalId={proposalId as `0x${string}`}/>
 
   </>
   )

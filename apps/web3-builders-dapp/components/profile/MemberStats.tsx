@@ -44,11 +44,12 @@ gap-3 py-4`}>
   <Button onClick={()=>{setIsCustom(true)}} className={`cursor-pointer ${isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Custom</Button>
   <Button onClick={()=>{setIsCustom(false)}} className={`cursor-pointer ${!isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Standard</Button>
 </div>
+
 {userVotes && userVotedProposalsCount && (userVotes as any[]).length > 0 &&  (userVotedProposalsCount as any) && Number((userVotedProposalsCount as any)) > 0 &&
 <div className=
-{`flex  gap-4 w-full
-${isOpen ? 'flex-col xl:flex-row' : 'flex-col lg:flex-row'}
-items-center justify-center py-2`}>
+{`flex  gap-4 w-full max-w-6xl
+${isOpen ? 'flex-col lg:flex-row' : 'flex-col lg:flex-row'}
+items-center  justify-center py-2`}>
 
  <VotingsParticipatedChart proposals={(userVotes as any[])}/>
 

@@ -20,39 +20,45 @@ import ProposalModal from '../modal/ProposalModal'
 import { ConnectKitButton } from 'connectkit'
 
 import { useAccount } from 'wagmi'
+import { usePathname } from 'next/navigation'
 
 
  function SidebarComponent({}: Props) {
 
   const {address}=useAccount();
+  const pathname=usePathname();
   
 
-    
+
     // Menu items.
 const items = [
     {
       title: "Home",
       url: "/",
       icon: Home,
-      display:true
+      display:true,
+      isActive: pathname === "/"
     },
     {
       title: "Profile",
       url: `/profile/${address}`,
       icon: User,
-      display: address ? true : false
+      display: address ? true : false,
+      isActive: pathname === `/profile/${address}`
     },
     {
       title: "Settings",
       url: `/settings/${address}`,
       icon: UserCog2Icon,
-      display: address ? true : false
+      display: address ? true : false,
+      isActive: pathname === `/settings/${address}`
     },
     {
       title: "About Us",
       url: "/about-us",
       icon: User,
-      display: true
+      display: true,
+      isActive: pathname === "/about-us"
     },
    
 
@@ -62,15 +68,15 @@ const items = [
 
   return (
     <>
-        <Sidebar variant='sidebar'>
-        <SidebarContent className='text-white flex flex-col justify-between  py-16 md:pt-0 bg-zinc-800'>
+        <Sidebar className='max-w-32 w-full bg-zinc-800'>
+        <SidebarContent className='text-white flex flex-col justify-between   py-16 md:pt-0 bg-zinc-800'>
       
-          <SidebarGroup className='flex flex-col gap-2'>
+          <SidebarGroup className='flex flex-col gap-4'>
             <SidebarGroupContent>
               <SidebarMenu>
                 {items.map((item) => (
                   <SidebarMenuItem  key={item.title}>
-                    <SidebarMenuButton className={`hover:bg-(--hacker-green-4)  transition-all ${item.display ? '' : 'hidden'}`} asChild>
+                    <SidebarMenuButton className={`${item.isActive ? 'bg-(--hacker-green-4) hover:bg-(--hacker-green-2)': 'hover:bg-(--hacker-green-4)'}  transition-all ${item.display ? '' : 'hidden'}`} asChild>
                       <a href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
