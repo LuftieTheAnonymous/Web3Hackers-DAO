@@ -8,10 +8,12 @@ import React, { useEffect } from 'react'
 type Props<T> = {
     initialData:T[],
     tableName:string,
-    parameterOnChanges:string
+    parameterOnChanges:string,
+    otherParameterOnChanges?:string,
+    matchOnChangeParam:string
 }
 
-function useRealtimeDocuments<T>({tableName, parameterOnChanges, initialData}: Props<T>) {
+function useRealtimeDocuments<T>({tableName, parameterOnChanges, initialData, otherParameterOnChanges, matchOnChangeParam}: Props<T>) {
 
     const [serverData,setData] = React.useState<T[]>(initialData);
     const [loading,setLoading] = React.useState<boolean>(false);
@@ -23,9 +25,18 @@ const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes"
     event:'INSERT',
     schema:'public',
     table:tableName
-}, (payload:any) => {
+}, async (payload:any) => {
+
+      const { data: full_element } = await supabase
+    .from(tableName)
+    .select(otherParameterOnChanges ? `*, ${otherParameterOnChanges}` : '*')
+    .eq(`${matchOnChangeParam}`, payload.new[matchOnChangeParam])
+    .single();
+
+    
+
     console.log(payload);
-    setData([...serverData,payload.new]);
+    setData(prev => [...prev, full_element as T]);
     setLoading(false);
  
 })
@@ -34,7 +45,8 @@ const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes"
         schema:'public',
     table:tableName
 }, (payload:any) => {
-    setData(serverData.filter((item:any) => item[parameterOnChanges] !== payload.old[parameterOnChanges]));
+    setData(prev => prev.filter((item: any) => item[parameterOnChanges] !== payload.old[parameterOnChanges]));
+
     setLoading(false);
  
 }).on("postgres_changes", {
@@ -42,7 +54,9 @@ const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes"
         schema:'public',
     table:tableName
 }, (payload:any) => {
-    setData(serverData.map((item:any) => item[parameterOnChanges] === payload.new[parameterOnChanges] ? payload.new : item));
+   setData(prev => prev.map((item: any) =>
+  item[parameterOnChanges] === payload.new[parameterOnChanges] ? payload.new : item
+));
         setLoading(false);
   
 }).subscribe();
@@ -52,7 +66,7 @@ const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes"
     supabase.removeChannel(channels);
  }
 
-},[supabase]);
+},[tableName, parameterOnChanges]);
 
 
 return {

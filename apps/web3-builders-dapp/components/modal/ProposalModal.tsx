@@ -41,8 +41,8 @@ tokenAmount:z.bigint({'message':'Token Amount must be a number'}),
 })),
 
 proposalEndTime: z.date({'message':'proposalEndTime must be a date'}),
-proposalEndtimeHour: z.number({'message':'The proposal end time hour must be a number'}),
-proposalEndTimeMinutes: z.number({'message':'The proposal end time minutes must be a number'}),
+proposalEndtimeHour: z.optional(z.number({'message':'The proposal end time hour must be a number'})),
+proposalEndTimeMinutes:  z.optional(z.number({'message':'The proposal end time minutes must be a number'})),
 
 
 proposalDelay: z.number({'message':'proposalDelay must be a number'}),
@@ -70,7 +70,6 @@ import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/conf
 import { decodeEventLog, encodeFunctionData } from 'viem';
 import { toast } from 'sonner';
 import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
-import { notifyEveryDAOMember } from '@/lib/web-push/db/actions';
 import { supabase } from '@/lib/db/supabaseConfigClient';
 
 

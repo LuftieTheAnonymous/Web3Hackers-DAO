@@ -5,7 +5,6 @@ import React, { useMemo } from 'react'
 import DropdownBar from '../drop-down/DropdownBar'
 import ProposalElement from '@/components/proposal-item/ProposalElement'
 import useRealtimeDocuments from '@/hooks/useRealtimeDocuments'
-import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { useAccount, useWatchContractEvent } from 'wagmi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLottie } from 'lottie-react';
@@ -13,15 +12,14 @@ import cryptoLottieAnimation from '@/public/gifs/Decentalized-Lottie.json';
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import { decodeEventLog } from 'viem';
 import { toast } from 'sonner';
-import { ethers } from 'ethers';
-import { config } from '@/lib/config';
+
 type Props = {
     proposals:any[]
 }
 
 function ProposalList({proposals}: Props) {
 const {address}=useAccount();
-    const {serverData,isLoading}=useRealtimeDocuments({initialData:proposals,tableName:'dao_proposals',parameterOnChanges:'proposal_id'});
+    const {serverData,isLoading}=useRealtimeDocuments({initialData:proposals,tableName:'dao_proposals',parameterOnChanges:'proposal_id', 'otherParameterOnChanges':'dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*)', 'matchOnChangeParam':'proposal_id'});
 
     const {View} = useLottie({animationData: cryptoLottieAnimation, loop: true});
 

@@ -40,7 +40,7 @@ try{
         if(statement){
             const tx = await daoContract.succeedProposal((event as ProposalEventArgs).args[0],{
                 maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
-  maxFeePerGas: ethers.parseUnits("100000", "gwei"),
+  maxFeePerGas: ethers.parseUnits("10000", "gwei"),
             });
     
             const txReceipt = await tx.wait();

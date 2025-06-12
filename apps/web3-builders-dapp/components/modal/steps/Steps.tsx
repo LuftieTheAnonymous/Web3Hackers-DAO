@@ -538,7 +538,7 @@ const goForward=useCallback(() => {
                     onChange={(e) =>{
                     if(watch('proposalEndTime')){
                          setValue('proposalEndtimeMinutes', Number(e.target.value));
-                      setValue('proposalEndTime', new Date(watch('proposalEndTime').setMinutes(watch('proposalEndtimeMinutes'))));
+                      setValue('proposalEndTime', new Date(watch('proposalEndTime').setMinutes(Number(watch('proposalEndtimeMinutes')))));
                     return; 
                     }
                     toast.error('Please select a date and hour first !');
@@ -639,7 +639,7 @@ const goForward=useCallback(() => {
     const currentValue = watch('proposalDelay');
 
     if (currentValue > maxDelay) {
-      setValue('proposalDelay', maxDelay);
+      setValue('proposalDelay', Number(maxDelay));
     }
   }
 }}

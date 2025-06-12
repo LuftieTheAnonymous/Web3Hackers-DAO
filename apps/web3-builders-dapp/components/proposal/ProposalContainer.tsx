@@ -6,10 +6,8 @@ import { Button } from '@/components/ui/button'
 import { useSidebar } from '@/components/ui/sidebar'
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
-import useRealtimeDocuments from '@/hooks/useRealtimeDocuments';
-import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
-import React, { useEffect, useState } from 'react'
-import { FaCheck, FaFlag, FaPaperPlane, FaPencilAlt } from 'react-icons/fa'
+import React, { useState } from 'react'
+import { FaCheck, FaFlag, FaPencilAlt } from 'react-icons/fa'
 import { MdCancel } from 'react-icons/md'
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from 'wagmi';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '../ui/dialog';
@@ -17,14 +15,13 @@ import { ethers } from 'ethers';
 import Image from 'next/image';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { toast } from 'sonner';
-import VotesCard from './voting-data/votes/VotesCard';
-import VotingResultChart from './voting-data/chart/VotingResultChart';
 import VotingDataContainer from './voting-data/VotingDataContainer';
 import { VoteIcon } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import VotingStandardModal from './voting-data/VotingStandardModal';
 import { decodeEventLog } from 'viem';
 import { notFound } from 'next/navigation';
+import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
 
 
 type Props<T> = {

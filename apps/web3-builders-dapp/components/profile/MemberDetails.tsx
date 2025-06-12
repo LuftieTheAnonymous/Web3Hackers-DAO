@@ -2,12 +2,11 @@
 
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
-import useRealtimeDocuments from '@/hooks/useRealtimeDocuments';
-import { config } from '@/lib/config';
-import { CloudLightningIcon, CoinsIcon, FilePlus2Icon, LucideVote, SmartphoneChargingIcon } from 'lucide-react'
+
+import { CoinsIcon, FilePlus2Icon, LucideVote, SmartphoneChargingIcon } from 'lucide-react'
 import React from 'react'
-import { readContract } from 'viem/actions';
-import { useAccount, useReadContracts } from 'wagmi';
+
+import {  useReadContracts } from 'wagmi';
 
 
 type Props

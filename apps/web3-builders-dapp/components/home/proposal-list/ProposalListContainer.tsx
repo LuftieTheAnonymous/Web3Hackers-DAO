@@ -13,7 +13,7 @@ async function ProposalListContainer() {
   
 
 const {data:proposals,error} = await supabase.from(`dao_proposals`)
-.select('*, dao_members!inner(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*)');
+.select('*, dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*)');
 
 
   return (

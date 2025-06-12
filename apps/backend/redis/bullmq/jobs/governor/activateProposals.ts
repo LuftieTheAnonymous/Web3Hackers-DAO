@@ -26,7 +26,7 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
         if (isNotOpenYet) {
           const tx = await daoContract.activateProposal(proposal.id, {
               maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
-  maxFeePerGas: ethers.parseUnits("100000", "gwei"),
+  maxFeePerGas: ethers.parseUnits("10000", "gwei"),
           });
           const receipt = await tx.wait();
           return { success: true, proposalId: proposal.id, receipt };
