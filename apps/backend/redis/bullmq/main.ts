@@ -19,10 +19,10 @@ await smartContractsInteracionQueue.remove("execute-proposals");
 await smartContractsInteracionQueue.setGlobalConcurrency(5);
 
 await smartContractsInteracionQueue.add("monthly-distribution", {},{ repeat: {'every': 1000 * 60 * 60 * 24 * 30 }, removeOnComplete: true,  });
-await smartContractsInteracionQueue.add("activate-proposals", {},{ repeat: {'every': 1000 * 60 * 15 }, removeOnComplete: true, });
-await smartContractsInteracionQueue.add("finish-proposals", {},{ repeat: {'every': 1000 * 60 * 15 }, 'delay':1000, removeOnComplete: true,  });
-await smartContractsInteracionQueue.add("queue-proposals", {},{ repeat: {'every': 1000 * 60 * 15  }, 'delay': 2000 , removeOnComplete: true, });
-await smartContractsInteracionQueue.add("execute-proposals", {},{ repeat: {'every': 1000 * 60 * 15  }, 'delay': 3000,removeOnComplete: true,  });
+await smartContractsInteracionQueue.add("activate-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, removeOnComplete: true, });
+await smartContractsInteracionQueue.add("finish-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, 'delay':1000, removeOnComplete: true,  });
+await smartContractsInteracionQueue.add("queue-proposals", {},{ repeat: {'every': 1000 * 60 * 2  }, 'delay': 2000 , removeOnComplete: true, });
+await smartContractsInteracionQueue.add("execute-proposals", {},{ repeat: {'every': 1000 * 60 * 2  }, 'delay': 3000,removeOnComplete: true,  });
 
 
 
