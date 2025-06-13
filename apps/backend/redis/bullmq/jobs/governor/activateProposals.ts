@@ -1,22 +1,27 @@
 import { ethers } from "ethers";
-import { daoContract } from "../../../../config/ethersConfig.js";
+import { daoContract, provider } from "../../../../config/ethersConfig.js";
 import pLimit from 'p-limit';
-import { supabaseConfig } from "../../../../config/supabase.js";
+import { ProposalEventArgs } from "../../../../controllers/GovernanceController.ts";
 
 export const activateProposals = async () => {
   try {
-    const { data } = await supabaseConfig.from('dao_proposals').select('*');
 
-    if (!data || data.length === 0) {
+                 const lastBlock = await provider.getBlockNumber();
+         const filters = daoContract.filters.ProposalCreated(); 
+     
+     const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
+         console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to execute');
+
+    if (!events || events.length === 0) {
 return { data: null, error: "No proposals found", message: "error", status: 404 };
     }
 
     const limit = pLimit(5); // Run max 5 activations at a time
 
-    const tasks = (data as any[]).map((event) =>{
+    const tasks = events.map((event) =>{
         return limit(async () => {
       try {
-        const proposal = await daoContract.getProposal(event.proposal_id);
+        const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
 
         const deadline = Number(proposal.startBlockTimestamp) * 1000;
 
@@ -36,8 +41,8 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
 
        
       } catch (err) {
-        console.error(`Error activating proposal ${event.proposal_id}:`, err);
-        return { success: false, proposalId: event.proposal_id, error: err };
+        console.error(`Error activating proposal ${(event as ProposalEventArgs).args[0]}:`, err);
+        return { success: false, proposalId: (event as ProposalEventArgs).args[0], error: err };
       }
     })
     });
