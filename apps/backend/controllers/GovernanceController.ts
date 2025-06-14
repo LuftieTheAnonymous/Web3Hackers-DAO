@@ -82,11 +82,11 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
     const {proposalId} = req.params;
 
     const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`);
-    console.log(redisStoredProposal, 'redisStoredProposal');
+    console.log(redisStoredProposal, proposalId, 'redisStoredProposal');
 
         try{
             if(!redisStoredProposal){
-                const {data, error}= await supabaseConfig.from('dao_proposals').select('*, dao_members!inner(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*)').eq('proposal_id', Number(req.params.proposalId)).single();
+               const {data, error}=await supabaseConfig.from('dao_proposals').select('*, dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*), dao_voting_comments:dao_voting_comments(*, dao_members:dao_members(*), dao_proposals:dao_proposals(*))').eq('proposal_id', proposalId).single();
     
                 console.log(data, error);
 
@@ -94,9 +94,6 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
         res.status(500).send({message:"error", status:500, data:null, error});
         return;
     }
-    
-    console.log(data);
-
             const proposalDetails = await daoContract.getProposal(proposalId);
             console.log(proposalDetails, 'proposalDetails');
 

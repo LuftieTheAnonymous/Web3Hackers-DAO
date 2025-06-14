@@ -49,6 +49,8 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
 
     const results = await Promise.allSettled(tasks);
 
+    console.log(results, "Activated proposals");
+
     const summary = results.map((result) =>
       result.status === 'fulfilled' ? result.value : { success: false, error: result.reason }
     );
