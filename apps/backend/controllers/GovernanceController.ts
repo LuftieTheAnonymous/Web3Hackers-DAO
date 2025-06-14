@@ -86,26 +86,43 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
 
         try{
             if(!redisStoredProposal){
-               const {data, error}=await supabaseConfig.from('dao_proposals').select('*, dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*), dao_voting_comments:dao_voting_comments(*, dao_members:dao_members(*), dao_proposals:dao_proposals(*))').eq('proposal_id', proposalId).single();
+               const {data, error}=await supabaseConfig.from('dao_proposals').select('*, dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*), dao_voting_comments:dao_voting_comments(*, dao_members:dao_members(*), dao_proposals:dao_proposals(*))').eq('proposal_id', proposalId).maybeSingle();
     
-                console.log(data, error);
+               
+               console.log(data, error);
 
-    if(!data || error){
-        res.status(500).send({message:"error", status:500, data:null, error});
+
+    if(!data && error){
+        res.status(500).send({ status:500, data:null, error});
         return;
     }
             const proposalDetails = await daoContract.getProposal(proposalId);
             console.log(proposalDetails, 'proposalDetails');
 
-            await redisClient.setEx(`dao_proposals:${proposalId}:data`, 7200, JSON.stringify({sm_data:proposalDetails,db_data:data}));
+            await redisClient.setEx(`dao_proposals:${proposalId}:data`, 7200, JSON.stringify({sm_data:{
+                id:proposalDetails.id,
+                description:proposalDetails.description,
+                proposer:proposalDetails.proposer,
+                state:Number(proposalDetails.state),
+                startBlockTimestamp:Number(proposalDetails.startBlockTimestamp),
+                endBlockTimestamp:Number(proposalDetails.endBlockTimestamp),
+            },db_data:data}));
 
-            res.status(200).send({message:"success", status:200, data:{sm_data:proposalDetails,db_data:data}, error:null});
-
+            res.status(200).send({status:200, data:{sm_data:{
+                id:proposalDetails.id,
+                description:proposalDetails.description,
+                proposer:proposalDetails.proposer,
+                state:Number(proposalDetails.state),
+                startBlockTimestamp:Number(proposalDetails.startBlockTimestamp),
+                endBlockTimestamp:Number(proposalDetails.endBlockTimestamp),
+            },db_data:data}, error:null});
             return;
             }
 
+                console.log(JSON.parse(redisStoredProposal));
 
-            res.status(200).send({message:"success", status:200, data:JSON.parse(redisStoredProposal), error:null});
+                res.status(200).send({message:"success", status:200, data:JSON.parse(redisStoredProposal), error:null});
+            
     }catch(err){
         res.status(500).send({message:"error", status:500, data:null, error:err});
     }
