@@ -6,13 +6,12 @@ import { ethers } from 'ethers';
 
  export   const executeProposals = async () => {
         try{
+    const lastBlock = await provider.getBlockNumber();
+    const filters = daoContract.filters.ProposalQueued();
 
-             const lastBlock = await provider.getBlockNumber();
-     const filters = daoContract.filters.ProposalQueued(); 
- 
- const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
+    const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
      console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to execute');
- const limit = pLimit(5);
+     const limit = pLimit(5);
 
 
 const receipts =events.map(async (event) => {

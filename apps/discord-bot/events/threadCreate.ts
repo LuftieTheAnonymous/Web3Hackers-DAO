@@ -51,7 +51,6 @@ components:[selectRow]});
 
 const selectCollector =  message.createMessageComponentCollector({componentType:ComponentType.UserSelect, time:60000, 'filter':i=>i.user.id === thread.ownerId});
 
-const collector =  message.createMessageComponentCollector({componentType:ComponentType.Button, time:60000, 'filter':i=>i.user.id === thread.ownerId});
 
 selectCollector.on('collect', async (i:SelectMenuInteraction)=>{
    try{

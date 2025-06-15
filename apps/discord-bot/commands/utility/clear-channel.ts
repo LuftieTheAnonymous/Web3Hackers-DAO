@@ -10,6 +10,7 @@ module.exports = {
          if(!interaction.guild) return await interaction.reply("This command can only be used in a server.");
          await interaction.deferReply();
          interaction.channel?.messages.cache.clear();
+         await interaction.editReply("Channel cleared!");
        }catch(err){
         console.log(err);
         await interaction.reply("There was an error while executing this command!");

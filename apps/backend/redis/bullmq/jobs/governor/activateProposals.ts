@@ -10,7 +10,7 @@ export const activateProposals = async () => {
          const filters = daoContract.filters.ProposalCreated(); 
      
      const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
-         console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to execute');
+         console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to activate');
 
     if (!events || events.length === 0) {
 return { data: null, error: "No proposals found", message: "error", status: 404 };
@@ -23,9 +23,8 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
       try {
         const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
 
-        const deadline = Number(proposal.startBlockTimestamp) * 1000;
 
-        const isNotOpenYet = new Date().getTime() >= deadline && Number(proposal.state) === 0
+        const isNotOpenYet = new Date().getTime() >= (Number(proposal.startBlockTimestamp) * 1000) && Number(proposal.state) === 0;
 
 
         if (isNotOpenYet) {
@@ -46,6 +45,9 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
       }
     })
     });
+
+    console.log(tasks, "Activated proposals");
+
 
     const results = await Promise.allSettled(tasks);
 

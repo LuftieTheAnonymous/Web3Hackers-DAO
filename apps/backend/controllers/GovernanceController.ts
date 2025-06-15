@@ -15,23 +15,6 @@ export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
 dotenv.config();
 
 
-const cancelProposal = async (req: Request, res: Response) => {
-    const {proposalId} = req.params;
-        try{
-                const tx = await daoContract.cancelProposal(proposalId);
-    
-                console.log(tx);
-    
-                const txReceipt = await tx.wait();
-
-                console.log(txReceipt);
-    
-                res.status(200).send({message:"success", status:200, data:txReceipt, error:null});
-        }
-    catch(error){
-        res.status(500).send({message:"error", status:500, data:null, error});
-    }
-}
 
 
 
@@ -131,7 +114,6 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
 
 
 export {
-    cancelProposal,
     getProposalVotes,
     getProposalState,
     getProposalDetails,

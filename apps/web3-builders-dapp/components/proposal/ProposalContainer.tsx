@@ -103,6 +103,24 @@ if(!proposalData){
         })
     }
 
+    const handleCancelProposal=()=>{
+ if(proposalOnchainData && (proposalOnchainData as any).state !== 0){
+        toast.error("Proposal is not cancellable anymore, you had the delay period for it.");
+        return;
+      } 
+
+      if(proposalOnchainData && (proposalOnchainData as any).proposer !== address){
+        toast.error("You are not the proposer of this proposal.");
+        return;
+      }
+
+      writeContract({
+          abi: governorContractAbi,
+          address: GOVERNOR_CONTRACT_ADDRESS,
+          functionName: "cancelProposal",
+          args:[(proposalObj as any).proposal_id],
+        });
+    }
 
     const {state}=useSidebar();
   return (
@@ -144,6 +162,8 @@ if(!proposalData){
       <p className='text-white text-2xl gap-2'><span className='text-(--hacker-green-4)'>@username's </span> Proposal Includes</p>
       <div className={`grid  grid-cols-1 ${state === 'expanded' ? 'sm:grid-cols-2': 'lg:grid-cols-3'}   bg-zinc-800 rounded-lg p-4 gap-4 w-full max-h-48 h-full overflow-y-auto overflow-x-hidden`}>
    {(proposalObj as any).calldata_objects.map((item:any, index:number)=>(<ProposalCallbackItem key={index} callbackText={item.functionDisplayName} />))}
+
+
 
       </div>
     
@@ -210,9 +230,17 @@ castVoteFunction={()=>handleStandardProposalVote(2)}
 />
 
       </> }
-    </div>
+      {(proposalOnchainData as any).proposer === address &&
+    <Button onClick={handleCancelProposal} className='bg-red-500 flex items-center gap-2 cursor-pointer hover:bg-red-700 transition-all hover:scale-95 text-white'>
+      Cancel Proposal <MdCancel/>
+    </Button>
+}
+    
     </div>
     
+    </div>
+
+
     
 {proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={commentsData} state={state}/>}
     

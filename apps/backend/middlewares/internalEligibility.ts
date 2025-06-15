@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import dotenv from 'dotenv';
 import { daoContract, proposalStates } from "../config/ethersConfig.js";
 import redisClient from "../redis/set-up.ts";
+import { supabaseConfig } from "../config/supabase.ts";
 dotenv.config();
 
 export function DAO_Discord_elligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
@@ -30,27 +31,39 @@ console.log('Middleware Passed');
 next();
 }
 
-export async function proposalCancelEndpointEligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
+export async function MembershipMiddleware(req:Request, res:Response, next:NextFunction) {
     const headers = req.headers['authorization'];
     const proposalId = req.params.proposalId;
     if(!headers) {
         res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
+        return;
     }
 
-    const userAddress = (headers as string).split(" ")[1];
+    const useriscordId = (headers as string).split(" ")[1];
 
-    const rediStoredElement= await redisClient.get(`dao_members:${userAddress}:userWalletAddress`);
+    const rediStoredElement= await redisClient.get(`dao_members:${useriscordId}:userWalletAddress`);
 
     console.log(rediStoredElement);
 
     const proposal = await daoContract.getProposal(proposalId);
 
-    if(rediStoredElement && proposal.proposer !== userAddress) {
+    if(rediStoredElement && proposal.proposer !== rediStoredElement) {
+        const {data}=await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(useriscordId)).single();
+
+        if(!data) {
+            res.status(403).json({error:"Forbidden", message:"There is no user with this discord id given.", status:403});
+            return;
+        }
+
+        await redisClient.set(`dao_members:${useriscordId}:userWalletAddress`, data.userWalletAddress);
+
         res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
+        return;
     }
 
     if(proposal.state !== 0) {
         res.status(403).json({error:"Forbidden", message:`Sorry, the proposal is not cancellable anymore at this stage. It's been ${proposalStates[Number(proposal.state)]}.`, status:403});
+   return;
     }
 
 console.log('Cancel Middleware Passed');
