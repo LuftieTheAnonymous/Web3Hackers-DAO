@@ -82,7 +82,7 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
     const {proposalId} = req.params;
 
     const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`);
-    console.log(redisStoredProposal, proposalId, 'redisStoredProposal');
+    console.log(redisStoredProposal && JSON.parse(redisStoredProposal), proposalId, 'redisStoredProposal');
 
         try{
             if(!redisStoredProposal){

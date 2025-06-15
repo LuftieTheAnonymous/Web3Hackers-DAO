@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import dotenv from 'dotenv';
 import { daoContract, proposalStates } from "../config/ethersConfig.js";
+import redisClient from "../redis/set-up.ts";
 dotenv.config();
 
 export function DAO_Discord_elligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
@@ -38,9 +39,13 @@ export async function proposalCancelEndpointEligibilityMiddleware(req:Request, r
 
     const userAddress = (headers as string).split(" ")[1];
 
+    const rediStoredElement= await redisClient.get(`dao_members:${userAddress}:userWalletAddress`);
+
+    console.log(rediStoredElement);
+
     const proposal = await daoContract.getProposal(proposalId);
 
-    if(proposal.proposer !== userAddress) {
+    if(rediStoredElement && proposal.proposer !== userAddress) {
         res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
     }
 
