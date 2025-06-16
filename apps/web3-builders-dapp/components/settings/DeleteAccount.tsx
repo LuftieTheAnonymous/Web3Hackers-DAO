@@ -3,11 +3,11 @@ import React from 'react'
 import { Button } from '../ui/button'
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { toast } from 'sonner';
-
+import { useRouter } from 'next/navigation';
 type Props = {}
 
 function DeleteAccount({}: Props) {
-
+const router= useRouter();
 const {currentUser}=useGetLoggedInUser();
 
 
@@ -31,6 +31,23 @@ try{
 
     const res=await fetchDelete.json();
     console.log(res);
+
+    if(res.error && res.error.code && res.error.shortMessage){
+        toast.error(`${res.error.code}: ${res.error.shortMessage}`);
+    }
+
+    if(res.error && res.error.message){
+        toast.error(`${res.error.message}`);
+    }
+
+    if(typeof res.error === 'string'){
+        toast.error(`${res.error}`);
+    }
+
+    if(res.data){
+        toast.success('Account deleted successfully !');
+      router.push('/');
+    }
 
 
 }catch(err){

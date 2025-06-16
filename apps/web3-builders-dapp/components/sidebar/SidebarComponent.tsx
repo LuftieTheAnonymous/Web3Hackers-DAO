@@ -21,13 +21,14 @@ import { ConnectKitButton } from 'connectkit'
 
 import { useAccount } from 'wagmi'
 import { usePathname } from 'next/navigation'
+import useGetLoggedInUser from '@/hooks/useGetLoggedInUser'
 
 
  function SidebarComponent({}: Props) {
 
   const {address}=useAccount();
   const pathname=usePathname();
-  
+  const {currentUser}=useGetLoggedInUser();
 
 
     // Menu items.
@@ -43,14 +44,14 @@ const items = [
       title: "Profile",
       url: `/profile/${address}`,
       icon: User,
-      display: address ? true : false,
+      display: (address && currentUser )? true : false,
       isActive: pathname === `/profile/${address}`
     },
     {
       title: "Settings",
       url: `/settings/${address}`,
       icon: UserCog2Icon,
-      display: address ? true : false,
+      display:  (address && currentUser ) ? true : false,
       isActive: pathname === `/settings/${address}`
     },
     {
@@ -73,13 +74,13 @@ const items = [
       
           <SidebarGroup className='flex flex-col gap-4'>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className='flex flex-col gap-2 justify-center items-center'>
                 {items.map((item) => (
                   <SidebarMenuItem  key={item.title}>
-                    <SidebarMenuButton className={`${item.isActive ? 'bg-(--hacker-green-4) hover:bg-(--hacker-green-2)': 'hover:bg-(--hacker-green-4)'}  transition-all ${item.display ? '' : 'hidden'}`} asChild>
+                    <SidebarMenuButton className={`${item.isActive ? 'bg-(--hacker-green-4) hover:bg-(--hacker-green-2)': 'hover:bg-(--hacker-green-4)'}   transition-all ${item.display ? '' : 'hidden'}`} asChild>
                       <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
+                        <item.icon size={48} className=' text-5xl' />
+                        <span className='hidden lg:block'>{item.title}</span>
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -87,11 +88,11 @@ const items = [
 
               </SidebarMenu>
                
-                 {address && <ProposalModal>
-                  <SidebarMenuButton className='hover:bg-(--hacker-green-4) cursor-pointer  transition-all w-full' asChild>
+                 {(address && currentUser ) && <ProposalModal>
+                  <SidebarMenuButton className='hover:bg-(--hacker-green-4) cursor-pointer transition-all w-full' asChild>
                <div className='flex items-center gap-2 px-2'>
                       <UserRoundPenIcon />
-                      <span>Propose</span>
+                      <span className='hidden lg:block'>Propose</span>
                </div>
                   </SidebarMenuButton>
                   </ProposalModal>}

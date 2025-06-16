@@ -40,7 +40,7 @@ console.log('Middleware Passed');
 next();
 }
 
-export async function MembershipMiddleware(req:Request, res:Response, next:NextFunction) {
+export async function Membership_ProposalCancel_Middleware(req:Request, res:Response, next:NextFunction) {
     const headers = req.headers['authorization'];
     const proposalId = req.params.proposalId;
     if(!headers) {
@@ -82,4 +82,39 @@ export async function MembershipMiddleware(req:Request, res:Response, next:NextF
 console.log('Cancel Middleware Passed');
 next();
 
+}
+
+export async function MembershipMiddleware(req:Request, res:Response, next:NextFunction){
+    try{
+          const memberId = req.params.memberDiscordId;
+
+           const rediStoredElement= await redisClient.get(`dao_members:${memberId}:userWalletAddress`);
+
+    console.log(rediStoredElement);
+
+    if(!rediStoredElement) {
+        const {data, error}=await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(memberId)).single();
+
+        if(!data) {
+            res.status(403).json({error:"Forbidden", message:"There is no user with this discord id given.", status:403});
+            return;
+        }
+
+        if(error){
+            res.status(403).json({error:"Forbidden", message:"There is no user with this discord id given.", status:403});
+            return;
+        }
+
+        await redisClient.set(`dao_members:${memberId}:userWalletAddress`, data.userWalletAddress);
+
+        next();
+        return;
+    }
+
+    next();
+
+
+    }catch(err){
+        console.log(err);
+    }
 }

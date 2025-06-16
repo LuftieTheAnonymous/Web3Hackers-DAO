@@ -19,6 +19,7 @@
     "@discordjs/util": "^1.1.1",
     "@discordjs/voice": "^0.18.0",
     "@discordjs/ws": "^1.2.2",
+    "@google/genai": "^1.5.1",
     "@napi-rs/canvas": "^0.1.70",
     "discord.js": "^14.18.0",
     "dotenv": "^16.5.0",

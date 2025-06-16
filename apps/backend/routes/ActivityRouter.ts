@@ -8,6 +8,6 @@ activityRouter.post('/update/:memberDiscordId', DAO_Discord_elligibilityMiddlewa
 
 activityRouter.delete('/update/:memberDiscordId', DAO_Discord_elligibilityMiddleware,MembershipMiddleware, upsertActivity);
 
-activityRouter.post('/insert/voice-activity/:memberDiscordId', DAO_Discord_elligibilityMiddleware,MembershipMiddleware, insertVoiceChatActivity);
+activityRouter.post('/insert/voice-activity/:memberDiscordId', DAO_Discord_elligibilityMiddleware, MembershipMiddleware, insertVoiceChatActivity);
 
 export default activityRouter;

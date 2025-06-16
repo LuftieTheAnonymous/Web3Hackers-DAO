@@ -205,8 +205,16 @@ const farewellMember = async (req: Request, res: Response) => {
            await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
            await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
 
-           await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
+           const {data:removedData,error:removedError}=await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
 
+
+           if(removedError){
+            res.status(500).json({message:"error", data:null, error:removedError.message, errorObj:removedError, discord_member_id:memberDiscordId, status:500 });
+            return;
+           }
+
+         
+         
            res.status(200).json({data:txReceipt, message:"success", error:null, discord_member_id:memberDiscordId, status:200});
            return;
         }
@@ -219,14 +227,26 @@ const farewellMember = async (req: Request, res: Response) => {
 
         console.log(txReceipt);
 
-          await redisClient.DEL(`dao_members:${memberDiscordId}`);
-           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
-           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
+        await redisClient.DEL(`dao_members:${memberDiscordId}`);
+        await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
+        await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
 
-           await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
+        const {data:removedData,error}=await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
+
+
+        console.log(removedData, error);
+
+        if(error){
+            res.status(500).json({message:"error", data:null, error:error.message, errorObj:error, discord_member_id:memberDiscordId, status:500 });
+            return;
+        }
+
+        if(!removedData){
+            res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:memberDiscordId, status:404 });
+            return;
+        }
 
         res.status(200).json({data:txReceipt, message:"success", error:null, discord_member_id:memberDiscordId, status:200});
-    
     }
     catch(err){
         console.log(err);
