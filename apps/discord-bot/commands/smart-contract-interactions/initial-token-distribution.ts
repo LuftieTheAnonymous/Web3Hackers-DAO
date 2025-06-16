@@ -164,7 +164,8 @@ const claimTokenRow= new ActionRowBuilder<ButtonBuilder>().addComponents(
 const message = await interaction.reply({
             content:'What is your programming seniority level (noncommercial + commercial)?',
             components: [psrRow],
-            withResponse: true
+            withResponse: true,
+            flags:MessageFlags.Ephemeral
         });
 
         const collector = message.resource?.message?.createMessageComponentCollector({
