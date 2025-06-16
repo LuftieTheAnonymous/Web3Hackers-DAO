@@ -230,7 +230,7 @@ castVoteFunction={()=>handleStandardProposalVote(2)}
 />
 
       </> }
-      {(proposalOnchainData as any).proposer === address &&
+      {(proposalOnchainData as any).proposer === address && (proposalOnchainData as any).state === 0 &&
     <Button onClick={handleCancelProposal} className='bg-red-500 flex items-center gap-2 cursor-pointer hover:bg-red-700 transition-all hover:scale-95 text-white'>
       Cancel Proposal <MdCancel/>
     </Button>

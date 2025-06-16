@@ -10,6 +10,7 @@ import { useAccount } from 'wagmi';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import Image from 'next/image';
 import { supabase } from '@/lib/db/supabaseConfigClient';
+import DeleteAccount from './DeleteAccount';
 
 
 type Props = {intialDocument:any}
@@ -77,7 +78,7 @@ try{
   }
 
   return (
-     <div className="flex flex-col justify-between max-w-sm w-full bg-zinc-800 border border-(--hacker-green-4) self-center h-[36rem] p-4 rounded-md">
+     <div className="flex flex-col overflow-y-auto gap-3 justify-between max-w-sm w-full bg-zinc-800 border border-(--hacker-green-4) self-center h-[36rem] p-4 rounded-md">
   <div className="flex flex-col gap-6">
                 <p className='text-xl text-white font-semibold flex items-center gap-2'>Theme <UserIcon className='text-(--hacker-green-4)' size={32}/> </p>
         
@@ -103,6 +104,9 @@ try{
              
     
               </div>
+
+<DeleteAccount/>
+
 
 <div className='self-end'>
   <Button onClick={handleSave}  className='bg-(--hacker-green-4) px-6 text-zinc-800 cursor-pointer hover:bg-(--hacker-green-5) hover:text-white hover:scale-90'>

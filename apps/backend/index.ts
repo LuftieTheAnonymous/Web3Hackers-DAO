@@ -15,7 +15,6 @@ import logger from "./config/winstonConfig.ts";
 import './redis/bullmq/main.ts';
 import './redis/bullmq/worker.ts';
 import './redis/bullmq/queueEvents.ts';
-import { smartContractsInteracionQueue } from "./redis/bullmq/main.ts";
 const app = express();
 dotenv.config();
 
@@ -50,14 +49,12 @@ xXssProtection:true,
         },
     },
     crossOriginOpenerPolicy: { policy: 'same-origin' },
-   referrerPolicy: { policy: 'strict-origin-when-cross-origin' }, 
+   referrerPolicy: { policy: 'no-referrer' }, 
 }));
 
-app.use(express());
-
 app.use(cors({
-    allowedHeaders:['Content-Type', 'Authorization', 'x-backend-eligibility', 'is-frontend-req'],
-    origin:['http://localhost:3000', 'http://localhost:2138'],
+    allowedHeaders:['Content-Type', 'Authorization', 'x-backend-eligibility', 'is-frontend-req', 'authorization'],
+    origin:['http://localhost:3000', 'http://localhost:2138', 'https://localhost:3000'],
     methods:['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     maxAge: 600, // 10 minutes
 }));

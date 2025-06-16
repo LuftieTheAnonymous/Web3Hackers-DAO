@@ -1,8 +1,8 @@
-import { MessageReaction, User } from "discord.js";
+import { MessageReaction, PartialMessageReaction, PartialUser, User } from "discord.js";
 
 module.exports={
     name:'messageReactionAdd',
-    async exectute(reaction:MessageReaction,user:User){
+    async execute(reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser){
         try{
             if(reaction.partial) await reaction.fetch();
             if(user.bot) return;
@@ -17,6 +17,9 @@ module.exports={
 
                 await member.roles.add('1375725595396145262');
             }
+               return;
+        }else{
+            console.log(reaction.message.id);
         }
         }catch(err){
             console.log(err);

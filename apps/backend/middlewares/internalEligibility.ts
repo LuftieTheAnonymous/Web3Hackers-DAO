@@ -14,6 +14,15 @@ export function DAO_Discord_elligibilityMiddleware(req:Request, res:Response, ne
 next();
 }
 
+export function frontend_Discord_elligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
+    if(!req.headers['x-backend-eligibility'] && (req.headers['x-backend-eligibility'] !== process.env.FRONTEND_ACCESS_SECRET || req.headers['x-backend-eligibility'] !== process.env.DISCORD_BOT_INTERNAL_SECRET)) {
+        console.log('error');
+        res.status(403).json({error:"Forbidden", message:"You are not allowed to access this resource.", status:403});
+    }
+
+next();
+}
+
 export function rewardPunishEndpointEligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
     const headers = req.headers['authorization'];
 
@@ -47,7 +56,7 @@ export async function MembershipMiddleware(req:Request, res:Response, next:NextF
 
     const proposal = await daoContract.getProposal(proposalId);
 
-    if(rediStoredElement && proposal.proposer !== rediStoredElement) {
+    if(!rediStoredElement) {
         const {data}=await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(useriscordId)).single();
 
         if(!data) {
@@ -57,6 +66,10 @@ export async function MembershipMiddleware(req:Request, res:Response, next:NextF
 
         await redisClient.set(`dao_members:${useriscordId}:userWalletAddress`, data.userWalletAddress);
 
+        next();
+    }
+
+    if(proposal.proposer !== rediStoredElement) {
         res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
         return;
     }

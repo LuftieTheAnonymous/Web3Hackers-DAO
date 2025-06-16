@@ -170,6 +170,13 @@ const farewellMember = async (req: Request, res: Response) => {
     try{
         const {memberDiscordId}= req.params;
 
+        console.log(memberDiscordId);
+
+        if(!memberDiscordId){
+            res.status(400).json({message:"error", data:null, error:"Please provide all the required parameters", status:400});
+            return;
+        }
+
         const userWalletAddress= await redisClient.hGet(`dao_members:${memberDiscordId}`, 'userWalletAddress');
 
         if(!userWalletAddress){
@@ -193,9 +200,14 @@ const farewellMember = async (req: Request, res: Response) => {
            const txReceipt = await tx.wait();
 
            console.log(txReceipt);
+           
+           await redisClient.DEL(`dao_members:${memberDiscordId}`);
+           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
+           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
+
+           await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
 
            res.status(200).json({data:txReceipt, message:"success", error:null, discord_member_id:memberDiscordId, status:200});
-
            return;
         }
 
@@ -207,8 +219,13 @@ const farewellMember = async (req: Request, res: Response) => {
 
         console.log(txReceipt);
 
-        res.status(200).json({data:txReceipt, message:"success", error:null, discord_member_id:memberDiscordId, status:200});
+          await redisClient.DEL(`dao_members:${memberDiscordId}`);
+           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
+           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
 
+           await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
+
+        res.status(200).json({data:txReceipt, message:"success", error:null, discord_member_id:memberDiscordId, status:200});
     
     }
     catch(err){
