@@ -125,6 +125,7 @@
     _;
         }
 
+
         modifier onlyWhitelisted(address member) {
           if(!whitelist[member]){
             revert NotWhitelisted();
@@ -205,12 +206,12 @@ if(address(0) == _address) {
     }
 
 
-    function _transferVotingUnits(address from, address to, uint256 amount) internal  virtual override(Votes, VotesExtended) {
+    function _transferVotingUnits(address from, address to, uint256 amount) internal virtual onlyWhitelisted(to) override(Votes, VotesExtended) {
     super._transferVotingUnits(from, to, amount);
     }
 
 
-  function _delegate(address account, address delegatee) internal virtual override(Votes, VotesExtended) {
+  function _delegate(address account, address delegatee) internal  virtual onlyWhitelisted(delegatee) override(Votes, VotesExtended) {
   super._delegate(account, delegatee);
   }
 
@@ -285,7 +286,7 @@ if(address(0) == _address) {
     return super.nonces(_owner);
     }
 
-  function delegate(address delegatee) public virtual override(Votes) {
+  function delegate(address delegatee) public virtual onlyWhitelisted(delegatee) override(Votes) {
    _delegate(msg.sender, delegatee);
     }
 
