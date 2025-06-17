@@ -1,5 +1,7 @@
 import {  GatewayIntentBits, Collection, Partials } from 'discord.js';
 import { CustomClient, CustomClientType } from './types/discordBotTypes';
+import { createErisCompat, GuildQueueEvent, Player } from 'discord-player';
+import {DefaultExtractors} from '@discord-player/extractor';
 
 // Require the necessary discord.js classes
 const dotenv = require('dotenv');
@@ -77,6 +79,33 @@ for (const file of eventFiles) {
         });
     }
 }
+
+const player =new Player(createErisCompat(client));
+
+const playerEventsPath = path.join(__dirname, 'discord-player-events');
+const playerEventFiles = fs.readdirSync(playerEventsPath).filter((file:any) => file.endsWith('.ts'));
+
+for (const file of playerEventFiles) {
+    const filePath = path.join(playerEventsPath, file);
+    const event = require(filePath);
+    if (event.once) {
+        player.events.once(event.name, (...args:any) => {
+            event.execute(...args);
+        });
+    }
+    else {
+        player.events.on(event.name, (...args:any) => {
+            event.execute(...args);
+        });
+    }
+}
+
+
+
+
+
+player.extractors.loadMulti(DefaultExtractors);
+
 
 
 client.login(token);
