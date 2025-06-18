@@ -2,6 +2,7 @@ import {  GatewayIntentBits, Collection, Partials } from 'discord.js';
 import { CustomClient, CustomClientType } from './types/discordBotTypes';
 import {  Player } from 'discord-player';
 import {DefaultExtractors} from '@discord-player/extractor';
+import { YoutubeiExtractor } from 'discord-player-youtubei';
 
 // Require the necessary discord.js classes
 const dotenv = require('dotenv');
@@ -100,5 +101,6 @@ for (const file of playerEventFiles) {
     }
 }
 
+player.extractors.register(YoutubeiExtractor, {'generateWithPoToken':true, 'authentication':process.env.YOUTUBE_EXTRACTION_PLAYER_AUTH as string, streamOptions:{'useClient':'WEB'}});
 client.login(token);
-player.extractors.loadMulti(DefaultExtractors);
+player.extractors.loadMulti([YoutubeiExtractor]);
