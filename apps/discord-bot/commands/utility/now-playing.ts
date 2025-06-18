@@ -12,7 +12,7 @@ module.exports = {
     data: data,
     async execute(interaction:ChatInputCommandInteraction) {
         if(!interaction.guild) return;
-const queue=useQueue();
+const queue=useQueue(interaction.guild);
 try{
 if(!queue) return await interaction.reply({content:"No music is being played right now."});
 

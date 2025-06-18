@@ -8,7 +8,7 @@ module.exports = {
         
         if(!channel) return;
 
-       await channel.send({content:`Finished Playing: **${track.title}**`});
+       await channel.send({content:`Finished Playing: ${track?.title} | ${track?.author}`});
 
     }
 }

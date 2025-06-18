@@ -101,6 +101,5 @@ for (const file of playerEventFiles) {
     }
 }
 
-player.extractors.register(YoutubeiExtractor, {'generateWithPoToken':true, 'authentication':process.env.YOUTUBE_EXTRACTION_PLAYER_AUTH as string, streamOptions:{'useClient':'WEB'}});
 client.login(token);
-player.extractors.loadMulti([YoutubeiExtractor]);
+player.extractors.loadMulti(DefaultExtractors);

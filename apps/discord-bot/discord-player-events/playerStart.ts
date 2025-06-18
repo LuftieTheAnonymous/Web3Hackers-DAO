@@ -9,7 +9,7 @@ module.exports = {
         
         if(!channel) return;
 
-       await channel.send({content:`Now playing **${track.title}**`});
+       await channel.send({content:`Now playing **${track?.title} | ${track?.author}**`});
 
     }
 }

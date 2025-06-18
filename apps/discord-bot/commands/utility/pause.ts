@@ -1,4 +1,4 @@
-import { useMainPlayer, useQueue, useTimeline } from 'discord-player';
+import { GuildQueueTimeline, useMainPlayer, useQueue, useTimeline } from 'discord-player';
 import {   ChatInputCommandInteraction, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -14,7 +14,8 @@ module.exports = {
         if(!interaction.guild) return;
 
         // Get the queue's timeline
-        const timeline = useTimeline();
+    
+        const timeline = useTimeline({'node':interaction.guild});
 try{
  
   if (!timeline) {
