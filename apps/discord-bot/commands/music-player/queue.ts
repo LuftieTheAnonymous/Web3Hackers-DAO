@@ -1,16 +1,16 @@
-import { useMainPlayer, useQueue, useTimeline } from 'discord-player';
+import { useQueue } from 'discord-player';
 import {   ChatInputCommandInteraction, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
  const data = new SlashCommandBuilder()
-  .setName('pause-song') // Command name
-  .setDescription('Display the currently playing song'); 
+  .setName('queue-song') // Command name
+  .setDescription('Queue the song !'); 
 
 module.exports = {
     cooldown:20,
     data: data,
-    async execute(interaction:any) {
+    async execute(interaction:ChatInputCommandInteraction) {
         if(!interaction.guild) return;
 
         // Get the current queue

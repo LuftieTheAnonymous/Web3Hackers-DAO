@@ -9,5 +9,6 @@ module.exports = {
         console.log(`Ready! 
            Bot is online and logged in as
             ${client.user.tag}`);
+
     }
 }

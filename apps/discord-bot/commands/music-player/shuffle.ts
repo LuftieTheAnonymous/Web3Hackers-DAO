@@ -4,15 +4,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
  const data = new SlashCommandBuilder()
-  .setName('now-playing') // Command name
-  .setDescription('Display the currently playing song'); 
+  .setName('shuffle') // Command name
+  .setDescription('Shuffle the queue !'); 
 
 module.exports = {
     cooldown:20,
     data: data,
-    async execute(interaction:any) {
+    async execute(interaction:ChatInputCommandInteraction) {
         if(!interaction.guild) return;
-const queue=useQueue();
+const queue=useQueue(interaction.guild);
 try{
 if (!queue) {
     return interaction.reply(

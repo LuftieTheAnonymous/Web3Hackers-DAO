@@ -5,12 +5,12 @@ dotenv.config();
 
  const data = new SlashCommandBuilder()
   .setName('pause-song') // Command name
-  .setDescription('Display the currently playing song'); 
+  .setDescription('Pause the song !'); 
 
 module.exports = {
     cooldown:20,
     data: data,
-    async execute(interaction:any) {
+    async execute(interaction:ChatInputCommandInteraction) {
         if(!interaction.guild) return;
 
         // Get the queue's timeline

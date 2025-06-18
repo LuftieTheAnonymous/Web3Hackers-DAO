@@ -5,17 +5,17 @@ dotenv.config();
 
 const data = new SlashCommandBuilder()
 .setName('skip-song')
-.setDescription('Play your favorite song on the channel and chill with your hacker-gang on discord, do not be a caveman 😅')
+.setDescription('Skip the current song on the channel !')
 .addStringOption(input=>input.setName('song').setDescription('The song you want to play').setRequired(true));
 
 module.exports = {
     cooldown:20,
     data: data,
-    async execute(interaction:any) {
+    async execute(interaction:ChatInputCommandInteraction) {
         if(!interaction.guild) return;
 
         // Get the current queue
-        const queue = useQueue();
+        const queue = useQueue(interaction.guild);
 try{
  
   if (!queue) {

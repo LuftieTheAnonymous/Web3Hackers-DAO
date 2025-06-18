@@ -5,12 +5,12 @@ dotenv.config();
 
  const data = new SlashCommandBuilder()
   .setName('now-playing') // Command name
-  .setDescription('Display the currently playing song'); 
+  .setDescription('Show the currently playing song !'); 
 
 module.exports = {
     cooldown:20,
     data: data,
-    async execute(interaction:any) {
+    async execute(interaction:ChatInputCommandInteraction) {
         if(!interaction.guild) return;
 const queue=useQueue();
 try{
@@ -18,6 +18,8 @@ if(!queue) return await interaction.reply({content:"No music is being played rig
 
   // Get the currently playing song
   const currentSong = queue.currentTrack as any;
+
+  console.log(currentSong);
  
   // Check if there is a song playing
   if (!currentSong) {
