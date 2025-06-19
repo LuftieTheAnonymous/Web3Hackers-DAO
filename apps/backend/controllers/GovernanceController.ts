@@ -151,7 +151,7 @@ const createProposalEligible = async (req:Request, res:Response) =>{
         res.status(200).send({message:"success", status:200, data:redisRead, error:null});
     }
     catch(err){
-        res.status(500).send({message:"error", status:500, data:null, error:err});
+        res.status(500).send({message:"error", status:500, data:null, error:'You are not eligible to create a proposal now !'});
     }
 }
 

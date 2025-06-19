@@ -155,6 +155,7 @@ const proposalCreationLimiter= rateLimit({
       if(!redisStoredWalletAddr && !redisStoredIsAdmin && !redisStoredCalledTimes){
         const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(req.params.memberDiscordId)).single();
         if(!memberData || !memberData.userWalletAddress){
+          
             return {'error': 'You are not a DAO member, please join the DAO to create proposals.'};
         }
 
@@ -164,15 +165,18 @@ const proposalCreationLimiter= rateLimit({
 
         const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
         if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01 ){
+           
             return {'error': 'You can create up to 10 proposals per week.'};
         }
 
         if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
+        
             return {'error': 'You can create up to 5 proposals per week. Sorry Baby !'};
         }
 
         if(memberData.isAdmin){
+      
             return {'error': 'Admins can create up to 100 proposals per week. No more mate'};
         }
         return;
@@ -181,15 +185,18 @@ const proposalCreationLimiter= rateLimit({
       if(redisStoredWalletAddr && redisStoredIsAdmin){
         const userTokens = await governorTokenContract.getVotes(redisStoredWalletAddr);
         if(redisStoredIsAdmin === 'true'){
+       
           return {'error': 'Admins can create up to 100 proposals per week.'};
         }
 
             if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01){
+                
             return {'error': 'You can create up to 10 proposals per week.'};
         }
 
         if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
+    
             return {'error': 'You can create up to 5 proposals per week.'};
         }
       }
@@ -236,15 +243,6 @@ const proposalCreationLimiter= rateLimit({
     return `error-${req.ip}`;
   }
 },
-keyGenerator: (req: Request, res)=> {
-    const authorizationHeader = req.params.memberDiscordId;
-    if (!authorizationHeader) {
-      console.warn("No discordId provided in rate limiter:", req.ip);
-      res.status(400).json({'error': 'No discordId provided in rate limiter.', key: `${req.ip}`});
-    }
-    res.status(200).json({'error': null, key: `${authorizationHeader}`});
-    return authorizationHeader;
-  },
   validate: {limit: false}
   
   

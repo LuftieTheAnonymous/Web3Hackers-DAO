@@ -81,7 +81,7 @@ const [currentStep, setCurrentStep] = useState<number>(0);
 const {writeContractAsync,writeContract, data, isError: writeContractIsError, error: writeContractError, isPending: writeContractIsPending, isIdle, isPaused, isSuccess: writeContractIsSuccess}=useWriteContract();
 const client = usePublicClient();
 const {currentUser}=useGetLoggedInUser();
-const {data:receipt, isError, error, isLoading, isSuccess, isPending}=useWaitForTransactionReceipt({
+const {data:receipt, isError, error, isLoading, isSuccess, isPending, isPaused:waitForTransactionError, isLoadingError, errorUpdatedAt,}=useWaitForTransactionReceipt({
   hash:data as `0x${string}`,
   'onReplaced': async (replaceData) => {
 
@@ -380,6 +380,10 @@ onError: (error) => {
 
 <p className='text-white'>Transaction is Succeeded.</p>
 
+<Button className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500 mt-6 px-6 hover:text-zinc-800 ' onClick={(e) => {
+  e.preventDefault();
+  window.location.reload();
+}}>Go back to Home</Button>
 </div>}
 
 {error && <>

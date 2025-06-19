@@ -418,8 +418,8 @@ const goForward=useCallback(() => {
     
    {!isCustom && 
    <div className='flex flex-col gap-4'>
-<p>You're almost done with your standard proposal...</p>
-  <p>The only thing left is to select the end date of the proposal and the delay !</p>
+<p className='text-white text-lg font-bold'>You're almost done with your standard proposal...</p>
+  <p className='text-(--hacker-green-4) text-sm italic'>The only thing left is to select the end date of the proposal and the delay !</p>
    </div>
    }
     </>
