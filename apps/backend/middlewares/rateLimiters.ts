@@ -99,34 +99,30 @@ const proposalCreationLimiter= rateLimit({
 
       const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress');
       const redisStoredIsAdmin = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'isAdmin');
-      
+
       if(!redisStoredWalletAddr && !redisStoredIsAdmin){
         const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(discordId)).single();
-      
-        
+
         if(!memberData || !memberData.userWalletAddress){
           return 0;
         }
         await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress', memberData.userWalletAddress);
         await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'isAdmin', `${memberData.isAdmin}`);
-  
+
         const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
-  
+
         if(memberData.isAdmin){
                return 100; // Admins can create 100 proposals per week
         }
         if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01){
             return 10 // Non-members can create up to 5 proposals
         }
-  
-        if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
-     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005
-     ){
+
+        if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01 && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
             return 5;// Members with less than 0.1 tokens can create up to 5 proposals
         }
 
       }
-      
       if(redisStoredWalletAddr && redisStoredIsAdmin){
 
         const userTokens = await governorTokenContract.getVotes(redisStoredWalletAddr);
@@ -148,39 +144,38 @@ const proposalCreationLimiter= rateLimit({
         }
 
       }
-      
-      
+
       return 0;
 
     }, //
     message: async (req:Request, res:Response) => {
-      const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter:${req.params.discordId}`, 'userWalletAddress');
-      const redisStoredIsAdmin = await redisClient.hGet(`proposalCreationLimiter:${req.params.discordId}`, 'isAdmin');
-      
-      if(!redisStoredWalletAddr && !redisStoredIsAdmin){
-        const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(req.params.discordId)).single();
-        
+      const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter:${req.params.memberDiscordId}`, 'userWalletAddress');
+      const redisStoredIsAdmin = await redisClient.hGet(`proposalCreationLimiter:${req.params.memberDiscordId}`, 'isAdmin');
+      const redisStoredCalledTimes = await redisClient.get(`proposalCreationLimiter:${req.params.memberDiscordId}:calledTimes`);
+      if(!redisStoredWalletAddr && !redisStoredIsAdmin && !redisStoredCalledTimes){
+        const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(req.params.memberDiscordId)).single();
         if(!memberData || !memberData.userWalletAddress){
             return {'error': 'You are not a DAO member, please join the DAO to create proposals.'};
         }
 
-        await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'userWalletAddress', memberData.userWalletAddress); 
-        await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'isAdmin', `${memberData.isAdmin}`);
+        await redisClient.hSet(`proposalCreationLimiter:${req.params.memberDiscordId}`, 'userWalletAddress', memberData.userWalletAddress); 
+        await redisClient.hSet(`proposalCreationLimiter:${req.params.memberDiscordId}`, 'isAdmin', `${memberData.isAdmin}`);
+        await redisClient.setEx(`proposalCreationLimiter:${req.params.memberDiscordId}:calledTimes`, 7 * 24 * 60 * 60, '1');
 
         const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
-        if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01){
+        if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01 ){
             return {'error': 'You can create up to 10 proposals per week.'};
         }
 
         if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
-            return {'error': 'You can create up to 5 proposals per week.'};
+            return {'error': 'You can create up to 5 proposals per week. Sorry Baby !'};
         }
 
         if(memberData.isAdmin){
-            return {'error': 'Admins can create up to 100 proposals per week.'};
+            return {'error': 'Admins can create up to 100 proposals per week. No more mate'};
         }
-        
+        return;
       }
 
       if(redisStoredWalletAddr && redisStoredIsAdmin){
@@ -197,7 +192,6 @@ const proposalCreationLimiter= rateLimit({
     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
             return {'error': 'You can create up to 5 proposals per week.'};
         }
-      
       }
     },
 

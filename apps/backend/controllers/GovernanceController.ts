@@ -111,11 +111,55 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
     }
 }
 
+const createProposalEligible = async (req:Request, res:Response) =>{
+    try{
+        if(!req.headers.authorization){
+            res.status(500).send({message:"error", status:500, data:null, error:"No token provided, get out of here !"});
+            return;
+        }
+
+        const token = req.headers.authorization.split(' ')[1];
+
+        const redisRead = await redisClient.get(`dao_members:${token}`);
+
+        if(!redisRead){
+
+            const {data, error} = await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', token).maybeSingle();
+
+            if(!data){
+                res.status(500).send({message:"error", status:500, data:null, error:"Invalid Member. Piss off 🤣"});
+                return;
+            }
+
+            if(error){
+                res.status(500).send({message:"error", status:500, data:null, error:error.message});
+                return;
+            }
+
+            await redisClient.setEx(`dao_members:${token}`, 7200, JSON.stringify(data));
+            await redisClient.setEx(`dao_members:${data.discord_member_id}`, 7200, JSON.stringify(data));
+                await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'userWalletAddress', data.userWalletAddress); 
+        await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'isAdmin', `${data.isAdmin}`);
+        await redisClient.setEx(`proposalCreationLimiter:${req.params.discordId}:calledTimes`, 7 * 24 * 60 * 60, '0');
+       
+
+            res.status(200).send({message:"success", status:200, data:data, error:null});
+            return;
+        }
+
+
+        res.status(200).send({message:"success", status:200, data:redisRead, error:null});
+    }
+    catch(err){
+        res.status(500).send({message:"error", status:500, data:null, error:err});
+    }
+}
 
 
 export {
     getProposalVotes,
     getProposalState,
     getProposalDetails,
-    getEmbededProposalDetails
+    getEmbededProposalDetails,
+    createProposalEligible
 }

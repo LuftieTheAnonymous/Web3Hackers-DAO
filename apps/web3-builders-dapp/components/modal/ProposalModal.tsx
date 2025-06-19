@@ -8,7 +8,7 @@ import { FormProvider, useForm
 import { StepContainer } from './steps/Steps';
 import {readContract} from "@wagmi/core";
 import {config} from '@/lib/config';
-
+import {AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 type Props = {children: React.ReactNode}
 // Emoji regex — catches most emojis, flags, skin tones, etc.
@@ -71,6 +71,7 @@ import { decodeEventLog, encodeFunctionData } from 'viem';
 import { toast } from 'sonner';
 import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
 import { supabase } from '@/lib/db/supabaseConfigClient';
+import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 
 
 
@@ -79,6 +80,7 @@ const {address}=useAccount();
 const [currentStep, setCurrentStep] = useState<number>(0);
 const {writeContractAsync,writeContract, data, isError: writeContractIsError, error: writeContractError, isPending: writeContractIsPending, isIdle, isPaused, isSuccess: writeContractIsSuccess}=useWriteContract();
 const client = usePublicClient();
+const {currentUser}=useGetLoggedInUser();
 const {data:receipt, isError, error, isLoading, isSuccess, isPending}=useWaitForTransactionReceipt({
   hash:data as `0x${string}`,
   'onReplaced': async (replaceData) => {
@@ -137,6 +139,29 @@ const methods = useForm<z.infer<typeof proposalObject>>({
 async function onSubmit(values: z.infer<typeof proposalObject>) {
  try{
   console.log(values);
+
+  if(!currentUser){
+    toast.error('You must be logged in to create a proposal');
+    return;
+  }
+
+  const proposalEligility = await fetch(`http://localhost:2137/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
+    method:'POST',
+    headers:{
+      'x-backend-eligibility': process.env.NEXT_PUBLIC_FRONTEND_ACCESS_SECRET as string,
+      authorization:`Bearer ${currentUser.discord_member_id}`,
+    }
+  });
+
+  const res=await proposalEligility.json();
+  console.log(res);
+  if(res.error && !res.data){
+    toast.error(`${res.error.code}: ${res.error}`);
+    return;
+  }
+
+
+
 
   const targets= values['functionsCalldatas'].map((item) => item['target']);
   const calldataValues = values['functionsCalldatas'].map((item) => BigInt(item['value']));
@@ -342,9 +367,9 @@ onError: (error) => {
     {methods.formState.isSubmitted ? 
     <div className='flex flex-col gap-2 w-full'>
 
-{isPending ? <div className='flex flex-col gap-2 items-center w-full'>
+{isLoading ? <div className='flex flex-col gap-2 items-center w-full'>
 
-<FaTruckLoading className=' animate-spin text-blue-500 text-6xl'/>
+<AiOutlineLoading3Quarters className=' animate-spin text-blue-500 text-6xl'/>
 
 <p className='text-white'>Transaction is pending...</p>
 
