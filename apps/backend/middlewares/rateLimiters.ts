@@ -237,13 +237,16 @@ const proposalCreationLimiter= rateLimit({
   }
 },
 keyGenerator: (req: Request, res)=> {
-    const authorizationHeader = req.params.discordId;
+    const authorizationHeader = req.params.memberDiscordId;
     if (!authorizationHeader) {
       console.warn("No discordId provided in rate limiter:", req.ip);
-      return `${req.ip}`;
+      res.status(400).json({'error': 'No discordId provided in rate limiter.', key: `${req.ip}`});
     }
+    res.status(200).json({'error': null, key: `${authorizationHeader}`});
     return authorizationHeader;
   },
+  validate: {limit: false}
+  
   
 }
 );
