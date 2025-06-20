@@ -4,6 +4,8 @@ import { supabaseConfig } from "../config/supabase.js";
 import {format, formatDistanceStrict} from "date-fns";
 import { notifyDAOMembersOnEvent } from "./actions/governor/governor-actions.js";
 import redisClient from "../redis/set-up.js";
+import { getDatabaseElement } from "../db-actions.ts";
+import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
 
 dotenv.config();
 
@@ -19,13 +21,14 @@ daoContract.on("ProposalCreated", async (proposalId) => {
             const redisStoredNickname= await redisClient.get(`${proposal[1]}:nickname`);
 
             if(!redisStoredNickname){
-                const {data:memberData} = await supabaseConfig.from('dao_members').select('*').eq('userWalletAddress', proposal[1]).single();
-        
-                await redisClient.set(`${proposal[1]}:nickname`, memberData.nickname);
-
+                const {data:memberData} = await getDatabaseElement<DaoMember>('dao_members', 'userWalletAddress', proposal[1]);
+                
                 if(!memberData){
                     throw new Error("Member not found");
                 }
+
+                await redisClient.set(`${proposal[1]}:nickname`, memberData.nickname);
+
                 console.log("Proposal details", proposal, "Proposal", proposalId);
         
         

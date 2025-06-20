@@ -135,10 +135,12 @@ if(!redisStoredNickname && !redisStoredWalletAddress){
     if(!userDBObject.data){
         res.status(404).json({message:"error", data:null, tokenAmount:null,
              error:"The user with provided nickname was not found", discord_member_id:dicordMemberId, status:404 });
-    }
+   return;
+            }
     
     if(userDBObject.error){
         res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,discord_member_id:dicordMemberId, status:500 });
+   return;
     }
     
         await redisClient.hSet(`dao_members:${dicordMemberId}`, 'nickname', (userDBObject.data as any).nickname);
