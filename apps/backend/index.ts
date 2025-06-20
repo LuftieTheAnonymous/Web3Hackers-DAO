@@ -8,15 +8,21 @@ import activityRouter from "./routes/ActivityRouter.ts";
 import dotenv from 'dotenv';
 import cors from 'cors';
 import express from 'express';
-import http from "http";
+import http, { IncomingMessage } from "http";
 import helmet from 'helmet';
 import redisClient  from "./redis/set-up.ts";
+import { createHandler } from 'graphql-http/lib/use/http';
 import logger from "./config/winstonConfig.ts";
 import './redis/bullmq/main.ts';
 import './redis/bullmq/worker.ts';
 import './redis/bullmq/queueEvents.ts';
+import { schema } from './types/graphql/RootQuery.js';
 const app = express();
 dotenv.config();
+
+// Create the GraphQL over HTTP Node request handler
+
+
 
 // contentSecurityPolicy - strict set of rules that only allows resources from the same origin
 // CROSS-ORIGIN OPENER POLICY - mitigates data leaks through shared browsing contexts
@@ -59,12 +65,17 @@ app.use(cors({
     maxAge: 600, // 10 minutes
 }));
 
-app.use(express.json());
 
+
+app.use(express.json());
+app.use('/graphql', createHandler({ schema }));
 app.use('/governance', governanceRouter);
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
+
+
+
 const server = http.createServer(app);
 
 redisClient.on('error', (err:any) => console.log('Redis Client Error', err));

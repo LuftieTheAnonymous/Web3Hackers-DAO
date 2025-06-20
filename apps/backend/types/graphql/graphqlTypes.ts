@@ -1,16 +1,5 @@
-import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLScalarType, GraphQLObjectType, GraphQLString, GraphQLUnionType, GraphQLID, GraphQLList } from "graphql";
+import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } from "graphql";
 
-const daoMemberType = new GraphQLObjectType({
-    name:'dao_member',
-    fields:{
-    userWalletAddress:{type: new GraphQLNonNull(GraphQLID)},
-    created_at:{type: new GraphQLNonNull(GraphQLString)},
-    discord_member_id:{type: new GraphQLNonNull(GraphQLInt)},
-    nickname:{type: new GraphQLNonNull(GraphQLString)},
-    isAdmin:{type: new GraphQLNonNull(GraphQLString)},
-    photoURL:{type: new GraphQLNonNull(GraphQLString)}
-    }
-})
 
 const daoProposalType= new GraphQLObjectType({
     name:'dao_proposal',
@@ -26,6 +15,20 @@ const daoProposalType= new GraphQLObjectType({
     }
 });
 
+
+const daoMemberType = new GraphQLObjectType({
+    name:'dao_member',
+    fields:{
+    userWalletAddress:{type: new GraphQLNonNull(GraphQLID)},
+    created_at:{type: new GraphQLNonNull(GraphQLString)},
+    discord_member_id:{type: new GraphQLNonNull(GraphQLInt)},
+    nickname:{type: new GraphQLNonNull(GraphQLString)},
+    isAdmin:{type: new GraphQLNonNull(GraphQLString)},
+    photoURL:{type: new GraphQLNonNull(GraphQLString)},
+    dao_proposals:{type: new GraphQLNonNull(new GraphQLList(daoProposalType))},
+    }
+});
+
 const daoCalldataObjectType= new GraphQLObjectType({
     name:'calldata_object',
     fields:{
@@ -38,9 +41,20 @@ const daoCalldataObjectType= new GraphQLObjectType({
     amountParameter:{type: new GraphQLNonNull(GraphQLInt)},
     isFunctionRewarding:{type: new GraphQLNonNull(GraphQLBoolean)},
     isFunctionPunishing:{type: new GraphQLNonNull(GraphQLBoolean)},
-    functionDisplayName:{type: new GraphQLNonNull(GraphQLString)}
+    functionDisplayName:{type: new GraphQLNonNull(GraphQLString)},
     }
 });
+
+const daoProposalCommentType= new GraphQLObjectType({
+    name:'dao_voting_comments',
+    fields:{
+        id:{type: new GraphQLNonNull(GraphQLInt)},
+        proposal_id:{type: new GraphQLNonNull(GraphQLString)},
+        user_wallet_id:{type: new GraphQLNonNull(GraphQLString)},
+        message:{type: new GraphQLNonNull(GraphQLString)},
+        created_at:{type: new GraphQLNonNull(GraphQLString)},
+    }
+})
 
 
 const daoMonthActivity= new GraphQLObjectType({
@@ -129,5 +143,6 @@ export {
     notificationType,
     voteOptionType,
     notificationSettings,
-    voiceChatActivity
+    voiceChatActivity,
+    daoProposalCommentType
 }
