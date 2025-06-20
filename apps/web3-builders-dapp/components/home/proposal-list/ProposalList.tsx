@@ -71,11 +71,7 @@ function ProposalList({ proposals }: Props) {
     },
   });
 
-    const router = useRouter()
- 
-  if (router.isFallback) {
-    return <div>Loading...</div>
-  }
+
 
   return (
     <>
