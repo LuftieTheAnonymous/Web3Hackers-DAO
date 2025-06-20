@@ -134,12 +134,14 @@ const proposalCreationLimiter= rateLimit({
 
 
           if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01){
+            
             return 10 // Non-members can create up to 5 proposals
         }
   
         if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
      && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005
      ){
+    
             return 5;// Members with less than 0.1 tokens can create up to 5 proposals
         }
 
@@ -166,18 +168,18 @@ const proposalCreationLimiter= rateLimit({
         const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
         if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01 ){
            
-            return {'error': 'You can create up to 10 proposals per week.'};
+            return {'error': 'You can create up to 10 proposals per week.', data:null, status:429};
         }
 
         if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
-        
-            return {'error': 'You can create up to 5 proposals per week. Sorry Baby !'};
+
+            return {'error': 'You can create up to 5 proposals per week. Sorry Baby !', data:null, status:429};
         }
 
         if(memberData.isAdmin){
       
-            return {'error': 'Admins can create up to 100 proposals per week. No more mate'};
+            return {'error': 'Admins can create up to 100 proposals per week. No more mate', data:null, status:429};
         }
         return;
       }
@@ -185,19 +187,19 @@ const proposalCreationLimiter= rateLimit({
       if(redisStoredWalletAddr && redisStoredIsAdmin){
         const userTokens = await governorTokenContract.getVotes(redisStoredWalletAddr);
         if(redisStoredIsAdmin === 'true'){
-       
-          return {'error': 'Admins can create up to 100 proposals per week.'};
+      
+          return {'error': 'Admins can create up to 100 proposals per week.', data:null, status:429};
         }
 
             if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01){
-                
-            return {'error': 'You can create up to 10 proposals per week.'};
+            return {'error': 'You can create up to 10 proposals per week.', data:null, status:429};
         }
 
         if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
+
     
-            return {'error': 'You can create up to 5 proposals per week.'};
+            return {'error': 'You can create up to 5 proposals per week.', data:null, status:429};
         }
       }
     },
@@ -243,9 +245,6 @@ const proposalCreationLimiter= rateLimit({
     return `error-${req.ip}`;
   }
 },
-  validate: {limit: false}
-  
-  
 }
 );
 
