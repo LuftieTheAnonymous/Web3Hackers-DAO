@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react'
-import { Button } from '../ui/button';
-
+import { Button } from '../ui/button'
 
 import { useRouter } from 'next/navigation';
 import { ConnectKitButton } from 'connectkit';
@@ -12,47 +11,36 @@ import { useAccountEffect, useSignMessage } from 'wagmi';
 import { config } from '@/lib/config';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/db/supabaseConfigClient';
-
-
-
+import { TokenState, useStore } from '@/lib/zustandConfig';
 
 type Props = {}
 
 function Navbar({}: Props) {
-const router=useRouter();
+  const router = useRouter();
+  const { signMessageAsync } = useSignMessage({ config });
+const setToken = useStore((state) => (state as TokenState).setToken);
+const unsetToken = useStore((state) => (state as TokenState).unsetToken)
 
-const {signMessageAsync}=useSignMessage({config:config});
+const token = useStore((state) => (state as TokenState).token);
+  useAccountEffect({
+    onConnect: async ({ address }) => {
+      if (typeof window === 'undefined') return;
 
-
-useAccountEffect({
-  'onConnect': async ({address})=>{
- 
-    if(!localStorage.getItem("supabase_jwt")){
-
-      await signMessageAsync({message:`
-      Welcome to Web3 Builders DAO !
-      \n\nA Platform for Web3 builders to decide on the future of the Web3 Builders Discord Server and its community.
-      But also to build a community of real change-makers in Web3 space, not just a regular smart-contract developers. But Real Web3 Engineers !
-      `});
-
-      const res = await fetch("/api/auth/wallet", {
-      method: "POST",
-      body: JSON.stringify({ address }),
-    });
-
-    const { token } = await res.json();
-
-    console.log(token);
-
-    localStorage.setItem("supabase_jwt", token);
+      if (!token) {
+        await signMessageAsync({ message: `Welcome message...` });
+        const res = await fetch("/api/auth/wallet", {
+          method: "POST",
+          body: JSON.stringify({ address }),
+        });
+        const { token } = await res.json();
+        setToken(token);
+      }
+    },
+    onDisconnect: () => {
+      unsetToken();
+      toast('You have been disconnected ! We hope to see you again !');
     }
-  },
-  'onDisconnect':()=>{
-    localStorage.removeItem("supabase_jwt");
-    toast('You have been disconnected ! We hope to see you again !');
-  },
-})
-
+  });
 
   return (
     <div className='w-full sticky top-0 left-0 h-16 bg-zinc-900 flex p-2 justify-center items-center

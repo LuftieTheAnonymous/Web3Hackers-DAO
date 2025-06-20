@@ -2,7 +2,6 @@ import {  GatewayIntentBits, Collection, Partials } from 'discord.js';
 import { CustomClient, CustomClientType } from './types/discordBotTypes';
 import {  Player } from 'discord-player';
 import {DefaultExtractors} from '@discord-player/extractor';
-import { YoutubeiExtractor } from 'discord-player-youtubei';
 
 // Require the necessary discord.js classes
 const dotenv = require('dotenv');

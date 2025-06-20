@@ -1,18 +1,21 @@
-
+'use server';
 import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+ const createSupabaseClient = async () => {
+  
+  const cookiesStored = await cookies();
 
- const createSupabaseClient = () => {
-  const token = typeof window !== "undefined" ? localStorage.getItem("supabase_jwt") : null;
+  
 
 
-  return token ?
+  return cookiesStored.get('supabase_jwt') && cookiesStored.get('supabase_jwt')?.value  ?
   createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
      process.env.NEXT_PUBLIC_API_KEY as string,
       {
       global: {
         headers: {
-          Authorization: token ? `Bearer ${token}` : "",
+          Authorization: cookiesStored.get('supabase_jwt') ? `Bearer ${cookiesStored.get('supabase_jwt')?.value}` : "",
         },
       },
     }
@@ -22,5 +25,5 @@ import { createClient } from "@supabase/supabase-js";
   );
 };
 
-export const supabase=createSupabaseClient();
+export const supabase= await createSupabaseClient();
 

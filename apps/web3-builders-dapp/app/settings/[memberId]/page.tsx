@@ -3,7 +3,7 @@ import UserProfileTile from '@/components/settings/UserProfileTile'
 import { supabase } from '@/lib/db/supabaseConfigClient';
 
 
-import { Bell, Settings2Icon, SettingsIcon, SunMoonIcon } from 'lucide-react'
+import { SettingsIcon } from 'lucide-react'
 import React from 'react'
 
 

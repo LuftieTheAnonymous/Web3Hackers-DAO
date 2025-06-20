@@ -4,11 +4,6 @@ import ProposalList from './ProposalList';
 import { supabase } from '@/lib/db/supabaseConfigClient';
 
 
-
-
-
-
-
 async function ProposalListContainer() {
   
 
