@@ -1,17 +1,20 @@
 'use client';
 
 
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+import { TokenState, useStore } from '@/lib/zustandConfig';
 import React, { useEffect } from 'react'
 
 type Props<T> = {
     initialObj: T,
-    tableName: string
+    tableName: string,
+
 }
 
 function useRealtimeDocument<T>({initialObj, tableName }: Props<T>) {
   const [serverObjectData,setServerObjectData] = React.useState<T>(initialObj);
-
+  const token = useStore((state) => (state as TokenState).token);
+  const supabase =  createSupabaseClient(!token ? '' : token);
 
 useEffect(()=>{
 const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes", {

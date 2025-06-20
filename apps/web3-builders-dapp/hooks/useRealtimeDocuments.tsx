@@ -2,7 +2,8 @@
 
 
 
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+import { TokenState, useStore } from '@/lib/zustandConfig';
 import React, { useEffect } from 'react'
 
 type Props<T> = {
@@ -10,17 +11,22 @@ type Props<T> = {
     tableName:string,
     parameterOnChanges:string,
     otherParameterOnChanges?:string,
-    matchOnChangeParam:string
+    matchOnChangeParam:string,
+    jsonToken?:string
 }
 
-function useRealtimeDocuments<T>({tableName, parameterOnChanges, initialData, otherParameterOnChanges, matchOnChangeParam}: Props<T>) {
+function useRealtimeDocuments<T>({tableName, parameterOnChanges, initialData, otherParameterOnChanges, jsonToken, matchOnChangeParam}: Props<T>) {
 
     const [serverData,setData] = React.useState<T[]>(initialData);
     const [loading,setLoading] = React.useState<boolean>(false);
 
+   const token = useStore((state) => (state as TokenState).token);
+   const supabase =  createSupabaseClient(!token ? '' : token);
+
 
 useEffect(()=>{
     setLoading(true);
+
 const channels = supabase.channel(`realtime:${tableName}`).on("postgres_changes", {
     event:'INSERT',
     schema:'public',

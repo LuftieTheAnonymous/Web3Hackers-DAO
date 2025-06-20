@@ -1,6 +1,7 @@
 import ProfilePageContainer from '@/components/profile/container/ProfilePageContainer'
 
-import { supabase } from '@/lib/db/supabaseConfigClient'
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient'
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation'
 import React from 'react'
 
@@ -8,7 +9,9 @@ import React from 'react'
 
 async function Page({ params }: { params: Promise<any> }) {
 
-
+const cookiesStore = await cookies();
+const token = cookiesStore.get('supabase_jwt');
+ const supabase=  createSupabaseClient(!token ? '' : token.value);
   const {profileId} = await params;
 const { data, error } = await supabase
   .from('dao_members')

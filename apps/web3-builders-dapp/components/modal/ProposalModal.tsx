@@ -70,8 +70,10 @@ import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/conf
 import { decodeEventLog, encodeFunctionData } from 'viem';
 import { toast } from 'sonner';
 import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
-import { supabase } from '@/lib/db/supabaseConfigClient';
+
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
+import { TokenState, useStore } from '@/lib/zustandConfig';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
 
 
 
@@ -90,7 +92,8 @@ const {data:receipt, isError, error, isLoading, isSuccess, isPending, isPaused:w
   },
   
   });
-
+    const token = useStore((state) => (state as TokenState).token);
+     const supabase =  createSupabaseClient(!token ? '' : token);
   useWatchContractEvent({
     'abi': governorContractAbi,
     'address': GOVERNOR_CONTRACT_ADDRESS,

@@ -10,7 +10,6 @@ import Link from 'next/link';
 import { useAccountEffect, useSignMessage } from 'wagmi';
 import { config } from '@/lib/config';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/db/supabaseConfigClient';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 
 type Props = {}
@@ -19,7 +18,9 @@ function Navbar({}: Props) {
   const router = useRouter();
   const { signMessageAsync } = useSignMessage({ config });
 const setToken = useStore((state) => (state as TokenState).setToken);
-const unsetToken = useStore((state) => (state as TokenState).unsetToken)
+const unsetToken = useStore((state) => (state as TokenState).unsetToken);
+
+
 
 const token = useStore((state) => (state as TokenState).token);
   useAccountEffect({
@@ -66,10 +67,7 @@ const token = useStore((state) => (state as TokenState).token);
   hover:text-white
   transition-all 
   '
-  variant={'secondary'} onClick={async ()=>{
-     await supabase.from('dao_members').select('*').single();
-    console.log(supabase);
-  }}>About Us</Button>
+  variant={'secondary'}>About Us</Button>
 </div>
 
 <div className="flex items-end gap-2">

@@ -2,7 +2,8 @@
 
 import webpush, { PushSubscription } from 'web-push';
 import { upsertWebPushSubscription } from './db/actions';
-import { supabase } from '../db/supabaseConfigClient';
+import { createSupabaseClient } from '../db/supabaseConfigClient';
+import { cookies } from 'next/headers';
 
 
 
@@ -45,6 +46,9 @@ try{
         throw new Error('No subscription found');
         
     }
+        const cookiesStore = await cookies();
+    const token = cookiesStore.get('supabase_jwt');
+     const supabase=  createSupabaseClient(!token ? '' : token.value);
 
     const {error: notificationError} = await 
     supabase.from('notification_settings').delete().eq('userAddress', address);
@@ -66,7 +70,10 @@ const sendNotification=async(message:string, notificationReceivePropertyName:str
     if(!subscription){
         throw new Error('No subscription found');
     }
-    try{
+    try{  
+            const cookiesStore = await cookies();
+const token = cookiesStore.get('supabase_jwt');
+ const supabase=  createSupabaseClient(!token ? '' : token.value);
 
         const {data: subscriptionData, error} = await 
         supabase.from('notification_settings').select('endpoint, auth_key, p256h_key, user_address').eq(notificationReceivePropertyName, true);

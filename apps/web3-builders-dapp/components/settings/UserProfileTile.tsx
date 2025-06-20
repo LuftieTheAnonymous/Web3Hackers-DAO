@@ -9,8 +9,10 @@ import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import Image from 'next/image';
-import { supabase } from '@/lib/db/supabaseConfigClient';
+
 import DeleteAccount from './DeleteAccount';
+import { TokenState, useStore } from '@/lib/zustandConfig';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
 
 
 type Props = {intialDocument:any}
@@ -21,7 +23,8 @@ function UserProfileTile({intialDocument}: Props) {
   const {address}=useAccount();
 
   const {objectData}=useRealtimeDocument({initialObj:intialDocument, tableName:'dao_members'});
-
+    const token = useStore((state) => (state as TokenState).token);
+     const supabase =  createSupabaseClient(!token ? '' : token);
   
 
   const handleFileUpload=(e: React.ChangeEvent<HTMLInputElement>) => {

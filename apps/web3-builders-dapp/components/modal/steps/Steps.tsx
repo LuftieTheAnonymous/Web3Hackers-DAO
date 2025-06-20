@@ -13,8 +13,9 @@ import { ArrowLeft, ArrowRight, CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/db/supabaseConfigClient'
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient'
 import Image from 'next/image'
+import { TokenState, useStore } from '@/lib/zustandConfig';
 
 
 
@@ -124,7 +125,8 @@ setValue('isCustom', value);
  }: Props) {
 
 const {fields, append} = useFieldArray({name: 'functionsCalldatas', control});
-
+    const token = useStore((state) => (state as TokenState).token);
+     const supabase =  createSupabaseClient(!token ? '' : token);
 const [members, setMembers]=useState<any[]>([]);
 const [isLoading, setIsLoading] = useState(false);
 

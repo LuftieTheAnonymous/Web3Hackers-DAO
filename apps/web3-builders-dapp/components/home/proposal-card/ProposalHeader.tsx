@@ -1,7 +1,5 @@
-
-
-
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+import { cookies } from 'next/headers';
 import React from 'react'
 
 type Props = {
@@ -9,6 +7,12 @@ type Props = {
 }
 
 async function ProposalHeader({address}: Props) {
+
+  const cookiesStore = await cookies();
+  const token = cookiesStore.get('supabase_jwt');
+  const supabase =  createSupabaseClient(!token ? '' : token.value);
+
+
 const {data}=await supabase.from('dao_members').select('*').eq('userWalletAddress', address).single();
   return (
      <div className="flex justify-between items-center px-3 py-2">

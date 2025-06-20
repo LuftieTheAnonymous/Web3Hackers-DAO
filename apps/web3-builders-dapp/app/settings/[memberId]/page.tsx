@@ -1,18 +1,22 @@
 import NotificationTile from '@/components/settings/NotificationTile'
 import UserProfileTile from '@/components/settings/UserProfileTile'
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
 
 
 import { SettingsIcon } from 'lucide-react'
+import { cookies } from 'next/headers';
 import React from 'react'
 
 
 
-async function Page({ params }: { params:
-  Promise<any>
- }) {
-
-    const {memberId}=  await params;
+async function Page({ params }: { params: Promise<{ memberId: string }>
+ }
+) {
+const cookiesStore = await cookies();
+const token = cookiesStore.get('supabase_jwt');
+ const supabase=  createSupabaseClient(!token ? '' : token.value);
+    const paramsReceived=  await params;
+    const memberId=paramsReceived.memberId;
     const {data}=await supabase.from('dao_members').select('*').eq('userWalletAddress', memberId).single();
     const {data: userData}=await supabase.from('notification_settings').select('*').eq('userAddress', memberId).single();
   return (

@@ -7,13 +7,18 @@ import WebPushNotificationComponent from '../web-push/WebPushNotificationCompone
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
 import { toast } from 'sonner';
 import usePushNotifications from '@/hooks/usePushNotifications';
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+import { TokenState, useStore } from '@/lib/zustandConfig';
 
 type Props = {
    notificationMemberData:any
 }
 
 function NotificationTile({notificationMemberData}: Props) {
+
+     const token = useStore((state) => (state as TokenState).token);
+     const supabase =  createSupabaseClient(!token ? '' : token);
+
    
    const {objectData}=useRealtimeDocument({initialObj:notificationMemberData, tableName: 'notification_settings'});
 const [defaultNotificationSettings, setDefaultNotificationSettings] = React.useState<Record<string, boolean>>({

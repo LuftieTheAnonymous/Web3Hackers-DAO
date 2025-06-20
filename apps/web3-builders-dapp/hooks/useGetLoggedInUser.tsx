@@ -3,13 +3,16 @@
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi';
 import {useCallback} from 'react';
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+import { TokenState, useStore } from '@/lib/zustandConfig';
 
 
 type Props = {}
 
 function useGetLoggedInUser() {
 
+  const token = useStore((state) => (state as TokenState).token);
+  const supabase =  createSupabaseClient(!token ? '' : token);
     const {address}=useAccount();
     const [isLoading, setIsLoading] = useState<boolean>(false);
 const [currentUser, setCurrentUser] = useState<any>(null);

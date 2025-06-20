@@ -2,7 +2,8 @@
 
 
 
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+import { cookies } from 'next/headers';
 import webpush from 'web-push';
 
 webpush.setVapidDetails(
@@ -13,6 +14,9 @@ webpush.setVapidDetails(
 
 export async function upsertWebPushSubscription(address: `0x${string}`, notificationsPreferences:any){ 
 try{
+    const cookiesStore = await cookies();
+const token = cookiesStore.get('supabase_jwt');
+ const supabase=  createSupabaseClient(!token ? '' : token.value);
 
 const {data: promises, error} = await supabase.from('notification_settings').select('*').eq('userAddress', address).single();
 
@@ -38,6 +42,9 @@ catch(err){
 
 export async function removeNotificationSettings(address: `0x${string}`){
     try{
+          const cookiesStore = await cookies();
+const token = cookiesStore.get('supabase_jwt');
+ const supabase=  createSupabaseClient(!token ? '' : token.value);
         await supabase.from('notification_settings').delete().eq('userAddress', address);
         await supabase.from('push_subscriptions').delete().eq('user_address', address);
     }catch(err){
@@ -47,6 +54,9 @@ export async function removeNotificationSettings(address: `0x${string}`){
 
 export async function notifyEveryDAOMember(message:string,notificationReceivePropertyName:string) {
     try{
+           const cookiesStore = await cookies();
+const token = cookiesStore.get('supabase_jwt');
+ const supabase=  createSupabaseClient(!token ? '' : token.value);
          const {data, error} = await supabase.from('notification_settings').select('endpoint, auth_key, p256h_key, userAddress').eq(notificationReceivePropertyName, true);
 
         if(error){
@@ -70,6 +80,8 @@ if(data.length === 0) {
 
 
       const result =  await Promise.all(promisesArray);
+
+      console.log('Notifications sent successfully', result);
 
 
     }catch(err){

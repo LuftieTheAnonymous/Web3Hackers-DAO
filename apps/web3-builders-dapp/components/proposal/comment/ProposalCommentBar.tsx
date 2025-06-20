@@ -12,7 +12,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAccount } from 'wagmi';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/db/supabaseConfigClient';
+import { TokenState, useStore } from '@/lib/zustandConfig';
+import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+
 
 
 type Props = {
@@ -24,7 +26,8 @@ type Props = {
 function ProposalCommentBar({state, proposalData, proposalId}: Props) {
   const {address}=useAccount();
 
-
+    const token = useStore((state) => (state as TokenState).token);
+     const supabase =  createSupabaseClient(!token ? '' : token);
 
 
   const zodMessageObject=z.object({
