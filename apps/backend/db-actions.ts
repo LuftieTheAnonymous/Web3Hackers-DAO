@@ -10,7 +10,8 @@ const handleResponse = <T>(res: { data: T | null; error: any }): DBReturn<T> => 
 export const getDatabaseElement = async <T>(
   table: string,
   column: string,
-  value: any
+  value: any,
+  
 ): DBReturn<T> => {
   try {
     const res = await supabaseConfig.from(table).select('*').eq(column, value).maybeSingle();
@@ -61,8 +62,8 @@ export const updateDatabaseElement = async <T>(
 
 export const deleteDatabaseElement = async <T>(
   table: string,
-  id: string,
-  idField = 'id'
+  id: any,
+  idField:string
 ): DBReturn<T> => {
   try {
     const res = await supabaseConfig.from(table).delete().eq(idField, id).single();

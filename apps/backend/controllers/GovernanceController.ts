@@ -6,6 +6,8 @@ import { daoContract, proposalStates } from "../config/ethersConfig.js";
 import { EventLog } from "ethers";
 import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
+import { getDatabaseElement } from "../db-actions.ts";
+import { DaoMember, DaoProposal } from "../types/graphql/TypeScriptTypes.ts";
 ;
 
 export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
@@ -13,8 +15,6 @@ export interface ProposalEventArgs extends Omit<EventLog, 'args'> {
 }
 
 dotenv.config();
-
-
 
 
 
@@ -124,7 +124,7 @@ const createProposalEligible = async (req:Request, res:Response) =>{
 
         if(!redisRead){
 
-            const {data, error} = await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', token).maybeSingle();
+            const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', token);
 
             if(!data){
                 res.status(500).send({message:"error", status:500, data:null, error:"Invalid Member. Piss off 🤣"});
@@ -132,12 +132,12 @@ const createProposalEligible = async (req:Request, res:Response) =>{
             }
 
             if(error){
-                res.status(500).send({message:"error", status:500, data:null, error:error.message});
+                res.status(500).send({message:"error", status:500, data:null, error:error});
                 return;
             }
 
             await redisClient.setEx(`dao_members:${token}`, 7200, JSON.stringify(data));
-            await redisClient.setEx(`dao_members:${data.discord_member_id}`, 7200, JSON.stringify(data));
+            await redisClient.setEx(`dao_members:${(data as any).discord_member_id}`, 7200, JSON.stringify(data));
                 await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'userWalletAddress', data.userWalletAddress); 
         await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'isAdmin', `${data.isAdmin}`);
         await redisClient.setEx(`proposalCreationLimiter:${req.params.discordId}:calledTimes`, 7 * 24 * 60 * 60, '0');

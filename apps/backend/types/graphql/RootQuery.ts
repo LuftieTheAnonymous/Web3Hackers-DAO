@@ -276,8 +276,8 @@ export const RootMutation = new GraphQLObjectType({
     deleteDaoMember: {
       type: daoMemberType,
       args: { id: { type: new GraphQLNonNull(GraphQLID) } },
-      async resolve(_, { id }) {
-        const { data, error } = await deleteDatabaseElement<DAOMember>('dao_members', id);
+      async resolve(_, { id, fieldId}) {
+        const { data, error } = await deleteDatabaseElement<DAOMember>('dao_members',fieldId ,id);
         if (error) throw new Error(error);
         return data;
       },
@@ -311,8 +311,8 @@ updateDaoProposal:{
 deleteDaoProposal: {
       type: daoProposalType,
       args: { id: { type: new GraphQLNonNull(GraphQLID) } },
-      async resolve(_, { id }) {
-        const { data, error } = await deleteDatabaseElement<DAOProposal>('dao_members', id);
+      async resolve(_, { id,idField }) {
+        const { data, error } = await deleteDatabaseElement<DAOProposal>('dao_members', idField,id);
         if (error) throw new Error(error);
         return data;
       },

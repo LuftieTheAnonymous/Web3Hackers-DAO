@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { governorTokenContract } from "../config/ethersConfig.js";
 import { supabaseConfig } from "../config/supabase.js";
-import retry from "async-retry";
 import redisClient from "../redis/set-up.js";
+import { deleteDatabaseElement, getDatabaseElement } from '../db-actions.js';
+import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
 
 
 // Single User Action
@@ -17,7 +18,7 @@ try {
         return;
     }
 
-    const {data, error} = await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(memberDiscordId)).single();
+    const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', memberDiscordId);
 
     if(!data){
         res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:memberDiscordId, status:404 });
@@ -29,7 +30,7 @@ try {
     console.log(error);
 
     if(error){
-         res.status(500).json({message:"error", data:null, error:error.message, errorObj:error, discord_member_id:memberDiscordId, status:500 });
+         res.status(500).json({message:"error", data:null, error:error, errorObj:error, discord_member_id:memberDiscordId, status:500 });
        return;
         }
 
@@ -82,7 +83,7 @@ const punishMember = async (req: Request, res: Response) => {
     const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${userAddress}`, 'userWalletAddress');
 
 if(!redisStoredNickname && !redisStoredWalletAddress){
-    const userDBObject= await supabaseConfig.from('dao_members').select('userWalletAddress, nickname').eq('userWalletAddress', userAddress).single();
+    const userDBObject= await getDatabaseElement<DaoMember>('dao_members', 'userWalletAddress', userAddress);
 
     if(!userDBObject.data){
         res.status(404).json({message:"error", data:null, tokenAmount:null,
@@ -128,7 +129,7 @@ try {
     const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${dicordMemberId}`, 'userWalletAddress');
 
 if(!redisStoredNickname && !redisStoredWalletAddress){
-    const userDBObject= await supabaseConfig.from('dao_members').select('userWalletAddress, nickname').eq('discord_member_id', Number(dicordMemberId)).single();
+    const userDBObject= await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(dicordMemberId));
     
     
     if(!userDBObject.data){
@@ -180,7 +181,7 @@ const farewellMember = async (req: Request, res: Response) => {
         const userWalletAddress= await redisClient.hGet(`dao_members:${memberDiscordId}`, 'userWalletAddress');
 
         if(!userWalletAddress){
-           const {data, error} = await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(memberDiscordId)).single();
+           const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(memberDiscordId));
 
            if(!data){
             res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:memberDiscordId, status:404 });
@@ -188,7 +189,7 @@ const farewellMember = async (req: Request, res: Response) => {
            }
 
            if(error){
-            res.status(500).json({message:"error", data:null, error:error.message, errorObj:error, discord_member_id:memberDiscordId, status:500 });
+            res.status(500).json({message:"error", data:null, error:error, errorObj:error, discord_member_id:memberDiscordId, status:500 });
             return;
            }
 
@@ -205,11 +206,15 @@ const farewellMember = async (req: Request, res: Response) => {
            await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
            await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
 
-           const {data:removedData,error:removedError}=await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
+           const {data:removedData,error:removedError}=await deleteDatabaseElement<DaoMember>('dao_members',  Number(memberDiscordId), 'discord_member_id');
 
+           if(!removedData){
+            res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:memberDiscordId, status:404 });
+            return;
+           }
 
            if(removedError){
-            res.status(500).json({message:"error", data:null, error:removedError.message, errorObj:removedError, discord_member_id:memberDiscordId, status:500 });
+            res.status(500).json({message:"error", data:null, error:removedError, errorObj:removedError, discord_member_id:memberDiscordId, status:500 });
             return;
            }
 

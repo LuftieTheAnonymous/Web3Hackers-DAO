@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { supabaseConfig } from "../config/supabase.js";
 import { governorTokenContract } from "../config/ethersConfig.js";
 import redisClient from "../redis/set-up.js";
+import { getDatabaseElement, insertDatabaseElement } from "../db-actions.ts";
+import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
 
 export const getMembers = async (req:Request, res:Response) => {
 try{
@@ -43,12 +45,12 @@ export const addMember= async (req:Request, res:Response) => {
     console.log(req.headers['x-backend-eligibility'], 'x-backend-eligibility');
     console.log(req.headers['authorization'], 'authorization');
     try{
-        const {data, error} = await supabaseConfig.from('dao_members').insert([{discord_member_id:discordId,isAdmin:isAdmin, photoURL:photoURL, userWalletAddress:walletAddress, nickname:nickname}]);
+        const {data, error} = await insertDatabaseElement('dao_members', {discord_member_id:discordId, userWalletAddress:walletAddress, nickname, isAdmin, photoURL});
         
         console.log(data, error);
 
         if(error){
-            res.status(500).json({message:"error", data:null, error:error.message, status:500 });
+            res.status(500).json({message:"error", data:null, error:error, status:500 });
 return;
         }
 
@@ -87,7 +89,17 @@ export const getMember= async (req:Request, res:Response) => {
         if(!redisStoredWalletAddr && !redisStoredIsAdmin && !redisStoredNickname && !redisStoredDiscordId){
             console.log('getting member from supabase');
           
-            const {data, error} = await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(discordId)).single();
+            const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', discordId);
+
+            if(!data){
+                res.status(404).json({message:"error", data:null, error:"Member not found", status:404 });
+                return;
+            }
+            if(!error){
+                console.log('setting member to redis');
+                  res.status(404).json({message:"error", data:null, error:"Member not found", status:404 });
+                  return;
+            }
 
             await redisClient.hSet(`dao_members:${discordId}`, 'userWalletAddress', data.userWalletAddress);
             await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', `${data.isAdmin}`);
@@ -101,7 +113,7 @@ export const getMember= async (req:Request, res:Response) => {
     
     
             if(error){
-                res.status(500).json({message:"error", data:null, error:error.message, status:500 });
+                res.status(500).json({message:"error", data:null, error:error, status:500 });
             }
     
     
