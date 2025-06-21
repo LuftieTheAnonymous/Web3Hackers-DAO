@@ -86,7 +86,7 @@ console.error('An error occurred while processing your request.');
 
 
 const proposalCreationLimiter= rateLimit({
-    windowMs:  1000 * 60, 
+    windowMs:  1000 * 60 * 60 * 24 * 7, 
     limit: async(req, res)=>{
 
       const authorizationHeader = req.headers.authorization;
