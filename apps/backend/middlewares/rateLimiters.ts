@@ -168,6 +168,10 @@ const proposalCreationLimiter= rateLimit({
 
       console.log(req.rateLimit);
 
+      if(req.rateLimit.limit === 0 && req.rateLimit.remaining === 0){
+        return {'error': 'Too many requests mate, please try again later. You have utilized your proposal creation limit (0) in the last 7 days.'};
+      }
+
     if(req.rateLimit.limit === 100 && req.rateLimit.remaining === 0){
       return {'error': 'Too many requests mate, please try again later. Admins have proposal creation limit (100) in the last 7 days.'};
     }
@@ -179,7 +183,7 @@ const proposalCreationLimiter= rateLimit({
       return {'error': 'Too many requests mate, please try again later. Members with less than 1% of tokens have proposal creation limit (5) in the last 7 days.'};
     }
 
-      return {'error': 'Too many requests mate, please try again later. You have utilized your proposal creation limit (1) in the last 7 days.'};
+      return {'error': 'Too many requests mate, please try again later. You have utilized your proposal creation limit (0) in the last 7 days.'};
     },
 
     statusCode: 429,
@@ -190,7 +194,7 @@ const proposalCreationLimiter= rateLimit({
 
     if (!authorizationHeader) {
       console.warn("No discordId provided in rate limiter:", req.ip);
-      return `no-discord-${req.ip}`;
+      return `${req.ip}`;
     }
     const discordId = authorizationHeader.split(" ")[1]; // Assuming the format is "Bearer
 
@@ -198,10 +202,10 @@ const proposalCreationLimiter= rateLimit({
     const parsedDiscordId = Number(discordId);
     if (isNaN(parsedDiscordId)) {
       console.warn("Invalid discordId in rate limiter:", discordId);
-      return `invalid-discord-${req.ip}`;
+      return `${req.ip}`;
     }
   
-      return `web3builders-dao-dapp-${parsedDiscordId}`;
+      return `${parsedDiscordId}`;
     
   } catch (err: any) {
     console.error("Rate limiter identifier crashed:", err.message);

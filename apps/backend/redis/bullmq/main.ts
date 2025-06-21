@@ -6,7 +6,7 @@ dotenv.config();
 
 
 
-export const smartContractsInteracionQueue = new Queue("smart-contract-jobs", {
+export const smartContractsInteracionQueue = new Queue("smart-contracts-jobs", {
     connection:redisConnection
 });
 

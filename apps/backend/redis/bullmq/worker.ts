@@ -9,7 +9,7 @@ import { activateProposals } from "./jobs/governor/activateProposals.js";
 import { updateMembersActivity } from "./jobs/activity/updateActivity.js";
 dotenv.config();
 
-const worker = new Worker('smart-contract-jobs', async (job) => {
+const worker = new Worker('smart-contracts-jobs', async (job) => {
     
     switch(job.name) {
         case 'monthly-distribution':

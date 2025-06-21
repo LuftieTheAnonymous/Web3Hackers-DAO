@@ -28,7 +28,6 @@
     event UserReceivedMonthlyDistribution(address indexed account, uint256 indexed amount);
     event AdminRoleGranted(address indexed account);
     event AdminRoleRevoked(address indexed account);
-    event MaliciousCounterIncreased(address indexed account);
 
     enum TokenReceiveLevel {
       LOW,
@@ -67,7 +66,7 @@
       bytes32 private constant GRANTER_ROLE = keccak256("GRANTER_ROLE");
 
       mapping(address => bool) private receivedInitialTokens;
-      mapping(address=>uint256) public userMaliciousActions;
+
       mapping(address => bool) private whitelist;
     mapping(TokenReceiveLevel => uint256) private psrOptions;
     mapping(TokenReceiveLevel => uint256) private jexsOptions;
@@ -180,13 +179,17 @@ if(address(0) == _address) {
       emit AdminRoleRevoked(account);
     }
 
-    function addToWhitelist(address user) external onlyManageRole  isAddressNonZero(user) {
+function addToWhitelist(address user) external onlyManageRole  isAddressNonZero(user) {
       whitelist[user] = true;
     }
 
-    function removeFromWhitelist(address user) external onlyManageRole isAddressNonZero(user)  {
-      whitelist[user] = false;
-    }
+function kickOutFromDAO(address user) external   isAddressNonZero(user)  {
+  receivedInitialTokens[user] = false;
+whitelist[user] = false;
+}
+
+
+
     // Internal functions (Contract Callable)
     function _maxSupply() internal view virtual override(ERC20Votes) returns (uint256) {
       return MAX_SUPPLY;
@@ -243,18 +246,12 @@ if(address(0) == _address) {
     }
 
     function punishMember(address user, uint256 amount) public nonReentrant  {
-    if(super.balanceOf(user) < amount) {
-            _burn(user, super.balanceOf(user));
-            return;
-      }
 
-      if (userMaliciousActions[user] >= malicious_actions_limit)  {
-        _burn(user, super.balanceOf(user));
-      } else {
-        _burn(user, amount);
-        userMaliciousActions[user] += 1;
-        emit UserPunished(user, amount);
-      }
+            _burn(user, amount);
+    emit UserPunished(user, amount);
+   
+
+    
     }
 
     function rewardUser(address user, uint256 amount) external nonReentrant  rewardOnlyInitialTokensReceivers(user) {
@@ -272,11 +269,6 @@ if(address(0) == _address) {
 
   emit UserReceivedMonthlyDistribution(user, amount);
   }
-
-    function increaseUserMaliciousActions(address user) external onlyManageRole  {  
-      userMaliciousActions[user] += 1;
-      emit MaliciousCounterIncreased(user);
-    }
 
     function readMemberInfluence(address user) external view returns (uint256) {
       return _getVotingUnits(user);

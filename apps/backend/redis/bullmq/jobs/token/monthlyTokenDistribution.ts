@@ -1,3 +1,4 @@
+import rateLimit from "express-rate-limit";
 import { governorTokenContract } from "../../../../config/ethersConfig.js";
 import { supabaseConfig } from "../../../../config/supabase.js";
 import retry from "async-retry";
@@ -19,10 +20,9 @@ const limit = pLimit(10);
 
 const promisesArray = (monthActivities.data as any).map(async (activity: any) => {
     return await limit(async()=>{
-
  return await retry((async () => {
  try {
-    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share ,activity.member_id);
+    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share, activity.member_id);
     console.log(tx);
     const txReceipt = await tx.wait();
     console.log(txReceipt);
@@ -43,6 +43,7 @@ const promisesArray = (monthActivities.data as any).map(async (activity: any) =>
     });
 
 });
+
 
 console.log(promisesArray, "Monthly Distributed Tokens");
 

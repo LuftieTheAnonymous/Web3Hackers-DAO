@@ -4,6 +4,7 @@ import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
 import { deleteDatabaseElement, getDatabaseElement } from '../db-actions.js';
 import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
+import { proposalCreationLimiter, rateLimiter } from "../middlewares/rateLimiters.ts";
 
 
 // Single User Action
@@ -204,6 +205,12 @@ const farewellMember = async (req: Request, res: Response) => {
            const txReceipt = await tx.wait();
 
            console.log(txReceipt);
+
+           const leaveDAOTx = await governorTokenContract.leaveDAO((data as any).userWalletAddress);
+
+           const leaveDAOTxReceipt = await leaveDAOTx.wait();
+
+           console.log(leaveDAOTxReceipt);
            
            await redisClient.DEL(`dao_members:${memberDiscordId}`);
            await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
@@ -224,6 +231,7 @@ const farewellMember = async (req: Request, res: Response) => {
          
          
            res.status(200).json({data:txReceipt, message:"success", error:null, discord_member_id:memberDiscordId, status:200});
+       
            return;
         }
 
