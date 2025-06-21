@@ -120,7 +120,7 @@ const proposalCreationLimiter= rateLimit({
         console.log(percentagePower, 'percentagePower');
 
         if(memberData.isAdmin && percentagePower >= 0.005){
-               return 15; // Admins can create 100 proposals per week
+               return 100; // Admins can create 100 proposals per week
         }
         if(percentagePower >= 0.01){
             return 10 // Non-members can create up to 5 proposals
@@ -157,7 +157,7 @@ const proposalCreationLimiter= rateLimit({
         }
 
                 if(redisStoredIsAdmin === 'true'  && percentagePower >= 0.005){
-          return 15; // Admins can create 100 proposals per week
+          return 100; // Admins can create 100 proposals per week
         }
 
 
@@ -208,7 +208,7 @@ const proposalCreationLimiter= rateLimit({
     return `error-${req.ip}`;
   }
 },
-validate:{'limit':false }
+validate:{'limit':true }
 }
 );
 
