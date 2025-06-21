@@ -130,7 +130,7 @@ const proposalCreationLimiter= rateLimit({
             return 5;// Members with less than 0.1 tokens can create up to 5 proposals
         }
 
-        return 1;
+        return 0;
       }
    
 
@@ -161,7 +161,7 @@ const proposalCreationLimiter= rateLimit({
         }
 
 
-      return 1;
+      return 0;
 
     }, //
     message: (req:any, res:any) => {
@@ -208,7 +208,7 @@ const proposalCreationLimiter= rateLimit({
     return `error-${req.ip}`;
   }
 },
-validate:{'limit':true }
+validate:{'limit':false }
 }
 );
 
