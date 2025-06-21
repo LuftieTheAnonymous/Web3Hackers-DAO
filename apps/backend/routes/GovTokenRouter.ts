@@ -3,8 +3,6 @@ import { farewellMember, getUserTokenBalance, intialTokenDistribution, punishMem
 import { DAO_Discord_elligibilityMiddleware, frontend_Discord_elligibilityMiddleware, MembershipMiddleware, rewardPunishEndpointEligibilityMiddleware } from "../middlewares/internalEligibility.js";
 import { punishUserLimiter, rewardUserLimiter } from "../middlewares/rateLimiters.js";
 
-
-
 const govTokenRouter = Router();
 
 govTokenRouter.get('/influence/:dicordMemberId', getUserTokenBalance);
