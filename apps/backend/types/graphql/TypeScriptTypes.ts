@@ -6,7 +6,7 @@ export interface DaoProposal {
   proposer_id: string;
   proposal_description: string;
   proposal_title: string;
-  isCustom: number;
+  isCustom: boolean;
 }
 
 export interface DaoMember {
@@ -14,9 +14,9 @@ export interface DaoMember {
   created_at: string;
   discord_member_id: number;
   nickname: string;
-  isAdmin: string;
+  isAdmin: boolean;
   photoURL: string;
-  dao_proposals: DaoProposal[];
+  dao_proposals?: DaoProposal[];
 }
 
 export interface DaoCalldataObject {

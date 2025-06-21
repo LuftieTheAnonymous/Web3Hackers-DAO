@@ -58,7 +58,7 @@ const rewardUserLimiter= rateLimit({
 const punishUserLimiter= rateLimit({
     windowMs: 15 * 60 * 1000, 
     limit: 5, 
-    message: {'error': 'Too many requests mate, please try again later.'},
+    message: {'error': 'Too many requests mate, please try again later. You have utilized your punish limit (5) in the last 15 minutes.'},
     statusCode: 429,
     standardHeaders: 'draft-8', // Enable the `RateLimit-*` headers
     identifier: 'adminFunctionAccess',
@@ -157,7 +157,6 @@ const proposalCreationLimiter= rateLimit({
       if(!redisStoredWalletAddr && !redisStoredIsAdmin && !redisStoredCalledTimes){
         const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(req.params.memberDiscordId)).single();
         if(!memberData || !memberData.userWalletAddress){
-          
             return {'error': 'You are not a DAO member, please join the DAO to create proposals.'};
         }
 
@@ -167,21 +166,18 @@ const proposalCreationLimiter= rateLimit({
 
         const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
         if(Math.floor(Number(userTokens) / Number(19e24)) >= 0.01 ){
-           
             return {'error': 'You can create up to 10 proposals per week.', data:null, status:429};
         }
 
         if(Math.floor(Number(userTokens) / Number(19e24)) < 0.01
     && Math.floor(Number(userTokens) / Number(19e24)) >= 0.005){
-
             return {'error': 'You can create up to 5 proposals per week. Sorry Baby !', data:null, status:429};
         }
 
         if(memberData.isAdmin){
-      
             return {'error': 'Admins can create up to 100 proposals per week. No more mate', data:null, status:429};
         }
-        return;
+
       }
 
       if(redisStoredWalletAddr && redisStoredIsAdmin){
