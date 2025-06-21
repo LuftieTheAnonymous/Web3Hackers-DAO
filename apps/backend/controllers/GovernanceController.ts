@@ -111,48 +111,17 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
     }
 }
 
-const createProposalEligible = async (req:Request, res:Response) =>{
-    try{
-        if(!req.headers.authorization){
-            res.status(500).send({message:"error", status:500, data:null, error:"No token provided, get out of here !"});
+const createProposalEligible = async(req:Request, res:Response) =>{
+        const {memberDiscordId} = req.params;
+
+        const daoMember = await  redisClient.hGetAll(`proposalCreationLimiter:${memberDiscordId}`);
+
+        if(!daoMember){
+            res.status(404).send({message:"error", status:404, data:null, error:"The user with provided nickname was not found"});
             return;
         }
 
-        const token = req.headers.authorization.split(' ')[1];
-
-        const redisRead = await redisClient.get(`dao_members:${token}`);
-
-        if(!redisRead){
-
-            const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', token);
-
-            if(!data){
-                res.status(500).send({message:"error", status:500, data:null, error:"Invalid Member. Piss off 🤣"});
-                return;
-            }
-
-            if(error){
-                res.status(500).send({message:"error", status:500, data:null, error:error});
-                return;
-            }
-
-            await redisClient.setEx(`dao_members:${token}`, 7200, JSON.stringify(data));
-            await redisClient.setEx(`dao_members:${(data as any).discord_member_id}`, 7200, JSON.stringify(data));
-                await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'userWalletAddress', data.userWalletAddress); 
-        await redisClient.hSet(`proposalCreationLimiter:${req.params.discordId}`, 'isAdmin', `${data.isAdmin}`);
-        await redisClient.setEx(`proposalCreationLimiter:${req.params.discordId}:calledTimes`, 7 * 24 * 60 * 60, '0');
-       
-
-            res.status(200).send({message:"success", status:200, data:data, error:null});
-            return;
-        }
-
-
-        res.status(200).send({message:"success", status:200, data:redisRead, error:null});
-    }
-    catch(err){
-        res.status(500).send({message:"error", status:500, data:null, error:'You are not eligible to create a proposal now !'});
-    }
+        res.status(200).send({message:"Success ! You are eligible to create a proposal.", status:200, data:daoMember, error:null});
 }
 
 

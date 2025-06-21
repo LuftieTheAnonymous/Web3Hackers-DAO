@@ -18,7 +18,7 @@ try {
         return;
     }
 
-    const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', memberDiscordId);
+    const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(memberDiscordId));
 
     console.log(data, error);
 
@@ -183,6 +183,8 @@ const farewellMember = async (req: Request, res: Response) => {
 
         if(!userWalletAddress){
            const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(memberDiscordId));
+
+           console.log(data, error);
 
            if(!data){
             res.status(404).json({message:"error", data:null, error:"The user with provided nickname was not found", discord_member_id:memberDiscordId, status:404 });
