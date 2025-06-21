@@ -197,20 +197,12 @@ const farewellMember = async (req: Request, res: Response) => {
             return;
            }
 
-           
-    const userTokens = await governorTokenContract.getVotes(data.userWalletAddress);
 
-           const tx= await governorTokenContract.punishMember((data as any).userWalletAddress, userTokens);
+           const tx= await governorTokenContract.kickOutFromDAO((data as any).userWalletAddress);
 
            const txReceipt = await tx.wait();
 
            console.log(txReceipt);
-
-           const leaveDAOTx = await governorTokenContract.leaveDAO((data as any).userWalletAddress);
-
-           const leaveDAOTxReceipt = await leaveDAOTx.wait();
-
-           console.log(leaveDAOTxReceipt);
            
            await redisClient.DEL(`dao_members:${memberDiscordId}`);
            await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');

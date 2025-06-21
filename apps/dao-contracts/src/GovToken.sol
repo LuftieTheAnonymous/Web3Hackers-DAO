@@ -183,11 +183,17 @@ function addToWhitelist(address user) external onlyManageRole  isAddressNonZero(
       whitelist[user] = true;
     }
 
-function kickOutFromDAO(address user) external   isAddressNonZero(user)  {
+function kickOutFromDAO(address user) external onlyManageRole isAddressNonZero(user)  {
   receivedInitialTokens[user] = false;
 whitelist[user] = false;
+_burn(msg.sender, balanceOf(msg.sender));
 }
 
+function leaveDAO() external isAddressNonZero(msg.sender) {
+  receivedInitialTokens[msg.sender] = false;
+whitelist[msg.sender] = false;
+_burn(msg.sender, balanceOf(msg.sender));
+}
 
 
     // Internal functions (Contract Callable)
@@ -281,8 +287,5 @@ whitelist[user] = false;
   function delegate(address delegatee) public virtual onlyWhitelisted(delegatee) override(Votes) {
    _delegate(msg.sender, delegatee);
     }
-
-
-    
 
     }

@@ -13,7 +13,6 @@ const {currentUser}=useGetLoggedInUser();
 
     const handleDeleteAccount=async ()=>{
 try{
-
     if(!currentUser.discord_member_id){
         toast.success('You are not logged in or no such user in DB !');
         return;
