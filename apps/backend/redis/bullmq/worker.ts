@@ -42,7 +42,7 @@ const updateActivityWorker = new Worker('activity-jobs', async (job) => {
         }
 },{connection:redisConnection, limiter:{
     'max':15,
-    'duration':1000 * 60 * 15
+    'duration': 1000 * 60 * 5
 }});
 
 updateActivityWorker.on('completed', (job) => console.info(`Activity Job ${job.name} completed`));

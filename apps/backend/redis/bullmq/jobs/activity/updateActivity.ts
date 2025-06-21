@@ -7,6 +7,7 @@ export const updateMembersActivity = async () => {
         const keys = await redisClient.keys("activity:*");
 
         for (const key of keys) {
+            console.log(key);
             const [_, id, memberDiscordId] = key.split(":"); // activity:id:memberDiscordId
             const activityData = await redisClient.hGetAll(key);
 
@@ -55,6 +56,8 @@ export const updateMembersActivity = async () => {
                     const current = existing[activity] ?? 0;
                     updatedFields[activity] = current + value;
                 }
+
+                console.log(updatedFields);
 
                 const { error: updateError } = await supabaseConfig
                     .from("dao_month_activity")

@@ -5,7 +5,7 @@ import pLimit from 'p-limit';
 export const monthlyTokenDistribution = async () => {
     try {
 
-        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members!inner(*)').contains('id', `${new Date().getFullYear()}-${new Date().getMonth()}`);
+        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:inner(*)').contains('id', `${new Date().getFullYear()}-${new Date().getMonth()}`);
 
         if(monthActivities.error){
             console.log(monthActivities.error);
@@ -22,7 +22,7 @@ const promisesArray = (monthActivities.data as any).map(async (activity: any) =>
 
  return await retry((async () => {
  try {
-    const tx = await governorTokenContract.distributeTokens(activity.id);
+    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share ,activity.member_id);
     console.log(tx);
     const txReceipt = await tx.wait();
     console.log(txReceipt);
@@ -33,7 +33,7 @@ const promisesArray = (monthActivities.data as any).map(async (activity: any) =>
 }
           }),{
             retries:5,
-            maxTimeout: 1 * 1000 * 3600, // 1 hour
+            maxTimeout: 1 * 1000 * 60 * 5, // 1 hour
             onRetry(err,attempt){
                 console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
             }
@@ -43,6 +43,8 @@ const promisesArray = (monthActivities.data as any).map(async (activity: any) =>
     });
 
 });
+
+console.log(promisesArray, "Monthly Distributed Tokens");
 
         const result = await Promise.allSettled(promisesArray);
 
