@@ -329,7 +329,7 @@ return (
   <DialogContent  className='bg-zinc-800 border border-(--hacker-green-4) drop-shadow-xs shadow-green-400/40'>
     <DialogHeader>
       <DialogTitle className='text-white'>DAO Proposal</DialogTitle>
-      <DialogDescription>
+      <DialogDescription onClick={()=>{console.log(token)}}>
         Make a proposal to the DAO, and vote for it to be implemented in the future.
       </DialogDescription>
 

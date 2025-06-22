@@ -1,11 +1,8 @@
 import { daoContract } from "../config/ethersConfig.js";
 import dotenv from "dotenv";
-import { supabaseConfig } from "../config/supabase.js";
 import {format, formatDistanceStrict} from "date-fns";
 import { notifyDAOMembersOnEvent } from "./actions/governor/governor-actions.js";
-import redisClient from "../redis/set-up.js";
-import { getDatabaseElement } from "../db-actions.ts";
-import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
+
 
 dotenv.config();
 
@@ -18,58 +15,14 @@ daoContract.on("ProposalCreated", async (proposalId) => {
 
             
             const proposal = await daoContract.getProposal(proposalId);
-            const redisStoredNickname= await redisClient.get(`${proposal[1]}:nickname`);
-
-            if(!redisStoredNickname){
-                const {data:memberData} = await getDatabaseElement<DaoMember>('dao_members', 'userWalletAddress', proposal[1]);
-                
-                if(!memberData){
-                    throw new Error("Member not found");
-                }
-
-                await redisClient.set(`${proposal[1]}:nickname`, memberData.nickname);
-
-                console.log("Proposal details", proposal, "Proposal", proposalId);
         
-        
-          await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                   content: `# New Proposal Announcement 📣 !\n A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
-          "components": [
-              {
-                  "type": 1,
-                  "components": [
-                    {
-                      "type": 2,
-                      "label": "View Proposal",
-                      "style": 5,
-                      url:`http://localhost:3000/proposal/${proposalId}`,
-                    }
-                  ]
-                },
-        
-                
-         
-          ]
-        }),
-                });
-             
-                await notifyDAOMembersOnEvent(`A new proposal has been created by ${memberData.nickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
-               
-                return;
-            }
-
              await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                   content: `# New Proposal Announcement 📣 !\n A new proposal has been created by ${redisStoredNickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
+                   content: `# New Proposal Announcement 📣 !\n A new proposal has been created ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
           "components": [
               {
                   "type": 1,
@@ -89,7 +42,7 @@ daoContract.on("ProposalCreated", async (proposalId) => {
         }),
                 });
              
-                await notifyDAOMembersOnEvent(`A new proposal has been created by ${redisStoredNickname} ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
+                await notifyDAOMembersOnEvent(`A new proposal has been created ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
 
 
 
@@ -135,6 +88,35 @@ daoContract.on("ProposalSucceeded", async (id) => {
 try{
     console.log("Proposal Succeeded triggered", id);
 
+            const proposal = await daoContract.getProposal(id);
+
+    await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                   content: `# The Proposal Succeeded 🎉 !\n The Proposal (${proposal.id}) has succeeded ! Now the queue period started and ${formatDistanceStrict(new Date(Number(proposal.endBlockTimestamp) * 1000), new Date())} (${format(new Date((Number(proposal.endBlockTimestamp) + Number(proposal.timelock)) * 1000),'dd/MM/yyyy')}) !`,
+          "components": [
+              {
+                  "type": 1,
+                  "components": [
+                    {
+                      "type": 2,
+                      "label": "View Proposal",
+                      "style": 5,
+                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                    }
+                  ]
+                },
+        
+                
+         
+          ]
+        }),
+                });
+
+
 await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Succeeded ! Now wait until it is queued to be executed !`, 'notifyOnSuccess');
 }catch(err){
 
@@ -142,9 +124,39 @@ await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Succeeded ! Now
 }
     });
 
-daoContract.on("ProposalCanceled", async (id) => {
+daoContract.on("ProposalCanceled", async (args) => {
       try{
           console.log("Proposal Canceled Event Triggered");
+          
+          const id = args[0];
+
+          const proposal = await daoContract.getProposal(id);
+
+           await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                   content: `# The Proposal Canceled 🚫 !\n The Proposal (${proposal.id}) has been canceled ! It won't be no longer procedured.`,
+          "components": [
+              {
+                  "type": 1,
+                  "components": [
+                    {
+                      "type": 2,
+                      "label": "View Proposal",
+                      "style": 5,
+                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                    }
+                  ]
+                },
+        
+                
+         
+          ]
+        }),
+                });
 
 await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Canceled. The proposal is not going to be voted !`, 'notifyOnCancel');
       }catch(err){
@@ -156,6 +168,38 @@ daoContract.on("ProposalQueued", async (args) => {
         try{
             console.log("Proposal Queued triggered");
             console.log("Arguments: ", args);
+            const id = args[0];
+
+            const proposal = await daoContract.getProposal(id);
+
+
+                await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                   content: `# Proposal Update 📌 !\n The Proposal (${proposal.id}) has been queued ! And it soon will be executed.`,
+          "components": [
+              {
+                  "type": 1,
+                  "components": [
+                    {
+                      "type": 2,
+                      "label": "View Proposal",
+                      "style": 5,
+                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                    }
+                  ]
+                },
+        
+                
+         
+          ]
+        }),
+                });
+
+
         }catch(err){
        console.error(err);
         }
@@ -164,6 +208,37 @@ daoContract.on("ProposalQueued", async (args) => {
 
 daoContract.on("ProposalExecuted", async (id) => {
         try{
+            const proposal = await daoContract.getProposal(id);
+
+
+                await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                   content: `# Proposal Update 📌 !\n The Proposal (${proposal.id}) has been successfully executed ! Now the result-decision is supposed to be executed.`,
+          "components": [
+              {
+                  "type": 1,
+                  "components": [
+                    {
+                      "type": 2,
+                      "label": "View Proposal",
+                      "style": 5,
+                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                    }
+                  ]
+                },
+        
+                
+         
+          ]
+        }),
+                });
+
+
+
             console.log("Execution event triggered");
             await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been executed. The proposal is not going to be voted !`, 'notifyOnExecution');
         }catch(err){

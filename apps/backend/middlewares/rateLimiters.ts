@@ -110,11 +110,11 @@ const proposalCreationLimiter= rateLimit({
         await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'isAdmin', `${memberData.isAdmin}`);
         await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'calledTimes', 1);
 
-           const userTokens = await governorTokenContract.getVotes(redisStoredWalletAddr);
+           const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
 
            const currentCirculation = await governorTokenContract.totalSupply();
 
-        const percentagePower= Number(Number(userTokens) / currentCirculation);
+        const percentagePower= Number(userTokens) / Number(currentCirculation);
 
         console.log(userTokens, 'Redis no data');
         console.log(percentagePower, 'percentagePower');

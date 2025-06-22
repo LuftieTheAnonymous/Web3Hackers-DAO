@@ -34,6 +34,7 @@ const token = useStore((state) => (state as TokenState).token);
           body: JSON.stringify({ address }),
         });
         const { token } = await res.json();
+        console.log(token);
         setToken(token);
       }
     },
