@@ -46,10 +46,7 @@ maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
     })
     });
 
-    console.log(receipts, "Receipts to be queued");
-
     const receiptsResults = await Promise.all(receipts);
-    console.log(receiptsResults, "Queue Proposals");
 
     if(!receiptsResults || receiptsResults.length === 0){
          return {data:null, error:"No proposals to queue", message:"error", status:404};

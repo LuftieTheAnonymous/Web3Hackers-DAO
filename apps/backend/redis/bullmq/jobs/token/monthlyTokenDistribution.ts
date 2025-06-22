@@ -8,14 +8,14 @@ const year = new Date().getFullYear();
 const month = new Date().getMonth(); // Note: getMonth() is 0-indexed
 const idPrefix = `${year}-${month}`; // example: "2025-5"
 
-        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:dao_members(*)').like('id', `-${idPrefix}%`);
+        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:dao_members(*)').filter('id', 'ilike', `%-${idPrefix}%`);
 
         if(monthActivities.error){
             console.log(monthActivities.error, 'Month Activities Error');
             return {data:null, error:monthActivities.error, message:"error", status:500};
         }
         if(!monthActivities.data || monthActivities.data.length === 0){
-            console.log('No monthly activities found');
+            console.log('No monthly activities found', monthActivities.data);
             return {data:null, error:"No monthly activities found", message:"error", status:404};
         }
 
@@ -28,7 +28,7 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
     return await limit(async()=>{
  return await retry((async () => {
  try {
-    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share, activity.member_id);
+    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share, activity.dao_members.userWalletAddressb);
     console.log(tx);
     const txReceipt = await tx.wait();
     console.log(txReceipt);

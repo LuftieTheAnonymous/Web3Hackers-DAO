@@ -28,16 +28,7 @@ const worker = new Worker('Smart_contracts-jobs', async (job) => {
     'duration':1000 * 60 * 2
 }});
 
-
-
-
-
-
-worker.on('completed', (job) => console.info(`Job ${job.name} completed`));
-worker.on('error', (err) => console.error('Worker error', err));
-worker.on('failed', (job, err) => console.error(`Job ${job?.name} failed`, err));
-
-const updateActivityWorker = new Worker('activity_Jobs', async (job) => {
+const updateActivityWorker = new Worker('activityjobs', async (job) => {
     switch(job.name) {
         case 'activity-update':
             await updateMembersActivity();

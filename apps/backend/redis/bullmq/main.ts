@@ -26,7 +26,7 @@ await smartContractsInteracionQueue.add("execute-proposals", {},{ repeat: {'ever
 
 
 
-export const activityInteracionQueue = new Queue("activity_Jobs", {
+export const activityInteracionQueue = new Queue("ActivityJobs", {
     connection:redisConnection
 });
 

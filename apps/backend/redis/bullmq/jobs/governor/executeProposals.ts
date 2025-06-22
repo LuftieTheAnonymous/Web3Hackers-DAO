@@ -25,7 +25,6 @@ try{
                         maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
      maxFeePerGas: ethers.parseUnits("10000", "gwei"),
                     });
-                    console.log(tx);
             
                     const txReceipt = await tx.wait();
 
@@ -48,7 +47,6 @@ try{
      });
         });
 
-        console.log(receipts, 'receipts to be executed');
 
         const receiptsResults = await Promise.allSettled(receipts);
         console.log(receiptsResults, "executed proposals");

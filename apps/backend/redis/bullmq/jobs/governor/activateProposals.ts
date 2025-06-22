@@ -10,7 +10,7 @@ export const activateProposals = async () => {
          const filters = daoContract.filters.ProposalCreated(); 
      
      const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
-         console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to activate');
+        
 
     if (!events || events.length === 0) {
 return { data: null, error: "No proposals found", message: "error", status: 404 };
@@ -46,13 +46,7 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
     })
     });
 
-    console.log(tasks, "Activated proposals");
-
-
     const results = await Promise.allSettled(tasks);
-
-    console.log(results, "Activated proposals");
-
     const summary = results.map((result) =>
       result.status === 'fulfilled' ? result.value : { success: false, error: result.reason }
     );

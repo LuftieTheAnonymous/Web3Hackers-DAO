@@ -29,8 +29,6 @@ const list= events.map(async (event) =>{
 
      const results=Promise.allSettled(list);
 
-     console.log(results,'events to finish');
-
  const receipts =  events.map(async (event) => {
     return limit(async ()=>{
               return  await retry(async ()=>{
@@ -76,11 +74,8 @@ try{
         })
     });
 
-    console.log(receipts, "receipts to finish");
-
     const receiptsResults = await Promise.allSettled(receipts);
 
-    console.log(receiptsResults, "finished proposals");
     if(!receiptsResults || receiptsResults.length === 0){
 return {data:null, error:"No proposals to finish", message:"error", status:404};
     }
