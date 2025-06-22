@@ -6,19 +6,19 @@ dotenv.config();
 
 
 
-export const smartContractsInteracionQueue = new Queue("smart-contracts-jobs", {
+export const smartContractsInteracionQueue = new Queue("Smart_contracts-jobs", {
     connection:redisConnection
 });
 
-await smartContractsInteracionQueue.remove("monthly-distribution");
-await smartContractsInteracionQueue.remove("activate-proposals");
-await smartContractsInteracionQueue.remove("finish-proposals");
-await smartContractsInteracionQueue.remove("queue-proposals");
-await smartContractsInteracionQueue.remove("execute-proposals");
+await smartContractsInteracionQueue.remove('monthly-distribution');
+await smartContractsInteracionQueue.remove('activate-proposals');
+await smartContractsInteracionQueue.remove('finish-proposals');
+await smartContractsInteracionQueue.remove('queue-proposals');
+await smartContractsInteracionQueue.remove('execute-proposals');
 
 await smartContractsInteracionQueue.setGlobalConcurrency(5);
 
-await smartContractsInteracionQueue.add("monthly-distribution", {},{ repeat: {'every': 1000 * 60 * 60 * 24 * 30 }, removeOnComplete: true,  });
+await smartContractsInteracionQueue.add("monthly-distribution", {},{ repeat: {'every': 1000 * 60 * 10 }, removeOnComplete: true,  });
 await smartContractsInteracionQueue.add("activate-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, removeOnComplete: true, });
 await smartContractsInteracionQueue.add("finish-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, 'delay':1000, removeOnComplete: true,  });
 await smartContractsInteracionQueue.add("queue-proposals", {},{ repeat: {'every': 1000 * 60 * 2  }, 'delay': 2000 , removeOnComplete: true, });
@@ -26,10 +26,12 @@ await smartContractsInteracionQueue.add("execute-proposals", {},{ repeat: {'ever
 
 
 
-export const activityInteracionQueue = new Queue("activity-jobs", {
+export const activityInteracionQueue = new Queue("activity_Jobs", {
     connection:redisConnection
 });
 
+await activityInteracionQueue.remove('activity-update');
+
 await activityInteracionQueue.setGlobalConcurrency(5);
 
-await activityInteracionQueue.add("activity-update", {},{ repeat: {'every': 1000 * 60 * 30 }, removeOnComplete: true,  });
+await activityInteracionQueue.add("activity-update", {},{ repeat: {'every': 1000 * 60  * 5 }, removeOnComplete: true,  });

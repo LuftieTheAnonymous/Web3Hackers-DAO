@@ -6,6 +6,13 @@ export const updateMembersActivity = async () => {
         // Scan Redis keys matching activity:*
         const keys = await redisClient.keys("activity:*");
 
+        if(Object.keys(keys).length === 0) return {
+            message: "success",
+            data: 'No activities found !',
+            error: null,
+            status: 200
+        };
+
         for (const key of keys) {
             console.log(key);
             const [_, id, memberDiscordId] = key.split(":"); // activity:id:memberDiscordId
@@ -28,6 +35,8 @@ export const updateMembersActivity = async () => {
                 .eq("id", id)
                 .eq("member_id", Number(memberDiscordId))
                 .single();
+
+                console.log(fetchError);
 
             if (fetchError && fetchError.code !== "PGRST116") {
                 // Skip only if it's a 'no rows found' error, otherwise throw

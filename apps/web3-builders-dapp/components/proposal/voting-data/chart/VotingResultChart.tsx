@@ -4,26 +4,60 @@ import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts"
 
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useSidebar } from "@/components/ui/sidebar";
+import { FaCheckCircle, FaDiceFive, FaDiceFour, FaDiceOne, FaDiceThree, FaDiceTwo, FaHandHolding } from "react-icons/fa";
+import { MdCancel } from "react-icons/md";
 
 
 
 
 const standardVotingChartConfig = {
-  voteOption: {
-    label: "Vote Option",
+  Approve: {
+    label: "Approve",
+    icon: FaCheckCircle,
     color: "#00e660",
   },
+  Abstain: {
+    label: "Abstain",
+    icon: FaHandHolding,
+    color: "#0080ff",
+  },
+  Defeat: {
+    label: "Defeat",
+    icon: MdCancel,
+    color: "#ff0000",
+  },
+};
 
-} satisfies ChartConfig;
 
 
 const customVotingChartConfig = {
-  voteOption:{
-    label: "Vote Option",
-    color: "#00b643",
+  "Option 1": {
+    label: "Option 1",
+    icon: FaDiceOne,
+    color: "#f6cd00",
   },
-  
-}satisfies ChartConfig;
+  "Option 2": {
+    label: "Option 2",
+    icon: FaDiceTwo,
+    color: "#00e660",
+  },
+  "Option 3": {
+    label: "Option 3",
+    icon: FaDiceThree,
+    color: "#006aff",
+  },
+  "Option 4": {
+    label: "Option 4",
+    icon: FaDiceFour,
+    color: "#ff00a1",
+  },
+  "Option 5": {
+    label: "Option 5",
+    icon: FaDiceFive,
+    color: "#59008c",
+  },
+};
+
 
 type Props = {
   chartData: any[],
@@ -52,7 +86,7 @@ function VotingResultChart({chartData, isCustom}: Props) {
 </Bar>
 
         <ChartTooltip content={<ChartTooltipContent  labelKey="voteOption" />}/>
-        <ChartLegend content={<ChartLegendContent  nameKey="voteOption"/>}/>
+        <ChartLegend content={<ChartLegendContent payload={chartData}  nameKey="voteOption"/>}/>
       </BarChart>
     </ChartContainer>
   )

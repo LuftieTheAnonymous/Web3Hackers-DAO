@@ -1,24 +1,30 @@
-import rateLimit from "express-rate-limit";
 import { governorTokenContract } from "../../../../config/ethersConfig.js";
 import { supabaseConfig } from "../../../../config/supabase.js";
 import retry from "async-retry";
 import pLimit from 'p-limit';
 export const monthlyTokenDistribution = async () => {
     try {
+const year = new Date().getFullYear();
+const month = new Date().getMonth(); // Note: getMonth() is 0-indexed
+const idPrefix = `${year}-${month}`; // example: "2025-5"
 
-        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:inner(*)').contains('id', `${new Date().getFullYear()}-${new Date().getMonth()}`);
+        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:dao_members(*)').like('id', `-${idPrefix}%`);
 
         if(monthActivities.error){
-            console.log(monthActivities.error);
+            console.log(monthActivities.error, 'Month Activities Error');
             return {data:null, error:monthActivities.error, message:"error", status:500};
         }
         if(!monthActivities.data || monthActivities.data.length === 0){
+            console.log('No monthly activities found');
             return {data:null, error:"No monthly activities found", message:"error", status:404};
         }
 
 const limit = pLimit(10);
 
-const promisesArray = (monthActivities.data as any).map(async (activity: any) => {
+
+console.log(monthActivities.data, 'Month Activities');
+
+const promisesArray = (monthActivities.data).map(async (activity: any) => {
     return await limit(async()=>{
  return await retry((async () => {
  try {
@@ -33,7 +39,7 @@ const promisesArray = (monthActivities.data as any).map(async (activity: any) =>
 }
           }),{
             retries:5,
-            maxTimeout: 1 * 1000 * 60 * 5, // 1 hour
+            maxTimeout:  1000 * 60 * 5, // 1 hour
             onRetry(err,attempt){
                 console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
             }

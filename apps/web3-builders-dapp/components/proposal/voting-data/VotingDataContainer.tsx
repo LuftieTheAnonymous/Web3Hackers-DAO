@@ -30,7 +30,8 @@ function VotingDataContainer({proposalId, isCustom}: Props) {
 
 
 <VotingResultChart isCustom={isCustom} chartData={isCustom ? [
-   {voteOption: 'Option 1', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 0).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0),
+   {voteOption: 'Option 1', 
+    value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 0).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0),
     fill: '#f6cd00', icon: FaDiceOne
    },
     {voteOption: 'Option 2', value: (proposalVotes as any[]).filter((vote) => Number(vote.voteOption) === 1).reduce((acc, vote) => acc + Number(vote.weight) / 1e18, 0), 

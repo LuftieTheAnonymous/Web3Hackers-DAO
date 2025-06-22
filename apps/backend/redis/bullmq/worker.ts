@@ -9,7 +9,7 @@ import { activateProposals } from "./jobs/governor/activateProposals.js";
 import { updateMembersActivity } from "./jobs/activity/updateActivity.js";
 dotenv.config();
 
-const worker = new Worker('smart-contracts-jobs', async (job) => {
+const worker = new Worker('Smart_contracts-jobs', async (job) => {
     
     switch(job.name) {
         case 'monthly-distribution':
@@ -25,8 +25,10 @@ const worker = new Worker('smart-contracts-jobs', async (job) => {
         }
 },{connection:redisConnection, limiter:{
     'max':20,
-    'duration':1000 * 60 * 60 
+    'duration':1000 * 60 * 2
 }});
+
+
 
 
 
@@ -35,9 +37,9 @@ worker.on('completed', (job) => console.info(`Job ${job.name} completed`));
 worker.on('error', (err) => console.error('Worker error', err));
 worker.on('failed', (job, err) => console.error(`Job ${job?.name} failed`, err));
 
-const updateActivityWorker = new Worker('activity-jobs', async (job) => {
+const updateActivityWorker = new Worker('activity_Jobs', async (job) => {
     switch(job.name) {
-        case 'update-activity':
+        case 'activity-update':
             await updateMembersActivity();
         }
 },{connection:redisConnection, limiter:{

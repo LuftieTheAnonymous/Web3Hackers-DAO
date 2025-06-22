@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import React from 'react'
 import { Bar, BarChart, Cell, XAxis, YAxis } from 'recharts';
@@ -8,30 +7,46 @@ type Props = {proposals:any[], isCustom:boolean}
 function VotesTypesCastedChart({proposals, isCustom}: Props) {
 
   const standardVotingOption={
-    votingOption: {
-      label: "Votes Casted",
+    Approve: {
+      label: "Approve",
       color: "#00ad48", // Green
+    },
+    Revoke: {
+      label: "Revoke",
+      color: "#ff4d4f", // Red
+    },
+    Abstain: {
+      label: "Abstain",
+      color: "#005eff", // Blue
     },
    
   } satisfies ChartConfig;
 
   const customVotingOption={
-    votingType: {
+    voteOption: {
       label: "Votes Casted",
       color: "#00ad48", // Green
     },
+   
 
   } satisfies ChartConfig;
 
   const chartData= [
-    {votingOption:'Approve', value: proposals.filter((prop)=> !prop.isCustom &&  prop.voteOption === 0).length, fill: '#00ad48'},
-    {votingOption:'Revoke', value: proposals.filter((prop)=> !prop.isCustom &&  prop.voteOption === 1).length, fill: '#ff4d4f'},
-    {votingOption:'Abstain', value: proposals.filter((prop)=> !prop.isCustom && prop.voteOption === 2).length, fill: '#005eff'},
+    {votingOption:'Approving', Approve:'Approve', value: proposals.filter((prop)=> !prop.isCustom && prop.voteOption === 0).length, fill: '#00ad48'},
+    {votingOption:'Revoking', Revoke:'Revoke', value: proposals.filter((prop)=> !prop.isCustom && prop.voteOption === 1).length, fill: '#ff4d4f'},
+    {votingOption:'Abstaining', Abstain:'Abstain', value: proposals.filter((prop)=> !prop.isCustom && prop.voteOption === 2).length, fill: '#005eff'},
   ];
 
   const chartCustomData =[
-{votingType:'Approving', value: proposals.filter((prop)=> prop.isCustom && !prop.isDefeatingVote && prop.isApprovingVote).length, fill: '#00ad48'},
-{votingType:'Rejecting', value: proposals.filter((prop)=> prop.isCustom && prop.isDefeatingVote && !prop.isApprovingVote).length, fill: '#ff4d4f'},
+{voteOption:'Approving', 
+  value: proposals.filter((prop)=> prop.isCustom && !prop.isDefeatingVote && prop.isApprovingVote).length, 
+  fill: '#00ad48'},
+{voteOption:'Rejecting',
+   value: proposals.filter((prop)=> prop.isCustom && prop.isDefeatingVote && !prop.isApprovingVote).length, 
+   fill: '#ff4d4f'},
+   {voteOption:'Abstaining',
+   value: proposals.filter((prop)=> prop.isCustom && !prop.isDefeatingVote && !prop.isApprovingVote).length, 
+   fill: '#005eff'},
   ]
 
 
@@ -51,22 +66,19 @@ function VotesTypesCastedChart({proposals, isCustom}: Props) {
               left: -20,
             }}
           >
-          
-          
-            <XAxis type="number" dataKey='value'  />
+            <XAxis  type="number" dataKey='value'  />
         <Bar
               dataKey="value"
               radius={[6, 6, 6, 6]}
               isAnimationActive={true}
               className="cursor-pointer"
+             label={{ position: 'right', fill: '#fff', formatter: (value:any) => `${value}` }}
             >
-              {chartCustomData.map((entry, index) => (
-                <Cell  key={`cell-${index}`} fill={entry.fill} />
-              ))}
+              {isCustom ? chartCustomData.map((entry, i) => <Cell key={i} fill={entry.fill} />) : chartData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
             </Bar>
           
             <YAxis
-  dataKey={isCustom ? 'votingType' : 'votingOption'}
+  dataKey={'votingOption'}
   type="category"
   tickLine={false}
   tickMargin={10}
@@ -78,7 +90,7 @@ function VotesTypesCastedChart({proposals, isCustom}: Props) {
 
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent label={isCustom ? 'votingType' : 'votingOption'} />}
+              content={<ChartTooltipContent label={'votingOption'} />}
             />
 
           </BarChart>

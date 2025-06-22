@@ -238,7 +238,7 @@ _burn(msg.sender, balanceOf(msg.sender));
             revert SupplySurpassed();
           }
 
-    if(!hasRole(MANAGE_ROLE, msg.sender)) {
+    if(hasRole(MANAGE_ROLE, msg.sender)) {
             amountOfTokens += initial_token_user_amount * (DSR_ADMIN_MULTIPLIER  / 1e2);
           } else {
             amountOfTokens += initial_token_user_amount * (DSR_USER_MULTIPLIER / 1e2);
