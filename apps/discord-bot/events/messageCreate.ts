@@ -46,7 +46,7 @@ module.exports={
                 },
                     body: JSON.stringify({
                     activity,
-                    id:`${message.author.id}-${new Date().getFullYear()}-${new Date().getMonth()}`,
+                    id:`${member.id}-${new Date().getFullYear()}-${new Date().getMonth()}`,
                     })
                 });
          

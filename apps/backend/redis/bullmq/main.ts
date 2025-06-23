@@ -6,7 +6,7 @@ dotenv.config();
 
 
 
-export const smartContractsInteracionQueue = new Queue("Smart_contracts-jobs", {
+export const smartContractsInteracionQueue = new Queue("smart-contracts-jobs", {
     connection:redisConnection
 });
 
@@ -26,7 +26,7 @@ await smartContractsInteracionQueue.add("execute-proposals", {},{ repeat: {'ever
 
 
 
-export const activityInteracionQueue = new Queue("ActivityJobs", {
+export const activityInteracionQueue = new Queue("activityJobs", {
     connection:redisConnection
 });
 

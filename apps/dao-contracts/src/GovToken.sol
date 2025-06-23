@@ -155,7 +155,7 @@
     }
 
     modifier isMonthlyDistributionTime() {
-      if(block.timestamp - lastClaimedTime[msg.sender] < 30 * 24 * 60 * 60){
+      if(lastClaimedTime[msg.sender] != 0 && block.timestamp - lastClaimedTime[msg.sender] < 30 * 24 * 60 * 60){
         revert MonthlyDistributionNotReady();
       }
       _;
@@ -247,7 +247,7 @@ _burn(msg.sender, balanceOf(msg.sender));
 
       _mint(receiverAddress, amountOfTokens);
       receivedInitialTokens[receiverAddress] = true;
-    lastClaimedTime[receiverAddress] = block.timestamp;
+    
       emit InitialTokensReceived(receiverAddress);
     }
 
@@ -265,7 +265,7 @@ _burn(msg.sender, balanceOf(msg.sender));
     emit UserRewarded(user, amount);
     }
 
-  function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported, uint256 vcMinutes, uint256 avgMessagesPerDay, address user) external isMonthlyDistributionTime onlyManageRole nonReentrant  {
+  function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported, uint256 vcMinutes, uint256 avgMessagesPerDay, address user) external isMonthlyDistributionTime onlyManageRole  {
 
     uint256 amount = dailyReports * 125e15 + DAOVotingPartcipation * 3e17 + DAOProposalsSucceeded * 175e15 + problemsSolved * 3e16 + issuesReported * 145e16 + vcMinutes * 1e16 + avgMessagesPerDay * 1e14;
 

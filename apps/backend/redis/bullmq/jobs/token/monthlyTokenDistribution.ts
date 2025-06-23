@@ -28,7 +28,7 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
     return await limit(async()=>{
  return await retry((async () => {
  try {
-    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share, activity.dao_members.userWalletAddressb);
+    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share, activity.dao_members.userWalletAddress);
     console.log(tx);
     const txReceipt = await tx.wait();
     console.log(txReceipt);

@@ -15,7 +15,7 @@ const token = cookiesStore.get('supabase_jwt');
   const {profileId} = await params;
 const { data, error } = await supabase
   .from('dao_members')
-  .select('*, dao_proposals:dao_proposals(*, dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*))')
+  .select('*, dao_proposals:dao_proposals(*, dao_members:dao_members(*), dao_vote_options:dao_vote_options(*), calldata_objects:calldata_objects(*)), dao_month_activity:dao_month_activity(*)')
   .eq('userWalletAddress', profileId)
   .single();
 

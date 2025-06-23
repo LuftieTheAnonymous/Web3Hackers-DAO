@@ -58,10 +58,8 @@ items-center  justify-center py-2`}>
 
 </div>
 }
-
-
-    </div>
-  )
+</div>
+)
 }
 
 export default MemberStats
