@@ -50,8 +50,7 @@ try{
     const token = cookiesStore.get('supabase_jwt');
      const supabase=  createSupabaseClient(!token ? '' : token.value);
 
-    const {error: notificationError} = await 
-    supabase.from('notification_settings').delete().eq('userAddress', address);
+    const {error: notificationError} = await supabase.from('notification_settings').delete().eq('userAddress', address);
     
     if(!notificationError){
         subscription = null;

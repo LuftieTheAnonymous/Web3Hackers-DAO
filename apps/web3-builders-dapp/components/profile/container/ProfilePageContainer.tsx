@@ -36,19 +36,7 @@ const {open}=useSidebar();
 
     const [isProposalsOpen, setIsProposalsOpen] = useState<boolean>(false);
 
-    const {writeContract}=useWriteContract({
-    mutation:{
-      onError:(err,variables)=>{
-  console.log('Error', err);
-  console.log('Variables', variables);
-      },
-      onSuccess(data, variables, context) {
-        console.log('Success', data, variables, context);
-
-      },
-    }
-    })
-
+  
 
   return (
      <div className='w-full h-full'>
@@ -59,9 +47,7 @@ const {open}=useSidebar();
    />
            </div>
 
-<Button onClick={()=>{
-  writeContract({'abi':tokenContractAbi, 'address':TOKEN_CONTRACT_ADDRESS, account:address, functionName:'rewardMonthlyTokenDistribution', args:[1,1,1,1,1,1,1, address]})
-}} className='bg-(--hacker-green-4) text-zinc-800 hover:bg-zinc-600 hover:text-zinc-100 mx-2 cursor-pointer'>Press !</Button>
+
 
           <div className="flex flex-col gap-2 w-full mx-auto">
    <div className="flex items-center gap-4 justify-center max-w-7xl mx-auto">
@@ -73,6 +59,7 @@ const {open}=useSidebar();
    </div>
         {isProposalsOpen ? <MemberProposalsCreated proposals={objectData.dao_proposals as any[]} /> :  <MemberStats
           isOpen={open}
+          monthActivities={profileData.dao_month_activity as any[]}
           walletAddress={walletAddress as `0x${string}`}/>}
           </div>
           

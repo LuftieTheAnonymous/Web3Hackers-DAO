@@ -4,14 +4,20 @@ import { Button } from '../ui/button'
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract } from 'wagmi';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
 type Props = {}
 
 function DeleteAccount({}: Props) {
 const router= useRouter();
+const {address}=useAccount();
 const {currentUser}=useGetLoggedInUser();
-const {writeContract, status}=useWriteContract();
+const {writeContract, status}=useWriteContract({
+  mutation:{
+    onError(error){console.log(error);toast.error('Transaction Failed ! Try again later !');},
+    onSuccess(data){console.log(data);toast.success('Transaction successful !');},
+  }
+});
 
 
     const handleDeleteAccount=async ()=>{
@@ -63,12 +69,10 @@ try{
         abi:tokenContractAbi,
         address: TOKEN_CONTRACT_ADDRESS,
         functionName: 'leaveDAO',
-        args: [currentUser.userWalletAddress],
+        args: [],
       });
 
-      status ==='success' && toast.success('You have left the DAO !');
-
-      status === 'error' && toast.error('Error leaving the DAO !');
+     
     };
 
 
@@ -80,7 +84,7 @@ try{
   <p className='text-xs'>If you're no longer enjoying DAO or doesn't enjoy the community, you can leave the DAO, but still be pertained in DB in case you'd like to return.</p>
 <Button
       onClick={leaveDAO}
-      className='cursor-pointer hover:scale-95 bg-yellow-300 hover:bg-yellow-500 text-black'>
+      className='cursor-pointer hover:scale-95 w-full mt-2 bg-yellow-300 hover:bg-yellow-500 text-black'>
         Leave DAO
       </Button>
 </div>

@@ -68,15 +68,15 @@ function Page({}: Props) {
       
         <div className=" max-w-6xl w-full mx-auto flex-col gap-6 flex items-center py-6 px-4">
 
-<div className="flex flex-col items-center gap-3">
+<div className="flex flex-col justify-center items-center gap-5 w-full">
 <BlurFade>
-<div className='text-white text-5xl font-bold flex flex-wrap gap-2'>Welcome to <SparklesText sparklesCount={10} colors={{first:'#05F29B', second: '#03A678'}} className='text-5xl font-bold'>
+<div className='text-white text-2xl sm:text-3xl text-center lg:text-5xl font-bold flex items-center w-full flex-wrap gap-2'>Welcome to <SparklesText sparklesCount={10} colors={{first:'#05F29B', second: '#03A678'}} className='text-5xl font-bold'>
 <AuroraText colors={['#2289ff', '#6e2094']}>Web3</AuroraText>Builders 
 </SparklesText></div>
 </BlurFade>
 
 <BlurFade>
-  <div className="text-white text-2xl font-medium flex flex-wrap gap-2">A community where Your <AuroraText className='font-bold ' colors={['#05F29B', '#03A678']}>Impact</AuroraText> is proportional to your <AuroraText className='font-bold ' colors={['#05F29B', '#03A678']}>Actions</AuroraText>.</div>
+  <div className="text-white text-2xl font-medium flex flex-wrap gap-2 text-center items-center">A community where Your <AuroraText className='font-bold ' colors={['#05F29B', '#03A678']}>Impact</AuroraText> is proportional to your <AuroraText className='font-bold ' colors={['#05F29B', '#03A678']}>Actions</AuroraText>.</div>
 </BlurFade>
         </div>
 

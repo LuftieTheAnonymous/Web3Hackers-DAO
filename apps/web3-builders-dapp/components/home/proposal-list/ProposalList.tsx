@@ -12,7 +12,6 @@ import cryptoLottieAnimation from '@/public/gifs/Decentalized-Lottie.json';
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import { decodeEventLog } from 'viem';
 import { toast } from 'sonner';
-import { useRouter } from 'next/router';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 
 type Props = {
@@ -77,14 +76,6 @@ function ProposalList({ proposals }: Props) {
     <>
       {serverData && token && (
         <>
-          <p
-            onClick={() => {
-              console.log(serverData);
-            }}
-            className='text-white text-2xl font-semibold'
-          >
-            List with current proposals
-          </p>
           <DropdownBar />
         </>
       )}

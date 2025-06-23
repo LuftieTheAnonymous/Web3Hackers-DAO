@@ -16,7 +16,9 @@ export async function upsertWebPushSubscription(address: `0x${string}`, notifica
 try{
     const cookiesStore = await cookies();
 const token = cookiesStore.get('supabase_jwt');
- const supabase=  createSupabaseClient(!token ? '' : token.value);
+console.log(token);
+const supabase=  createSupabaseClient(!token ? '' : token.value);
+
 
 const {data: promises, error} = await supabase.from('notification_settings').select('*').eq('userAddress', address).single();
 
@@ -26,14 +28,19 @@ if(error && error.code !== 'PGRST116') {
 
 if(!promises){
     
-       const {error: insertError} = await supabase.from('notification_settings').upsert({...notificationsPreferences, userAddress:address}).single();
+       const {error: insertError} = await supabase.from('notification_settings').insert({...notificationsPreferences, userAddress:address}).single();
         if(insertError) {
             throw new Error(`Failed to upsert notification settings: ${insertError.message}`);
         }
 
-}
+        return;
 }
 
+const {error: updateError} = await supabase.from('notification_settings').update({...notificationsPreferences, userAddress:address}).eq('userAddress', address).single();
+if(updateError) {
+    throw new Error(`Failed to upsert notification settings: ${updateError.message}`);
+}
+}
 catch(err){
     console.log(err);
     throw new Error(`Failed to upsert web push subscription: ${err}`);

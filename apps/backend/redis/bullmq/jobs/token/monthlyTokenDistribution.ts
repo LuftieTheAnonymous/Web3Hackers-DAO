@@ -8,7 +8,7 @@ const year = new Date().getFullYear();
 const month = new Date().getMonth(); // Note: getMonth() is 0-indexed
 const idPrefix = `${year}-${month}`; // example: "2025-5"
 
-        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:dao_members(*)').filter('id', 'ilike', `%-${idPrefix}%`);
+        const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:dao_members(*)').filter('id', 'ilike', `%-${idPrefix}%`).is('is_rewarded', false);
 
         if(monthActivities.error){
             console.log(monthActivities.error, 'Month Activities Error');
@@ -32,6 +32,11 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
     console.log(tx);
     const txReceipt = await tx.wait();
     console.log(txReceipt);
+
+    if(txReceipt){
+        await supabaseConfig.from('dao_month_activity').update({is_rewarded: true}).eq('id', activity.id);
+    }
+
     return { success: true, activityId: activity.id, receipt: txReceipt };
 } catch (err) {
     console.log(err);

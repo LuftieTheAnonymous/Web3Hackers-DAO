@@ -22,6 +22,7 @@ import VotingStandardModal from './voting-data/VotingStandardModal';
 import { decodeEventLog } from 'viem';
 import { notFound } from 'next/navigation';
 import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
 
 
 type Props<T> = {
@@ -130,12 +131,12 @@ if(!proposalData){
     <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto ">
     <div className="w-full bg-zinc-800 max-sm:max-h-80 h-full min-h-96 lg:min-h-[28rem] max-h-[32rem] border-(--hacker-green-4) overflow-y-auto  rounded-lg">
     <div className="w-full flex justify-between sticky top-0 left-0 items-center bg-zinc-900 rounded-t-lg px-2 md:px-4 py-8 h-14">
-    <div className="flex items-center gap-2">
+    <Link href={`/profile/${(proposalObj as any).dao_members.userWalletAddress}`} className="flex hover:scale-95 transition-all duration-500 items-center gap-2">
       <div className="w-10 h-10 rounded-full bg-zinc-600">
             {proposalObj && (proposalObj as any).dao_members.photoURL && <Image alt={'avatar'} src={(proposalObj as any).dao_members.photoURL} width={32} height={32} className='rounded-full w-full h-full'/>}
       </div>
       <p className='text-(--hacker-green-4)'>@{proposalObj && (proposalObj as any).dao_members.nickname}</p>
-    </div>
+    </Link>
     
     <div className="flex items-center gap-2">
      {proposalOnchainData as any && Number((proposalOnchainData as any).state) !== 1 && 

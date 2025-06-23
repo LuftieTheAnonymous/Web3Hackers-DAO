@@ -46,7 +46,7 @@ const chartConfig = {
 
 
 
-    const totalVisitors = React.useMemo(() => {
+    const allVotes = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.votesGiven, 0)
   }, [])
 
@@ -89,7 +89,7 @@ config={chartConfig}
               y={viewBox.cy}
               className="fill-white text-2xl font-bold"
             >
-              {totalVisitors.toLocaleString()}
+              {allVotes.toLocaleString()}
             </tspan>
             <tspan
               x={viewBox.cx}

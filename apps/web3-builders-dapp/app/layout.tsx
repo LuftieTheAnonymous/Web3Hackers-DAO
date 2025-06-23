@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   title: "Web3 Builders DAO Dapp",
   description: "An open source web3 builders DAO dapp. Created for needs of the web3 builders community on discord.",
   
+  
 };
 
 export default function RootLayout({

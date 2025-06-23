@@ -10,6 +10,8 @@ import {useLottie} from "lottie-react";
 import cryptoLottieAnimation from "@/public/gifs/Crypto-Lottie-Animation.json";
 import Image from 'next/image';
 import { Skeleton } from '../ui/skeleton';
+import Link from 'next/link';
+import { FaDiscord } from 'react-icons/fa';
 
 
 type Props = {}
@@ -90,8 +92,8 @@ function ProposalCard({}: Props) {
 
 
 <div className="flex flex-col gap-2 items-center justify-center max-w-2xl w-full text-center">
-<p className='text-white text-lg'>If you want to participate in our DAO, you would need to belong to our Discord Community and register your wallet address. Please DM <span className='text-(--hacker-green-4)'>@Luftjunkie_19</span> on Discord, we'll see  !</p>
-<p className='text-sm text-white'>And also claim the DAO Tokens 😅</p>
+<p className='text-white text-lg'>If you want to participate in our DAO and you're a <span className='text-(--hacker-green-4)'>Web3 Builder</span>, you would need to belong to our <span className='text-(--discord-colour)'>Discord Community</span> and register your wallet address to claim the tokens.</p>
+<Link target='_blank' className='bg-(--discord-colour) hover:bg-gray-600 transition-all duration-500 hover:scale-95 rounded-lg flex items-center gap-2 text-white p-2' href={`https://discord.gg/ZRVt9F7s`}>Join Discord Now <FaDiscord className='text-white text-3xl'/></Link>
 </div>
 
     
