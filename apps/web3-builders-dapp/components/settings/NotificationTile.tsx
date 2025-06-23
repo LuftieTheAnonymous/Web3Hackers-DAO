@@ -35,19 +35,22 @@ const [defaultNotificationSettings, setDefaultNotificationSettings] = React.useS
 
    const handleUpdateNotificationSettings = async () => {
       try {
+         
   
-if(subscription){
+if(subscription && address) {
 
-   const {data:existingData, error:existingError} = await supabase.from('notification_settings').select('userAddress').eq('userAddress', address).single();
+   const {data:existingData, error:existingError} = await supabase.from('notification_settings').select('*').eq('userAddress', address).single();
 
 if(existingError && existingError.code !== 'PGRST116') {
     throw new Error(`Failed to fetch notification settings: ${existingError.message}`);
 }
 
 
-if(existingData){
-    const {error, data} = await supabase.from('notification_settings').update({...defaultNotificationSettings, userAddress:address}).eq('userAddress', address).single();
+if(existingData && address){
+    const {error, data} = await supabase.from('notification_settings').update({...defaultNotificationSettings}).eq('userAddress', address).single();
        
+console.log(data, error);
+
          if(error) {
                toast.error(`Error while updating notification settings: ${error.message}`);
             console.error('Error updating notification settings:', error);
@@ -60,12 +63,6 @@ if(existingData){
          toast.success('Notification settings updated successfully!');
 return;
 }
-
-
-      
-         console.log('Updated Notification Settings:', defaultNotificationSettings);
-         toast.success('Notification settings updated successfully!');
-return;
       }
 
    toast.error('Please subscribe to notifications first.');
@@ -76,10 +73,6 @@ return;
          console.error('Error updating notification settings:', error);
       }
    }
-
-
-   
-
 
   return (
     <div className="flex flex-col justify-between max-w-md w-full bg-zinc-800 border border-(--hacker-green-4) self-center h-[36rem] p-4 rounded-md">
@@ -95,36 +88,36 @@ return;
                 <p className=' text-white text-sm'>New Proposals Notification</p>
                 <Switch onClick={() => {
                   setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnNewProposals: !defaultNotificationSettings.notifyOnNewProposals });
-                }} checked={defaultNotificationSettings?.notifyOnNewProposals ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
+                }} checked={defaultNotificationSettings.notifyOnNewProposals ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
              </div>
 
              <div className="flex items-center gap-4 justify-between max-w-4/5 w-full">
                 <p className=' text-white text-sm'>Final Proposal-Voting Notification</p>
                 <Switch onClick={() => {
                   setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnUnvoted: !defaultNotificationSettings.notifyOnUnvoted });
-                }} checked={defaultNotificationSettings?.notifyOnUnvoted ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
+                }} checked={defaultNotificationSettings.notifyOnUnvoted ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
              </div>
     
              <div className="flex items-center gap-4 justify-between max-w-4/5 w-full">
                 <p className=' text-white text-sm'>Monthly Token Rewards Notification</p>
                 <Switch onClick={() => {
                   setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnSuccess: !defaultNotificationSettings.notifyOnSuccess });
-                }}  checked={defaultNotificationSettings?.notifyOnSuccess ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
+                }}  checked={defaultNotificationSettings.notifyOnSuccess ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
              </div>
     
              <div className="flex items-center gap-2 justify-between max-w-4/5 w-full">
                 <p className=' text-white text-sm'>Cancelation Notification</p>
-                <Switch onClick={()=>{setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnCancel: !defaultNotificationSettings.notifyOnCancel });}} checked={defaultNotificationSettings?.notifyOnCancel ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
+                <Switch onClick={()=>{setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnCancel: !defaultNotificationSettings.notifyOnCancel });}} checked={defaultNotificationSettings.notifyOnCancel ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
              </div>
 
                  <div className="flex items-center gap-2 justify-between max-w-4/5 w-full">
                 <p className=' text-white text-sm'>Vote Notification</p>
-                <Switch onClick={()=>{setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnVote: !defaultNotificationSettings.notifyOnVote });}} checked={defaultNotificationSettings?.notifyOnVote ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
+                <Switch onClick={()=>{setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnVote: !defaultNotificationSettings.notifyOnVote });}} checked={defaultNotificationSettings.notifyOnVote ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
              </div>
 
                 <div className="flex items-center gap-2 justify-between max-w-4/5 w-full">
                 <p className=' text-white text-sm'>Execution Notification</p>
-                <Switch onClick={()=>{setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnExecution: !defaultNotificationSettings.notifyOnExecution });}} checked={defaultNotificationSettings?.notifyOnExecution ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
+                <Switch onClick={()=>{setDefaultNotificationSettings({...defaultNotificationSettings, notifyOnExecution: !defaultNotificationSettings.notifyOnExecution });}} checked={defaultNotificationSettings.notifyOnExecution ?? false} className='data-[state=checked]:bg-(--hacker-green-4) cursor-pointer  scale-150 data-[state=unchecked]:bg-zinc-600 '/>
              </div>
 
                        <WebPushNotificationComponent/>

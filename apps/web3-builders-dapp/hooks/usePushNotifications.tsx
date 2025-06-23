@@ -81,7 +81,8 @@ function usePushNotifications() {
         const serializeSub = JSON.parse(JSON.stringify(sub));
         console.log(serializeSub, 'serializeSub');
         if(address) {
-          await subscribeUser(serializeSub, address);
+         const {subscription, error, success} = await subscribeUser(serializeSub, address);
+         console.log(subscription, error, success);
         await upsertWebPushSubscription(address, {notifyOnNewProposals:true, notifyOnExecution:true, notifyOnSuccess:true, notifyOnCancel:true, notifyOnVote:true, notifyOnUnvoted:true, endpoint:sub.endpoint, p256h_key: serializeSub.keys.p256dh, auth_key: serializeSub.keys.auth});
               toast.success('Subscribed from push notifications !');
       }
@@ -93,10 +94,11 @@ function usePushNotifications() {
 
     const unsubscribeFromPush=async()=>{
    try{
-   if(subscription){
-        await subscription.unsubscribe();
-        setSubscription(null);
-        await unsubscribeUser(address as `0x${string}`);
+   if(subscription && address){
+     await subscription.unsubscribe();
+     setSubscription(null);
+     const {subscription:object, error, success}=  await unsubscribeUser(address);
+     console.log(object, error, success);
         toast.success('Unsubscribed from push notifications !');
    }
    }catch(err){
