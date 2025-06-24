@@ -19,14 +19,17 @@ const token = cookiesStore.get('supabase_jwt');
 console.log(token);
 const supabase=  createSupabaseClient(!token ? '' : token.value);
 
+console.log(address, 'supabase');
 
 const {data: promises, error} = await supabase.from('notification_settings').select('*').eq('userAddress', address).single();
+
+console.log(promises, error, 'promises AND error');
 
 if(error && error.code !== 'PGRST116') {
     throw new Error(`Failed to fetch notification settings: ${error.message}`);
 }
 
-if(!promises){
+if(!promises && address){
     
        const {error: insertError} = await supabase.from('notification_settings').insert({...notificationsPreferences, userAddress:address}).single();
         if(insertError) {
@@ -36,9 +39,9 @@ if(!promises){
         return;
 }
 
-const {error: updateError} = await supabase.from('notification_settings').upsert({...notificationsPreferences, userAddress:address}).eq('userAddress', address).single();
+const {error: updateError} = await supabase.from('notification_settings').update({...notificationsPreferences}).eq('userAddress', address).single();
 if(updateError) {
-    throw new Error(`Failed to upsert notification settings: ${updateError.message}`);
+    throw new Error(`${updateError.message}, ${updateError.code}`);
 }
 }
 catch(err){

@@ -39,7 +39,7 @@ const [defaultNotificationSettings, setDefaultNotificationSettings] = React.useS
 if(address) {
 
 
-await upsertWebPushSubscription(address, defaultNotificationSettings);
+await upsertWebPushSubscription(address as `0x${string}`, {...defaultNotificationSettings, updateAt:new Date().toISOString(), userAddress:address as `0x${string}`});
 
       }
 

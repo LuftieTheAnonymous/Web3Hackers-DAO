@@ -17,6 +17,7 @@ import './redis/bullmq/main.ts';
 import './redis/bullmq/worker.ts';
 import './redis/bullmq/queueEvents.ts';
 import { schema } from './types/graphql/RootQuery.js';
+import webpush from 'web-push';
 const app = express();
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use('/governance', governanceRouter);
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
+
 
 
 
