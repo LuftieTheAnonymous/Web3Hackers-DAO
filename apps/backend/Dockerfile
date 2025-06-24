@@ -14,7 +14,7 @@ ENV NODE_ENV=development
 COPY package*.json ./
 
 # Install ALL dependencies, including devDependencies
-RUN npm install
+RUN npm install --production
 
 RUN npm install -g ts-node typescript && \
     npm install -g nodemon && \
