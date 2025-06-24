@@ -7,20 +7,12 @@ import { governorTokenContract } from "../config/ethersConfig.js";
     // Because of the proposal execution cron-job every 1 hours
 export const executeGovenorTokenEvents=()=>{
 governorTokenContract.on("UserPunished", async (args:any) => {
-
-    // Implement the feature that will take the receiver Id and will notify him
-    // with web-push notification about the punishment
     console.log("User Punished Triggered");
     console.log("Arguments: ", args);
 });
 
 // Every time an user is rewarded and this event is mostly likely to be called every 1 hours.
 governorTokenContract.on("UserRewarded", async (args:any) => {
-
-    // Implement the feature that will take the receiver Id and will notify him
-    // with web-push notification about the reward
-
-
     console.log("User Rewarded Triggered");
     console.log("Arguments: ", args);
 });

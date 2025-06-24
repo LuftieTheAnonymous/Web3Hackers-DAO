@@ -10,6 +10,7 @@ import usePushNotifications from '@/hooks/usePushNotifications';
 import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 import { useAccount } from 'wagmi';
+import { upsertWebPushSubscription } from '@/lib/web-push/db/actions';
 
 type Props = {
    notificationMemberData:any
@@ -18,56 +19,30 @@ type Props = {
 function NotificationTile({notificationMemberData}: Props) {
 const {address}=useAccount();
      const token = useStore((state) => (state as TokenState).token);
-      const supabase =  createSupabaseClient(!token ? '' : token);
 
    
    const {objectData}=useRealtimeDocument({initialObj:notificationMemberData, tableName: 'notification_settings'});
 const [defaultNotificationSettings, setDefaultNotificationSettings] = React.useState<Record<string, boolean>>({
       notifyOnNewProposals: objectData && objectData.notifyOnNewProposals !== undefined ? objectData.notifyOnNewProposals : false,
       notifyOnUnvoted: objectData && objectData.notifyOnUnvoted !== undefined ? objectData.notifyOnUnvoted : false,
-      notifyOnSuccess:  objectData && objectData.notifyOnSuccess !== undefined  ? objectData.notifyOnRewarding : false,
+      notifyOnSuccess:  objectData && objectData.notifyOnSuccess !== undefined  ? objectData.notifyOnSuccess : false,
       notifyOnExecution: objectData && objectData.notifyOnExecution !== undefined ? objectData.notifyOnExecution :  false,
       notifyOnCancel: objectData && objectData.notifyOnCancel !== undefined ? objectData.notifyOnCancel : false,
       notifyOnVote: objectData && objectData.notifyOnVote !== undefined ? objectData.notifyOnVote : false
    });
 
-     const {subscription }=usePushNotifications();
 
    const handleUpdateNotificationSettings = async () => {
       try {
          
   
-if(subscription && address) {
-
-   const {data:existingData, error:existingError} = await supabase.from('notification_settings').select('*');
-
-   console.log(existingData, existingError);
-
-if(existingError && existingError.code !== 'PGRST116') {
-    throw new Error(`Failed to fetch notification settings: ${existingError.message}`);
-}
+if(address) {
 
 
-if(existingData && address){
-    const {error, data} = await supabase.from('notification_settings').update({...defaultNotificationSettings}).eq('userAddress', address).single();
-       
-console.log(data, error);
+await upsertWebPushSubscription(address, defaultNotificationSettings);
 
-         if(error) {
-               toast.error(`Error while updating notification settings: ${error.message}`);
-            console.error('Error updating notification settings:', error);
-            return;
-         }
-
-         if(!data) throw new Error('No subscriptions found');  
-
-         console.log('Updated Notification Settings:', defaultNotificationSettings);
-         toast.success('Notification settings updated successfully!');
-return;
-}
       }
 
-   toast.error('Please subscribe to notifications first.');
 
         
       } catch (error:any) {

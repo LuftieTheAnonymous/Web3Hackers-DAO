@@ -23,6 +23,7 @@ import { decodeEventLog } from 'viem';
 import { notFound } from 'next/navigation';
 import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
+import { write } from 'fs';
 
 
 type Props<T> = {
@@ -172,16 +173,8 @@ if(!proposalData){
     </div>)  
   }
 
-  <Button onClick={()=>{
-    writeContract({
-      abi: governorContractAbi,
-      address: GOVERNOR_CONTRACT_ADDRESS,
-      functionName: "succeedProposal",
-      args:[proposalId],
-    })
-  }}>Succeed</Button>
-  
-    
+
+  {(proposalOnchainData as any) && (proposalOnchainData as any).state === 1 &&
     <div  className={`max-w-2xl mx-auto self-center w-full bg-zinc-800 h-12 rounded-lg flex items-center gap-5 overflow-y-hidden ${proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? 'justify-center' : 'justify-between'} overflow-x-auto p-7`}>
       {proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? <>
      <Dialog>
@@ -247,6 +240,8 @@ castVoteFunction={()=>handleStandardProposalVote(2)}
 }
     
     </div>
+  }
+    
     
     </div>
 

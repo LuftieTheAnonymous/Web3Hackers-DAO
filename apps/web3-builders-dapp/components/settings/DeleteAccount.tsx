@@ -71,8 +71,6 @@ try{
         functionName: 'leaveDAO',
         args: [],
       });
-
-     
     };
 
 

@@ -5,7 +5,6 @@ import redisClient from "../redis/set-up.js";
 import { deleteDatabaseElement, getDatabaseElement } from '../db-actions.js';
 import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
 
-
 // Single User Action
 const intialTokenDistribution = async (req: Request, res: Response) => {
 try {
@@ -48,7 +47,6 @@ try {
     res.status(500).json({data:null, error:(error as any).shortMessage, message:"error", status:500});
 }
 }
-
 
 const rewardMember = async (req: Request, res: Response) => {
     try {

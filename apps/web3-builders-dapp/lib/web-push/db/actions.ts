@@ -36,7 +36,7 @@ if(!promises){
         return;
 }
 
-const {error: updateError} = await supabase.from('notification_settings').update({...notificationsPreferences, userAddress:address}).eq('userAddress', address).single();
+const {error: updateError} = await supabase.from('notification_settings').upsert({...notificationsPreferences, userAddress:address}).eq('userAddress', address).single();
 if(updateError) {
     throw new Error(`Failed to upsert notification settings: ${updateError.message}`);
 }

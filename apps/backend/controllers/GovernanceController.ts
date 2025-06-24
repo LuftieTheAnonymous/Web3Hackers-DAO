@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
-
 import dotenv from "dotenv";
 import { daoContract, proposalStates } from "../config/ethersConfig.js";
 
 import { EventLog } from "ethers";
 import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
-import { getDatabaseElement } from "../db-actions.ts";
-import { DaoMember, DaoProposal } from "../types/graphql/TypeScriptTypes.ts";
 ;
 
 export interface ProposalEventArgs extends Omit<EventLog, 'args'> {

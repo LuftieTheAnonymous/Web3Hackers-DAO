@@ -15,8 +15,6 @@ function usePushNotifications() {
     const [isSupported, setIsSupported]=useState<boolean>(false);
     const [subscription, setSubscription]=useState<PushSubscription|null>(null);
 
-
-
       const urlBase64ToUint8Array=(base64String: string) => {
     console.log(base64String);
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
