@@ -135,26 +135,26 @@ if(!proposalData){
       <div className="w-10 h-10 rounded-full bg-zinc-600">
             {proposalObj && (proposalObj as any).dao_members.photoURL && <Image alt={'avatar'} src={(proposalObj as any).dao_members.photoURL} width={32} height={32} className='rounded-full w-full h-full'/>}
       </div>
-      <p className='text-(--hacker-green-4)'>@{proposalObj && (proposalObj as any).dao_members.nickname}</p>
+      <p className='text-(--hacker-green-4) text-sm'>@{proposalObj && (proposalObj as any).dao_members.nickname}</p>
     </Link>
     
     <div className="flex items-center gap-2">
      {proposalOnchainData as any && Number((proposalOnchainData as any).state) !== 1 && 
      new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000).getTime() - new Date().getTime() >= 0 
-     &&   <p className='text-white text-sm'>
+     &&   <p className='text-white'>
      <span className='text-(--hacker-green-4)'>{formatDistanceToNow(new Date(Number((proposalOnchainData as any).startBlockTimestamp) * 1000))}</span>
      to start
      </p>
      } 
 
      {proposalOnchainData && (proposalOnchainData as any).state === 1 &&
-           <p className={`${new Date(Number(((proposalOnchainData as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-gray-700'}   text-xs`}>{proposalOnchainData as any && `${formatDistanceStrict(new Date(Number(((proposalOnchainData as any).endBlockTimestamp)) * 1000), new Date())}`} <span className='text-white'>until the end</span></p>
+           <p className={`${new Date(Number(((proposalOnchainData as any).endBlockTimestamp)) * 1000).getTime() >= new Date().getTime() ? 'text-(--hacker-green-4)' : 'text-gray-700'}  text-sm`}>{proposalOnchainData as any && `${formatDistanceStrict(new Date(Number(((proposalOnchainData as any).endBlockTimestamp)) * 1000), new Date())}`} <span className='text-white'>until the end</span></p>
      }
     </div>
     </div>
     
     <div className="w-full  h-full flex flex-col  justify-between gap-2 py-2 px-2">
-      <p className='text-white text-sm'>{(proposalObj as any).proposal_description}</p>
+      <p className='text-white'>{(proposalObj as any).proposal_description}</p>
     </div>
     
     </div>
@@ -171,6 +171,15 @@ if(!proposalData){
     
     </div>)  
   }
+
+  <Button onClick={()=>{
+    writeContract({
+      abi: governorContractAbi,
+      address: GOVERNOR_CONTRACT_ADDRESS,
+      functionName: "succeedProposal",
+      args:[proposalId],
+    })
+  }}>Succeed</Button>
   
     
     <div  className={`max-w-2xl mx-auto self-center w-full bg-zinc-800 h-12 rounded-lg flex items-center gap-5 overflow-y-hidden ${proposalOnchainData && (proposalOnchainData as any) && (proposalOnchainData as any).isCustom ? 'justify-center' : 'justify-between'} overflow-x-auto p-7`}>

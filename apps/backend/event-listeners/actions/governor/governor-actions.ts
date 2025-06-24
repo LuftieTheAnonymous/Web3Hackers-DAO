@@ -9,7 +9,7 @@ export async function notifyDAOMembersOnEvent(message: string, notificationRecei
     try{
         if(!redisStoredNotifcationSubscriptions){
             
-            const {data, error} = await supabaseConfig.from('notification_settings').select('endpoint, auth_key, p256h_key, userAddress').eq(notificationReceivePropertyName, true);
+            const {data, error} = await supabaseConfig.from('notification_settings').select('*').eq(notificationReceivePropertyName, true);
     
             if(error){
                 console.log({message:"error", data:null, error:error.message, status:500});

@@ -24,7 +24,7 @@ const token = cookiesStore.get('supabase_jwt');
        <div className="mx-auto max-w-4xl w-full flex flex-col gap-4 py-6 px-2 ">
 
        <p className='text-white text-2xl font-bold flex items-center gap-1'>Settings <SettingsIcon/> </p> 
-        
+
         <div className="flex w-full gap-8 items-center flex-col md:flex-row">
 
 <UserProfileTile intialDocument={data}/>

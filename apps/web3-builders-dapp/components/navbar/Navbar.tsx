@@ -41,6 +41,7 @@ const token = useStore((state) => (state as TokenState).token);
     onDisconnect: () => {
       unsetToken();
       toast('You have been disconnected ! We hope to see you again !');
+      router.push('/');
     }
   });
 

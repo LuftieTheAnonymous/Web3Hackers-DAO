@@ -4,7 +4,6 @@ import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
 import { deleteDatabaseElement, getDatabaseElement } from '../db-actions.js';
 import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
-import { proposalCreationLimiter, rateLimiter } from "../middlewares/rateLimiters.ts";
 
 
 // Single User Action

@@ -18,7 +18,7 @@ type Props = {
 function NotificationTile({notificationMemberData}: Props) {
 const {address}=useAccount();
      const token = useStore((state) => (state as TokenState).token);
-     const supabase =  createSupabaseClient(token ? token : '');
+      const supabase =  createSupabaseClient(!token ? '' : token);
 
    
    const {objectData}=useRealtimeDocument({initialObj:notificationMemberData, tableName: 'notification_settings'});
@@ -39,7 +39,9 @@ const [defaultNotificationSettings, setDefaultNotificationSettings] = React.useS
   
 if(subscription && address) {
 
-   const {data:existingData, error:existingError} = await supabase.from('notification_settings').select('*').eq('userAddress', address).single();
+   const {data:existingData, error:existingError} = await supabase.from('notification_settings').select('*');
+
+   console.log(existingData, existingError);
 
 if(existingError && existingError.code !== 'PGRST116') {
     throw new Error(`Failed to fetch notification settings: ${existingError.message}`);
