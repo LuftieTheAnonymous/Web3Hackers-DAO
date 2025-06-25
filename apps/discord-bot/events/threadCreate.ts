@@ -60,7 +60,7 @@ selectCollector.on('collect', async (i:SelectMenuInteraction)=>{
 
         i.values.forEach(async (value) => {
             
- await fetch(`http://localhost:2137/activity/update/${value}`,{
+ await fetch(`${process.env.BACKEND_ENDPOINT}/activity/update/${value}`,{
             method:'POST',
          headers: {
                   'Content-Type': 'application/json',

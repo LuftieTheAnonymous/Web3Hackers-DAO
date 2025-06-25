@@ -21,7 +21,7 @@ try{
         return;
     }
     
-    const request = await fetch(`http://localhost:2137/gov_token/influence/${member.id}`);
+    const request = await fetch(`${process.env.BACKEND_ENDPOINT}/gov_token/influence/${member.id}`);
 
    const response = await request.json();
    

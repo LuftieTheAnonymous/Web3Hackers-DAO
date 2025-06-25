@@ -28,7 +28,7 @@ module.exports = {
 
         await interaction.deferReply();
 
-    const proposalEmbedDetailsFetch= await fetch(`http://localhost:2137/governance/get_embeded_proposal_details/${proposalId}`, {
+    const proposalEmbedDetailsFetch= await fetch(`${process.env.BACKEND_ENDPOINT}/governance/get_embeded_proposal_details/${proposalId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

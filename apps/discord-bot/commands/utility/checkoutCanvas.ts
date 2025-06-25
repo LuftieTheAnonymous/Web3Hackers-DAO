@@ -49,7 +49,7 @@ module.exports={
 
     await interaction.deferReply();
     
-    const fetchMember = await fetch(`http://localhost:2137/gov_token/influence/${interaction.user.id}`);
+    const fetchMember = await fetch(`${process.env.BACKEND_ENDPOINT}/gov_token/influence/${interaction.user.id}`);
 
     const memberObject = await fetchMember.json();
     

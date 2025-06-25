@@ -27,7 +27,7 @@ try{
     }
 
 
-    const proposalRequest = await fetch(`http://localhost:2137/governance/get_proposal_details/${proposalId}`, {
+    const proposalRequest = await fetch(`${process.env.BACKEND_ENDPOINT}/governance/get_proposal_details/${proposalId}`, {
         method: 'GET',
         headers: {
             'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string,
@@ -46,7 +46,7 @@ try{
         return;
     }
     
-    const request = await fetch(`http://localhost:2137/gov_token/influence/${member.id}`);
+    const request = await fetch(`${process.env.BACKEND_ENDPOINT}/gov_token/influence/${member.id}`);
 
    const response = await request.json();
    
