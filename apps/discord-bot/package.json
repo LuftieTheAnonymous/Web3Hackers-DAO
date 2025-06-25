@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
-  "author": "",
-  "type": "module",
+  "author": "Luftjunkie",
+  "type": "commonjs",
   "main": "index.ts",
   "scripts": {
-    "build": "esbuild --bundle",
+    "build": "tsc",
     "start": "nodemon index.ts",
     "dev": "nodemon index.ts"
   },
