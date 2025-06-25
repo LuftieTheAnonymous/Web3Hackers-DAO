@@ -38,7 +38,7 @@ module.exports={
                 };
         
               
-             await fetch(`http://localhost:2137/activity/update/${member.id}`,{
+             await fetch(`${process.env.BACKEND_ENDPOINT}/activity/update/${member.id}`,{
                     method:'POST',
                   headers: {
                   'Content-Type': 'application/json',

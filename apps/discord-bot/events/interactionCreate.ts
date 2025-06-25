@@ -132,7 +132,7 @@ function buildTrackEmbed(track: any): EmbedBuilder {
             const member = interaction.guild.members.cache.get(interaction.user.id);
         
           
-            const userRegister=await fetch('http://localhost:2137/members/add-member', {
+            const userRegister=await fetch(`${process.env.BACKEND_ENDPOINT}/members/add-member`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

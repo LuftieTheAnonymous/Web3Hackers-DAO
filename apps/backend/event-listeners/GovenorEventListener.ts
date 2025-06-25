@@ -31,7 +31,7 @@ daoContract.on("ProposalCreated", async (proposalId) => {
                       "type": 2,
                       "label": "View Proposal",
                       "style": 5,
-                      url:`http://localhost:3000/proposal/${proposalId}`,
+                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposalId}`,
                     }
                   ]
                 },
@@ -72,7 +72,7 @@ daoContract.on("ProposalActivated", async (id) => {
               "type": 2,
               "label": "View Proposal",
               "style": 5,
-              url:`http://localhost:3000/proposal/${id}`,
+              url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${id}`,
             }
 ]
         },
@@ -105,7 +105,7 @@ try{
                       "type": 2,
                       "label": "View Proposal",
                       "style": 5,
-                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
                     }
                   ]
                 },
@@ -147,7 +147,7 @@ daoContract.on("ProposalCanceled", async (args) => {
                       "type": 2,
                       "label": "View Proposal",
                       "style": 5,
-                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
                     }
                   ]
                 },
@@ -188,7 +188,7 @@ daoContract.on("ProposalQueued", async (args) => {
                       "type": 2,
                       "label": "View Proposal",
                       "style": 5,
-                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
                     }
                   ]
                 },
@@ -226,7 +226,7 @@ daoContract.on("ProposalExecuted", async (id) => {
                       "type": 2,
                       "label": "View Proposal",
                       "style": 5,
-                      url:`http://localhost:3000/proposal/${proposal.id}`,
+                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
                     }
                   ]
                 },

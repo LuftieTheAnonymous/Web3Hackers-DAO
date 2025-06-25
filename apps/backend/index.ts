@@ -17,7 +17,6 @@ import './redis/bullmq/main.ts';
 import './redis/bullmq/worker.ts';
 import './redis/bullmq/queueEvents.ts';
 import { schema } from './types/graphql/RootQuery.js';
-import webpush from 'web-push';
 const app = express();
 dotenv.config();
 
@@ -38,11 +37,6 @@ dotenv.config();
 
 app.use(helmet({
     crossOriginResourcePolicy:{'policy':'cross-origin'},
-    // strictTransportSecurity:{
-    //     maxAge: 60 * 60 * 24 * 365, // 1 year in seconds
-    //     includeSubDomains: true,
-    //     preload: true
-    // },
     dnsPrefetchControl:{ allow: true },
     xDownloadOptions: false,
     frameguard:{action:'sameorigin'},
@@ -61,7 +55,7 @@ xXssProtection:true,
 
 app.use(cors({
     allowedHeaders:['Content-Type', 'Authorization', 'x-backend-eligibility', 'is-frontend-req', 'authorization'],
-    origin:['http://localhost:3000', 'http://localhost:2138', 'https://localhost:3000'],
+    origin:[process.env.FRONTEND_ENDPOINT_1 as string, process.env.FRONTEND_ENDPOINT_2 as string, process.env.BACKEND_ENDPOINT_1 as string, process.env.BACKEND_ENDPOINT_2 as string],
     methods:['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     maxAge: 600, // 10 minutes
 }));
@@ -88,7 +82,7 @@ if (!redisClient.isOpen) await redisClient.connect();
 await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
 
-export const runningPort=process.env.NODE_ENV !=='production' ? process.env.DEV_RUNNING_PORT : process.env.PRODUCTION_RUNNING_PORT;
+export const runningPort = process.env.PORT || 2137;
 
 server.listen(runningPort, async () => {
     logger.info(`Server started on port ${runningPort}`, {

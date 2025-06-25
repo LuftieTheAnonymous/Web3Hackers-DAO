@@ -26,7 +26,7 @@ try{
         toast.success('You are not logged in or no such user in DB !');
         return;
     }
-      const fetchDelete=await fetch(`http://localhost:2137/gov_token/influence/remove/${currentUser.discord_member_id}`, {
+      const fetchDelete=await fetch(`${process.env.BACKEND_ENDPOINT_1}/gov_token/influence/remove/${currentUser.discord_member_id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

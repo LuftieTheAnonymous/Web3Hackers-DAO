@@ -9,7 +9,8 @@ data: new SlashCommandBuilder().setName('initial-token-distribution').setDescrip
 async execute(interaction:any){
 
 
-    const checkAbilityResponse = await fetch(`http://localhost:2137/gov_token/influence/${interaction.user.id}`);
+    const checkAbilityResponse = await fetch(`
+    ${process.env.BACKEND_ENDPOINT}/gov_token/influence/${interaction.user.id}`);
 
     const checkAbilityResponseJson = await checkAbilityResponse.json();
 
@@ -326,7 +327,8 @@ const message = await interaction.reply({
                   await i.deferUpdate();
        
 
-                  const request = await Promise.race([await fetch(`http://localhost:2137/gov_token/intial_token_distribution/${interaction.user.id}`, {
+                  const request = await Promise.race([await fetch(`
+                  ${process.env.BACKEND_ENDPOINT}/gov_token/intial_token_distribution/${interaction.user.id}`, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',

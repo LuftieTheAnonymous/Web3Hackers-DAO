@@ -11,7 +11,7 @@ module.exports={
  
      if(!channel) return console.log('Channel not found');
 
-     await fetch(`http://localhost:2137/gov_token/influence/remove/${member.id}`, {
+     await fetch(`${process.env.BACKEND_ENDPOINT}/gov_token/influence/remove/${member.id}`, {
          method: 'POST',
          headers: {
              'Content-Type': 'application/json',
