@@ -8,7 +8,7 @@
   "type": "module",
   "module": "nodenext",
   "scripts": {
-    "build":"tsc",
+    "build": "tsc",
     "start": "tsx index.ts",
     "dev": "tsx index.ts"
   },
@@ -20,6 +20,7 @@
     "cron": "^4.3.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
+    "esbuild": "^0.25.5",
     "ethers": "^6.14.3",
     "express-rate-limit": "^7.5.0",
     "graphql": "^16.11.0",
