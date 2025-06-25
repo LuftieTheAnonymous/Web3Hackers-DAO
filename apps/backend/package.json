@@ -8,6 +8,7 @@
   "type": "module",
   "module": "nodenext",
   "scripts": {
+    "build":"tsc",
     "start": "tsx index.ts",
     "dev": "tsx index.ts"
   },
