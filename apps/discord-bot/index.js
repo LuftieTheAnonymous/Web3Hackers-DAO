@@ -10,8 +10,8 @@ const discord_player_1 = require("discord-player");
 const extractor_1 = require("@discord-player/extractor");
 // Require the necessary discord.js classes
 const dotenv_1 = __importDefault(require("dotenv"));
-const fs = require('fs');
-const path = require('path');
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const { token } = require('./discordConfig.json');
 dotenv_1.default.config();
 exports.client = new discordBotTypes_1.CustomClient({ intents: [
@@ -41,13 +41,13 @@ exports.client.cooldowns = new discord_js_1.Collection();
 exports.client.on('error', (error) => {
     console.log(error.message);
 });
-const folderPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(folderPath);
+const folderPath = path_1.default.join(__dirname, 'commands');
+const commandFolders = fs_1.default.readdirSync(folderPath);
 for (const folder of commandFolders) {
-    const commandPath = path.join(folderPath, folder);
-    const commandFiles = fs.readdirSync(path.join(commandPath)).filter((file) => file.endsWith('.ts'));
+    const commandPath = path_1.default.join(folderPath, folder);
+    const commandFiles = fs_1.default.readdirSync(path_1.default.join(commandPath)).filter((file) => file.endsWith('.ts'));
     for (const file of commandFiles) {
-        const filePath = path.join(commandPath, file);
+        const filePath = path_1.default.join(commandPath, file);
         const command = require(filePath);
         if ('data' in command && 'execute' in command) {
             exports.client.commands.set(command.data.name, command);
@@ -57,10 +57,10 @@ for (const folder of commandFolders) {
         }
     }
 }
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter((file) => file.endsWith('.ts'));
+const eventsPath = path_1.default.join(__dirname, 'events');
+const eventFiles = fs_1.default.readdirSync(eventsPath).filter((file) => file.endsWith('.ts'));
 for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file);
+    const filePath = path_1.default.join(eventsPath, file);
     const event = require(filePath);
     if (event.once) {
         exports.client.once(event.name, (...args) => {
@@ -74,10 +74,10 @@ for (const file of eventFiles) {
     }
 }
 exports.player = new discord_player_1.Player(exports.client);
-const playerEventsPath = path.join(__dirname, 'discord-player-events');
-const playerEventFiles = fs.readdirSync(playerEventsPath).filter((file) => file.endsWith('.ts'));
+const playerEventsPath = path_1.default.join(__dirname, 'discord-player-events');
+const playerEventFiles = fs_1.default.readdirSync(playerEventsPath).filter((file) => file.endsWith('.ts'));
 for (const file of playerEventFiles) {
-    const filePath = path.join(playerEventsPath, file);
+    const filePath = path_1.default.join(playerEventsPath, file);
     const event = require(filePath);
     if (event.once) {
         exports.player.events.once(event.name, (...args) => {
