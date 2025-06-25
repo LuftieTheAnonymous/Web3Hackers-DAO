@@ -4,9 +4,10 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.ts",
   "scripts": {
+    "build": "esbuild --bundle",
     "start": "nodemon index.ts",
     "dev": "nodemon index.ts"
   },
