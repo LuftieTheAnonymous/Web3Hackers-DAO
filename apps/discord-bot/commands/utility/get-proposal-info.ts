@@ -1,4 +1,4 @@
-import { formatDate } from 'date-fns';
+import {format } from 'date-fns';
 import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { EmbedBuilder } from "discord.js";
 
@@ -65,8 +65,8 @@ const exampleEmbed= new EmbedBuilder()
     
     exampleEmbed.setFooter({'iconURL':`${proposalEmbedDetails.data.db_data.dao_members.photoURL}`, text:`Proposer : ${proposalEmbedDetails.data.db_data.dao_members.nickname} | Proposal ID: ${proposalEmbedDetails.data.db_data.proposal_id}`});
     
-    exampleEmbed.addFields([{name:'Start Date', value:`${formatDate(proposalEmbedDetails.data.sm_data.startBlockTimestamp * 1000, 'dd-MM-yyyy, HH:mm')}`, inline:true}]);
-    exampleEmbed.addFields([{name:'Deadline Date', value:`${formatDate(proposalEmbedDetails.data.sm_data.endBlockTimestamp * 1000, 'dd-MM-yyyy, HH:mm')}`, inline:true}]);
+    exampleEmbed.addFields([{name:'Start Date', value:`${format(proposalEmbedDetails.data.sm_data.startBlockTimestamp * 1000, 'dd-MM-yyyy, HH:mm')}`, inline:true}]);
+    exampleEmbed.addFields([{name:'Deadline Date', value:`${format(proposalEmbedDetails.data.sm_data.endBlockTimestamp * 1000, 'dd-MM-yyyy, HH:mm')}`, inline:true}]);
 
 
         await interaction.editReply({content:`Here you are 😁`, embeds:[exampleEmbed]});

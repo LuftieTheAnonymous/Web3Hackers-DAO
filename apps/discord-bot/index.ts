@@ -50,7 +50,7 @@ const commandFolders = fs.readdirSync(folderPath);
 
 for (const folder of commandFolders) {
     const commandPath = path.join(folderPath, folder);
-const commandFiles = fs.readdirSync(path.join(commandPath)).filter((file:any) => file.endsWith('.ts'));
+const commandFiles = fs.readdirSync(path.join(commandPath)).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
 for (const file of commandFiles) {
     const filePath = path.join(commandPath, file);
     const command = require(filePath);
@@ -63,7 +63,7 @@ for (const file of commandFiles) {
 }
 
 const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter((file:any) => file.endsWith('.ts'));
+const eventFiles = fs.readdirSync(eventsPath).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
 
 for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
@@ -83,7 +83,7 @@ for (const file of eventFiles) {
 export const player =new Player(client);
 
 const playerEventsPath = path.join(__dirname, 'discord-player-events');
-const playerEventFiles = fs.readdirSync(playerEventsPath).filter((file:any) => file.endsWith('.ts'));
+const playerEventFiles = fs.readdirSync(playerEventsPath).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
 
 for (const file of playerEventFiles) {
     const filePath = path.join(playerEventsPath, file);

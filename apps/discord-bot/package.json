@@ -4,12 +4,13 @@
   "description": "",
   "license": "ISC",
   "author": "Luftjunkie",
-  "type": "module",
+  "type": "commonjs",
   "main": "index.ts",
   "scripts": {
     "build": "tsc",
-    "start": "tsx index.ts",
-    "dev": "tsx index.ts"
+    "check": "tsc --noEmit",
+    "start": "nodemon index.ts",
+    "dev": "nodemon index.ts"
   },
   "dependencies": {
     "@discord-player/extractor": "^7.1.0",
@@ -23,13 +24,19 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@google/genai": "^1.5.1",
     "@napi-rs/canvas": "^0.1.70",
+    "date-fns": "^2.30.0",
     "discord-player": "^7.1.0",
     "discord.js": "^14.18.0",
     "dotenv": "^16.5.0",
+    "esbuild": "^0.25.5",
     "express": "^5.1.0",
     "ffmpeg-static": "^5.2.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
-    "undici": "^6.21.1"
+    "undici": "^6.21.1",
+    "yn": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/date-fns": "^2.5.3"
   }
 }
