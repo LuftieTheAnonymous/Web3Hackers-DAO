@@ -22,7 +22,10 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link package.json .
-RUN npm install --production=true
+
+RUN npm i --save-dev @types/express
+
+RUN npm install --production=true 
 
 # Copy application code
 COPY --link . .
