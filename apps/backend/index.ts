@@ -55,7 +55,7 @@ xXssProtection:true,
 
 app.use(cors({
     allowedHeaders:['Content-Type', 'Authorization', 'x-backend-eligibility', 'is-frontend-req', 'authorization'],
-    origin:[process.env.FRONTEND_ENDPOINT_1 as string, process.env.FRONTEND_ENDPOINT_2 as string, process.env.BACKEND_ENDPOINT_1 as string, process.env.BACKEND_ENDPOINT_2 as string],
+    origin:[process.env.FRONTEND_ENDPOINT_1 as string, process.env.FRONTEND_ENDPOINT_2 as string, process.env.BACKEND_ENDPOINT_1 as string],
     methods:['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     maxAge: 600, // 10 minutes
 }));
