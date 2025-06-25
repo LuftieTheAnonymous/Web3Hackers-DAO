@@ -82,7 +82,7 @@ if (!redisClient.isOpen) await redisClient.connect();
 await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
 
-export const runningPort = process.env.PORT || 2137;
+export const runningPort = !process.env.PRODUCTION ? process.env.PORT : 2137;
 
 server.listen(runningPort, async () => {
     logger.info(`Server started on port ${runningPort}`, {

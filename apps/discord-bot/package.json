@@ -8,8 +8,8 @@
   "main": "index.ts",
   "scripts": {
     "build": "tsc",
-    "start": "nodemon index.ts",
-    "dev": "nodemon index.ts"
+    "start": "tsx index.ts",
+    "dev": "tsx index.ts"
   },
   "dependencies": {
     "@discord-player/extractor": "^7.1.0",
