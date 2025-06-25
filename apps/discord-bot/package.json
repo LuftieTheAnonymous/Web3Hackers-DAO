@@ -7,7 +7,6 @@
   "type": "commonjs",
   "main": "index.ts",
   "scripts": {
-    "build": "esbuild --bundle",
     "start": "nodemon index.ts",
     "dev": "nodemon index.ts"
   },
