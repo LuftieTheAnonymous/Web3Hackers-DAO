@@ -1,5 +1,5 @@
 import {  GatewayIntentBits, Collection, Partials } from 'discord.js';
-import { CustomClient, CustomClientType } from './types/discordBotTypes';
+import { CustomClient, CustomClientType } from './types/discordBotTypes.js';
 import {  Player } from 'discord-player';
 import {DefaultExtractors} from '@discord-player/extractor';
 
