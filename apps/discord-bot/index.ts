@@ -5,8 +5,8 @@ import {DefaultExtractors} from '@discord-player/extractor';
 
 // Require the necessary discord.js classes
 import dotenv from 'dotenv';
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 const { token } = require('./discordConfig.json');
 
 dotenv.config();
