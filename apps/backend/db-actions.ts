@@ -1,4 +1,4 @@
-import { supabaseConfig } from './config/supabase.ts';
+import { supabaseConfig } from './config/supabase.js';
 
 type DBReturn<T> = Promise<{ data: T | null; error: string | null }>;
 

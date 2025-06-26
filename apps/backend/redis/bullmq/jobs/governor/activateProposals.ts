@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { daoContract, provider } from "../../../../config/ethersConfig.js";
 import pLimit from 'p-limit';
-import { ProposalEventArgs } from "../../../../controllers/GovernanceController.ts";
+import { ProposalEventArgs } from "../../../../controllers/GovernanceController.js";
 
 export const activateProposals = async () => {
   try {

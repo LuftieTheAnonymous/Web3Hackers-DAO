@@ -18,7 +18,7 @@ import {
   voteOptionType,
   voiceChatActivity,
   daoProposalCommentType,
-} from './graphqlTypes.ts';
+} from './graphqlTypes.js';
 
 import {
   getDatabaseElement,
@@ -26,7 +26,7 @@ import {
   insertDatabaseElement,
   updateDatabaseElement,
   deleteDatabaseElement,
-} from '../../db-actions.ts';
+} from '../../db-actions.js';
 
 import {
   DaoMember as DAOMember,
@@ -38,7 +38,7 @@ import {
   VoteOption as VoteOption,
   VoiceChatActivity as VoiceChatActivity,
   DaoProposalComment as DaoProposalComment,
-} from '../graphql/TypeScriptTypes.ts';
+} from '../graphql/TypeScriptTypes.js';
 
 export const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',

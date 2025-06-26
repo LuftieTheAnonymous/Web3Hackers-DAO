@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {   createProposalEligible, getEmbededProposalDetails, getProposalDetails, getProposalState, getProposalVotes } from "../controllers/GovernanceController.js";
 import { DAO_Discord_elligibilityMiddleware, MembershipMiddleware } from "../middlewares/internalEligibility.js";
-import { proposalCreationLimiter } from "../middlewares/rateLimiters.ts";
+import { proposalCreationLimiter } from "../middlewares/rateLimiters.js";
 
 
 const governanceRouter = Router();

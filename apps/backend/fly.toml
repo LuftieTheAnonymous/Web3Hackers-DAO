@@ -1,20 +1,22 @@
-# fly.toml app configuration file generated for backend-proud-dew-6511 on 2025-06-25T20:25:26+02:00
+# fly.toml app configuration file generated for web3-builders-backend on 2025-06-25T23:53:42+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'backend-proud-dew-6511'
+app = "web3-builders-backend"
+
 primary_region = 'fra'
 
 [build]
 
 [env]
-  PORT = '8080'
+PORT = 8080
+
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = 'off'
   auto_start_machines = true
   min_machines_running = 0
   processes = ['app']
