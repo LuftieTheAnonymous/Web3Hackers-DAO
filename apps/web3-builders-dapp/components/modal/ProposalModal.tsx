@@ -148,7 +148,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     return;
   }
 
-  const proposalEligility = await fetch(`${process.env.BACKEND_ENDPOINT_1}/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
+  const proposalEligility = await fetch(`${process.env.BACKEND_ENDPOINT}/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
     method:'POST',
     headers:{
       'x-backend-eligibility': process.env.NEXT_PUBLIC_FRONTEND_ACCESS_SECRET as string,

@@ -21,7 +21,8 @@ import { Textarea } from '../ui/textarea';
 import VotingStandardModal from './voting-data/VotingStandardModal';
 import { decodeEventLog } from 'viem';
 import { notFound } from 'next/navigation';
-import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
+import { formatDistanceStrict } from 'date-fns/formatDistanceStrict';
+import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 import Link from 'next/link';
 import { write } from 'fs';
 
@@ -61,9 +62,9 @@ if(!proposalData){
       abi: governorContractAbi,
       address: GOVERNOR_CONTRACT_ADDRESS,
       eventName: "ProposalVoted",
-      'onLogs': (logs) => {
+      'onLogs': (logs:any) => {
         console.log('ProposalVoted logs:', logs);
- logs.forEach((log) => {
+ logs.forEach((log:any) => {
     try{
       const decoded= decodeEventLog({
         abi: governorContractAbi,
@@ -86,7 +87,7 @@ if(!proposalData){
 
 
       },
-      onError(error) {
+      onError(error:any) {
         toast.error(`Error casting vote: ${error.message}`);
       },
     });
