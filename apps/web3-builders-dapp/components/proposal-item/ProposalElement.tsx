@@ -6,7 +6,7 @@ import Link from 'next/link';
 import React from 'react'
 import { useReadContract, useWriteContract, useAccount } from 'wagmi';
 import ProposalCallbackItem from './ProposalCallbackItem';
-import { formatDistanceStrict } from 'date-fns';
+import { formatDistanceStrict } from 'date-fns/formatDistanceStrict';
 
 import { ethers } from 'ethers';
 import Image from 'next/image';

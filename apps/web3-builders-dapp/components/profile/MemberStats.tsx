@@ -4,7 +4,7 @@ import { useReadContract } from 'wagmi'
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import VotesTypesCastedChart from './container/charts/VotesTypesCastedChart';
 import { Button } from '../ui/button';
-import { formatDate } from 'date-fns';
+import  format  from 'date-fns/format';
 import { FaCoins } from 'react-icons/fa';
 import Lottie from 'lottie-react';
 
@@ -73,7 +73,7 @@ items-center  justify-center py-2`}>
   </>}
   {monthActivities.length > 0 && monthActivities.map((activity, index)=>(<div key={index} className='flex justify-between items-center gap-2 bg-zinc-600 p-4 rounded-lg max-w-9/10 w-full'>
    <div className="flex flex-col gap-1">
-     <p className='text-white text-base font-semibold'>{formatDate(activity.reward_month, 'MM-yyyy')}</p>
+     <p className='text-white text-base font-semibold'>{format(activity.reward_month, 'MM-yyyy')}</p>
      <p className={`${activity.is_rewarded ? 'text-(--hacker-green-4)' : 'text-zinc-400'} text-sm`}>{activity.is_rewarded ? 'Rewarded ✅' : 'Not Rewarded Yet ❌'}</p>
    </div>
 
