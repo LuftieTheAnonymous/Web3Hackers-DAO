@@ -1,5 +1,5 @@
-import { supabaseConfig } from "../../../config/supabase.js";
 import webpush from 'web-push';
+import { supabaseConfig } from "../../../config/supabase.js";
 import redisClient from "../../../redis/set-up.js";
 import dotenv from 'dotenv';
 

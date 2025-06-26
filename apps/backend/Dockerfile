@@ -1,52 +1,34 @@
-# syntax = docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
-# Adjust NODE_VERSION as desired
 ARG NODE_VERSION=22.14.0
 FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="NodeJS"
-
-# NodeJS app lives here
 WORKDIR /app
-
-# Set production environment
 ENV NODE_ENV=production
 
-
-# Throw-away build stage to reduce size of final image
 FROM base as build
 
-# Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+    apt-get install -y python-is-python3 pkg-config build-essential
 
-# Install node modules
-COPY --link package.json .
-RUN npm install --production=false
+# Copy and install packages (including dev deps for build)
+COPY --link package*.json ./
+RUN npm install
 
-RUN npm install -g npm@11.4.2 
-
-RUN npm i --save-dev @types/async-retry @types/express p-limit @types/p-limit
-
-RUN npm install -g tsx
-
-# Copy application code
+# Copy all code
 COPY --link . .
 
-# Build application
+# Compile the TypeScript code
 RUN npm run build
 
-# Remove development dependencies
-RUN npm prune --production
-
-
-# Final stage for app image
 FROM base
 
-RUN npm install -g tsx p-limit
+# Install only production deps in final image
+COPY --link package*.json ./
+RUN npm install --omit=dev
 
-# Copy built application
+# Copy built app
 COPY --from=build /app /app
 
-# Start the server by default, this can be overwritten at runtime
-CMD [ "npm", "run", "start" ]
+CMD ["npm", "run", "start"]
