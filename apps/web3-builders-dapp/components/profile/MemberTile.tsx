@@ -1,5 +1,5 @@
 
-import { formatDate } from 'date-fns'
+import format  from 'date-fns/format'
 import Image from 'next/image'
 import React from 'react'
 type Props = {
@@ -29,7 +29,7 @@ function MemberTile({objectData}: Props) {
             @{objectData.nickname}
         </p>
         <p className="text-(--hacker-green-4) text-xs">
-          Joined  {formatDate(objectData.created_at, 'dd/MM/yyyy')}
+          Joined  {format(objectData.created_at, 'dd/MM/yyyy')}
         </p>
     </div>
   )

@@ -21,9 +21,10 @@ import { Textarea } from '../ui/textarea';
 import VotingStandardModal from './voting-data/VotingStandardModal';
 import { decodeEventLog } from 'viem';
 import { notFound } from 'next/navigation';
-import { formatDistanceStrict, formatDistanceToNow } from 'date-fns';
+import { formatDistanceStrict } from 'date-fns/formatDistanceStrict';
+import {formatDistanceToNow} from "date-fns/formatDistanceToNow";
 import Link from 'next/link';
-import { write } from 'fs';
+
 
 
 type Props<T> = {

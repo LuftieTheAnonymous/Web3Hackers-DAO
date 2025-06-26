@@ -10,10 +10,7 @@ import useRealtimeDocument from '@/hooks/useRealtimeDocument'
 import { useSidebar } from '@/components/ui/sidebar';
 import { notFound } from 'next/navigation';
 import MemberProposalsCreated from '../MemberProposalsCreated';
-import { useAccount, useWriteContract } from 'wagmi';
-import { governorTokenContract } from '../../../../backend/config/ethersConfig';
-import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
-
+import { useAccount } from 'wagmi';
 
 type Props = {
     profileData:any,
