@@ -1,15 +1,13 @@
 import { daoContract } from "../config/ethersConfig.js";
 import dotenv from "dotenv";
-import {distanceInWords, format} from "date-fns";
+import {format} from "date-fns";
+import {formatDistanceStrict} from "date-fns/formatDistanceStrict"
 import { notifyDAOMembersOnEvent } from "./actions/governor/governor-actions.js";
 
 
 
 dotenv.config();
 
-const formatDistanceStrict= (date: Date, baseDate: Date) => {
- return distanceInWords(date, baseDate);
-}
 
 export const executeGovenorContractEvents=()=>{
 

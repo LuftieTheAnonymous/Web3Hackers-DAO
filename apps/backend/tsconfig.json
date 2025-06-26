@@ -3,17 +3,20 @@
     "target": "es2022",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "esModuleInterop": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "rootDir": "./",
     "skipLibCheck": true,
     "allowImportingTsExtensions": false,
-    "noEmit": false
+    "noEmit": false,
+    "noImplicitAny": false,
+     "esModuleInterop": true
   },
   "ts-node": {
     "esm": true
   },
-  "include": ["."]
+"include": ["."],
+"exclude": ["node_modules", "dist"]
+  
 }

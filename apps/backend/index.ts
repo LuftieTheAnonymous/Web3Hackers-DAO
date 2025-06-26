@@ -8,7 +8,7 @@ import activityRouter from "./routes/ActivityRouter.js";
 import dotenv from 'dotenv';
 import cors from 'cors';
 import express from 'express';
-import http, { IncomingMessage } from "http";
+import http from "http";
 import helmet from 'helmet';
 import redisClient  from "./redis/set-up.js";
 import { createHandler } from 'graphql-http/lib/use/http';
