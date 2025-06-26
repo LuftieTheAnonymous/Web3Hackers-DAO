@@ -1,15 +1,19 @@
 import { daoContract } from "../config/ethersConfig.js";
 import dotenv from "dotenv";
-import {format, formatDistanceStrict} from "date-fns";
+import {distanceInWords, format} from "date-fns";
 import { notifyDAOMembersOnEvent } from "./actions/governor/governor-actions.js";
+
 
 
 dotenv.config();
 
+const formatDistanceStrict= (date: Date, baseDate: Date) => {
+ return distanceInWords(date, baseDate);
+}
 
 export const executeGovenorContractEvents=()=>{
 
-daoContract.on("ProposalCreated", async (proposalId) => {
+daoContract.on("ProposalCreated", async (proposalId:any) => {
         try{
             console.log("Proposal Created triggered", proposalId);
 

@@ -3,7 +3,7 @@ import { governorTokenContract } from "../config/ethersConfig.js";
 import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
 import { deleteDatabaseElement, getDatabaseElement } from '../db-actions.js';
-import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
+import { DaoMember } from "../types/graphql/TypeScriptTypes.js";
 
 // Single User Action
 const intialTokenDistribution = async (req: Request, res: Response) => {

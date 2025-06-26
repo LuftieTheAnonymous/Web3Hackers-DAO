@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { supabaseConfig } from "../config/supabase.js";
 import { governorTokenContract } from "../config/ethersConfig.js";
 import redisClient from "../redis/set-up.js";
-import { getDatabaseElement, insertDatabaseElement } from "../db-actions.ts";
-import { DaoMember } from "../types/graphql/TypeScriptTypes.ts";
+import { getDatabaseElement, insertDatabaseElement } from "../db-actions.js";
+import { DaoMember } from "../types/graphql/TypeScriptTypes.js";
 
 export const getMembers = async (req:Request, res:Response) => {
 try{
