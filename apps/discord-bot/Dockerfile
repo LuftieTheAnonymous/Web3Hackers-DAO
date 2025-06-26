@@ -28,6 +28,8 @@ RUN npm run build
 # --- Final image ---
 FROM base
 
+RUN npm install --save npm@11.4.2 ts-node nodemon
+
 COPY --from=build /app /app
 
 CMD ["npm", "run", "start"]
