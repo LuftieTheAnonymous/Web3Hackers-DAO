@@ -87,7 +87,9 @@ function SlidingSidebar({}: Props) {
 </div>
 
 
-  <ConnectKitButton    />
+<div className="self-center w-full">
+    <ConnectKitButton    />
+</div>
 </div>
 
     
