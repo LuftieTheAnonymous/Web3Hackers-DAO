@@ -1,84 +1,58 @@
-# Turborepo starter
+# 🛠️ Web3 Builders DAO
 
-This Turborepo starter is maintained by the Turborepo core team.
+> A decentralized builders' hub fostering coordination, contribution, and reputation-based rewards.
 
-## Using this example
+![Banner](https://sdmntprsouthcentralus.oaiusercontent.com/files/00000000-52f0-61f7-9466-ccd253bb1b46/raw?se=2025-06-26T23%3A50%3A12Z&sp=r&sv=2024-08-04&sr=b&scid=ee913585-cb7a-517b-b9b1-64c08452a212&skoid=a3412ad4-1a13-47ce-91a5-c07730964f35&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-06-26T21%3A29%3A35Z&ske=2025-06-27T21%3A29%3A35Z&sks=b&skv=2024-08-04&sig=wCkB06SdNS2q%2BACqN%2ByR2e03Fh3YtRsp5PqPzRxqc8g%3D)
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
+## 🧭 Overview
+
+W3b Builders DAO is a system built to **track** activity, **evaluate** the awards, and **reward** contributors in the discord community for their work, effort put into the work and really dedicate to build the community together.
+
+Whether you're a developer, contributor, or Web3 Builders Community member — welcome aboard!
+
+---
+
+## 📚 Project Structure
+
+This repository consists of 4 layers. Each layer has its own `README` with more technical details:
+
+| Module | Description | Link |
+|--------|-------------|------|
+| 🖼️ Frontend | Interface for user interactions | [Frontend README](./apps/frontend/README.md) |
+| 🧠 Backend | Core logic, APIs, and data processing | [Backend README](./apps/backend/README.md) |
+| ⛓️ Smart Contracts | Solidity contracts for on-chain logic | [Smart Contracts README](./apps/smart-contracts/README.md) |
+| 🤖 Discord Bot | Handles Discord integration & activity tracking | [Discord Bot README](./apps/discord-bot/README.md) |
+
+---
+
+## 🌐 Technologies Used
+
+- `React`, `Next.js`, `TypeScript`, `TailwindCSS`
+- `Node.js`, `Express`, `GraphQL`, `Redis`, `PostgreSQL`
+- `Solidity`, `Foundry`
+- `Docker`, `GitHub Actions`
+- `Discord API`, `JWT`
+
+---
+
+## 🏁 Getting Started
+
+> Clone the monorepo and follow instructions in each submodule’s README.
+
+```bash
+git clone https://github.com/Luftjunkie19/Web3Builders-DAO
+cd Web3Builders-DAO
 ```
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
+Next up in order to let everything work smoothly install all the dependecies from `package.json` by running:
+```bash
+npm i
 ```
-cd my-turborepo
-pnpm build
+Or optionally if you will get errors in downloading the dependencies.
+
+```bash
+npm i --force
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/docs/reference/command-line-reference)
