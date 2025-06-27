@@ -148,7 +148,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     return;
   }
 
-  const proposalEligility = await fetch(`${process.env.BACKEND_ENDPOINT_1}/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
+  const proposalEligility = await fetch(`${process.env.BACKEND_ENDPOINT}/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
     method:'POST',
     headers:{
       'x-backend-eligibility': process.env.NEXT_PUBLIC_FRONTEND_ACCESS_SECRET as string,
@@ -251,6 +251,19 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
           }
 
 
+   await fetch(`${process.env.BACKEND_ENDPOINT}/activity/update/${currentUser.discord_member_id}`, {
+    method:'POST',
+    headers:{
+      'x-backend-eligibility': process.env.NEXT_PUBLIC_BACKEND_ACCESS_SECRET as string,
+      authorization:`Bearer ${currentUser.discord_member_id}`,
+    },
+    body: JSON.stringify({
+      activity: 'proposals_created',
+      id:`${currentUser.discord_member_id}-${new Date().getFullYear()}-${new Date().getMonth()}`,
+    })
+  });
+
+
           const calldataRows = values.functionsCalldatas.map((item) => ({
   proposal_id: id,
   method_signature: encodeFunctionData({
@@ -338,7 +351,11 @@ methods.clearErrors(); // Clear any previous errors
 
   if (!valid && errors) {
     console.log(valid);
-    toast.error('Please fill all the required fields correctly before proceeding.');
+    Object.values(errors).forEach((error) => {
+      toast.error(error.message);
+      console.log(error);
+    })
+    
     return;
   }; // Don't proceed if invalid
 
