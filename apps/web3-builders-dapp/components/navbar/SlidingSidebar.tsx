@@ -61,8 +61,8 @@ function SlidingSidebar({}: Props) {
   </SheetTrigger>
   <SheetContent side='left' style={{zIndex:9999999}} className='bg-zinc-800 text-white rounded-r-xl  border-(--hacker-green-4) border max-w-64 w-full p-2 '>
     
-    <SheetHeader className='flex items-center justify-between gap-2 mb-4'>
-                  <Image src={'/Web3Builders.png'} alt='logo' width={60} height={60} className='w-16 h-16'/>
+    <SheetHeader className='flex items-center justify-between gap-2 p-2'>
+                  <Image src={'/Web3Builders.png'} alt='logo' width={32} height={32} className='w-8 h-8 rounded-lg'/>
 
       <SheetTitle className='text-lg text-white'>Web3 Builders
         <span className='text-(--hacker-green-4)'>DAO</span>
@@ -71,6 +71,9 @@ function SlidingSidebar({}: Props) {
     
     </SheetHeader>
 
+<div className="flex flex-col justify-between gap-6 w-full h-full">
+<div className="flex flex-col w-full gap-2">
+  
  {items.map((item) => (
                   <div  key={item.title} className='w-full'>
                     <Button className={`${item.isActive ? 'bg-(--hacker-green-4) hover:bg-(--hacker-green-2)': 'hover:bg-(--hacker-green-4)'} w-full transition-all ${item.display ? '' : 'hidden'}`} asChild>
@@ -81,6 +84,11 @@ function SlidingSidebar({}: Props) {
                     </Button>
                   </div>
                 ))}
+</div>
+
+
+  <ConnectKitButton    />
+</div>
 
     
   </SheetContent>
