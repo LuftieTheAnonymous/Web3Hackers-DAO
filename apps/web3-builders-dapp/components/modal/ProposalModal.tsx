@@ -323,7 +323,12 @@ const {
 const goToNextStep = async () => {
 methods.clearErrors(); // Clear any previous errors
 
-  const valid = await methods.trigger(); // validate all fields
+
+  const valid = await methods.trigger(currentStep === 0 ? ['title', 'isCustom', 'shortDescripton', 'longDescription'] :
+ currentStep === 1 ? ['functionsCalldatas', 'urgencyLevel'] 
+ : currentStep === 2 ?
+  [ 'customVotesOptions'] 
+  : currentStep === 3 ? ['proposalDelay', 'proposalDelayUnit', 'timelockPeriod', 'timelockUnit'] :[]);
   const errors= methods.formState.errors; // Get the errors if any
   
   if(valid){  setCurrentStep((prev) => prev + 1); return;}
