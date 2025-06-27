@@ -35,40 +35,40 @@ function ProposalList({ proposals }: Props) {
 
   const { View } = useLottie({ animationData: cryptoLottieAnimation, loop: true });
 
-  useWatchContractEvent({
-    abi: governorContractAbi,
-    address: GOVERNOR_CONTRACT_ADDRESS,
-    eventName: 'ProposalVoted',
-    onLogs: (logs) => {
-      console.log('ProposalVoted logs:', logs);
-      logs.forEach((log) => {
-        try {
-          const decoded = decodeEventLog({
-            abi: governorContractAbi,
-            eventName: 'ProposalVoted',
-            data: log.data,
-            topics: log.topics,
-          });
+  // useWatchContractEvent({
+  //   abi: governorContractAbi,
+  //   address: GOVERNOR_CONTRACT_ADDRESS,
+  //   eventName: 'ProposalVoted',
+  //   onLogs: (logs) => {
+  //     console.log('ProposalVoted logs:', logs);
+  //     logs.forEach((log) => {
+  //       try {
+  //         const decoded = decodeEventLog({
+  //           abi: governorContractAbi,
+  //           eventName: 'ProposalVoted',
+  //           data: log.data,
+  //           topics: log.topics,
+  //         });
 
-          console.log('Decoded ProposalVoted log:', decoded);
-          if (
-            decoded &&
-            decoded.args &&
-            decoded.args.find((log) => (log as any).voter === address)
-          ) {
-            toast.success('Your vote has been cast successfully!', {
-              classNames: { toast: 'bg-zinc-800 text-white' },
-            });
-          }
-        } catch (e) {
-          console.error('Error decoding ProposalVoted log:', e);
-        }
-      });
-    },
-    onError(error) {
-      toast.error(`Error casting vote: ${error.message}`);
-    },
-  });
+  //         console.log('Decoded ProposalVoted log:', decoded);
+  //         if (
+  //           decoded &&
+  //           decoded.args &&
+  //           decoded.args.find((log) => (log as any).voter === address)
+  //         ) {
+  //           toast.success('Your vote has been cast successfully!', {
+  //             classNames: { toast: 'bg-zinc-800 text-white' },
+  //           });
+  //         }
+  //       } catch (e) {
+  //         console.error('Error decoding ProposalVoted log:', e);
+  //       }
+  //     });
+  //   },
+  //   onError(error) {
+  //     toast.error(`Error casting vote: ${error.message}`);
+  //   },
+  // });
 
 
 
