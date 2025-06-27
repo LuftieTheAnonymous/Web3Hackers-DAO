@@ -321,14 +321,23 @@ const {
 
 
 const goToNextStep = async () => {
+methods.clearErrors(); // Clear any previous errors
+
   const valid = await methods.trigger(); // validate all fields
-  if (!valid) {
+  const errors= methods.formState.errors; // Get the errors if any
+  
+  if(valid){  setCurrentStep((prev) => prev + 1); return;}
+
+  console.log(errors, 'errors');
+  console.log(valid, 'valid');
+
+  if (!valid && errors) {
     console.log(valid);
     toast.error('Please fill all the required fields correctly before proceeding.');
     return;
   }; // Don't proceed if invalid
-methods.clearErrors(); // Clear any previous errors
-  setCurrentStep((prev) => prev + 1);
+
+
 };
 
 
