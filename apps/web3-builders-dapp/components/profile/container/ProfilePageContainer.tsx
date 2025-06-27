@@ -35,7 +35,7 @@ function ProfilePageContainer({profileData,  walletAddress
 
   return (
      <div className='w-full h-full'>
-          <div className={`max-w-6xl w-full mx-auto flex-col lg:flex-row  gap-6 flex justify-between items-center py-6 px-4
+          <div className={`max-w-6xl w-full mx-auto flex-col md:flex-row  gap-6 flex justify-between items-center py-6 px-4
            `}>
     <MemberTile objectData={objectData}/>
    <MemberDetails objectData={objectData} walletAddress={walletAddress}
