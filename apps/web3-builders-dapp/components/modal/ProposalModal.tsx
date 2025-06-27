@@ -368,7 +368,7 @@ return (
   <DialogTrigger className='w-full'>
     {children}
   </DialogTrigger>
-  <DialogContent  className='bg-zinc-800 border border-(--hacker-green-4) drop-shadow-xs shadow-green-400/40'>
+  <DialogContent className='bg-zinc-800 border z-[99999999999999999999999999999999999999999999999999999999999999999999999999] border-(--hacker-green-4) drop-shadow-xs shadow-green-400/40'>
     <DialogHeader>
       <DialogTitle className='text-white'>DAO Proposal</DialogTitle>
       <DialogDescription onClick={()=>{console.log(token)}}>

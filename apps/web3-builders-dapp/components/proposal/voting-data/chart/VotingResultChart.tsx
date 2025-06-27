@@ -2,8 +2,8 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts"
 
-import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { useSidebar } from "@/components/ui/sidebar";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+
 import { FaCheckCircle, FaDiceFive, FaDiceFour, FaDiceOne, FaDiceThree, FaDiceTwo, FaHandHolding } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 
@@ -65,9 +65,8 @@ type Props = {
 }
 
 function VotingResultChart({chartData, isCustom}: Props) {
-  const {state}=useSidebar();
   return (
-    <ChartContainer config={isCustom ? customVotingChartConfig : standardVotingChartConfig} className={`w-full p-2 bg-zinc-800 border border-(--hacker-green-4) rounded-lg ${state === 'expanded' ? 'max-w-lg lg:max-w-md' : 'max-w-xl'} min-h-72`}>
+    <ChartContainer config={isCustom ? customVotingChartConfig : standardVotingChartConfig} className={`w-full p-2 bg-zinc-800 border border-(--hacker-green-4) rounded-lg max-w-lg lg:max-w-md min-h-72`}>
       <BarChart accessibilityLayer data={chartData}>
 <CartesianGrid vertical={false} />
 <XAxis dataKey={'voteOption'} tickLine={false} axisLine={false} />

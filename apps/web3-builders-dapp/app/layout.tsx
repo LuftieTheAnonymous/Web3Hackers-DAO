@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Poppins, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
-import SidebarComponent from "@/components/sidebar/SidebarComponent";
+
 
 import { Toaster } from '@/components/ui/sonner';
 import ProvidersWrapper from '@/lib/providers/ProvidersWrapper';
@@ -43,7 +43,7 @@ export default function RootLayout({
       >
 
 <ProvidersWrapper>
-    <SidebarComponent />
+
 
   <div className="flex flex-col w-full h-full gap-2">
 <Navbar/>

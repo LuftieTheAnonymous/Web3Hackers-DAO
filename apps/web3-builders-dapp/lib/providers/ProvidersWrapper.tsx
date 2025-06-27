@@ -14,9 +14,9 @@ function ProvidersWrapper({
   return (
   
         <WagmiSetupProvider>
-  <SidebarProvider>
+
     {children}
-    </SidebarProvider>
+
     </WagmiSetupProvider>
 
   )

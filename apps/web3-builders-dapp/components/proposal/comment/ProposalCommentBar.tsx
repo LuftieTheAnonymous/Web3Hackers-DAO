@@ -18,12 +18,11 @@ import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
 
 
 type Props = {
-  state: 'expanded' | 'collapsed',
   proposalData: any[],
   proposalId: string
 }
 
-function ProposalCommentBar({state, proposalData, proposalId}: Props) {
+function ProposalCommentBar({proposalData, proposalId}: Props) {
   const {address}=useAccount();
 
     const token = useStore((state) => (state as TokenState).token);
@@ -60,7 +59,7 @@ function ProposalCommentBar({state, proposalData, proposalId}: Props) {
 
 
   return (
-<div className={` ${state === 'expanded' ? 'w-full border-0 bg-none lg:max-w-sm lg:border-(--hacker-green-4) lg:bg-zinc-800 ': 'border-none  lg:max-w-sm lg:border-(--hacker-green-4) lg:bg-zinc-800'}   w-full md:flex  h-full lg:max-h-[42rem] rounded-lg border   flex-col justify-between`}>
+<div className={`border-none  lg:max-w-sm lg:border-(--hacker-green-4) lg:bg-zinc-800  w-full md:flex  h-full lg:max-h-[42rem] rounded-lg border   flex-col justify-between`}>
 <div className="flex flex-col gap-1">
 <div className="flex items-center gap-2 p-3 text-white">
   <LucideMessageCircle size={32} className='text-(--hacker-green-4)' />
@@ -68,7 +67,7 @@ function ProposalCommentBar({state, proposalData, proposalId}: Props) {
 </div>
 
 
-  <CommentList state={state} commentsData={proposalData} />
+  <CommentList  commentsData={proposalData} />
 
 </div>
 <Form {...methods}>

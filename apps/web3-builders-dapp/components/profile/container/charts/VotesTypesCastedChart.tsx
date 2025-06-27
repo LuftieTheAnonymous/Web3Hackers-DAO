@@ -57,7 +57,7 @@ function VotesTypesCastedChart({proposals, isCustom}: Props) {
     <div className="bg-zinc-800 p-4 flex flex-col  text-white border-(--hacker-green-4) border  rounded-lg max-w-xl  lg:max-w-2xl h-80 w-full">
 <p className='text-lg font-bold'>Types Of Casted Votes</p>
 
-<ChartContainer config={isCustom ? customVotingOption : standardVotingOption} className="w-full max-h-64 h-full">
+{proposals.length > 0 && <ChartContainer config={isCustom ? customVotingOption : standardVotingOption} className="w-full max-h-64 h-full">
     <BarChart
             accessibilityLayer
             data={isCustom ? chartCustomData : chartData}
@@ -94,7 +94,7 @@ function VotesTypesCastedChart({proposals, isCustom}: Props) {
             />
 
           </BarChart>
-</ChartContainer>
+</ChartContainer>}
 
 
 </div>
