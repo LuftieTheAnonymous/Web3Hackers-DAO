@@ -320,6 +320,13 @@ const {
 });
 
 
+const goToNextStep = async () => {
+  const valid = await methods.trigger(); // validate all fields
+  if (!valid) return; // Don't proceed if invalid
+
+  setCurrentStep((prev) => prev + 1);
+};
+
 
 return (
 <Dialog >
@@ -436,9 +443,7 @@ setCurrentStep(currentStep - 1);
 {
   currentStep !== 4 &&
 <div className='flex justify-end'>
-<Button onClick={() => {
-setCurrentStep(currentStep + 1);
-}} className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500 
+<Button onClick={goToNextStep} className='hover:bg-(--hacker-green-4) cursor-pointer transition-all duration-500 
  px-6 hover:text-zinc-800 '>
   Next
 </Button>
