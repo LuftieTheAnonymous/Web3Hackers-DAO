@@ -2,12 +2,12 @@ import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 import Image from 'next/image'
 import React from 'react'
 
-type Props= {state: 'expanded' | 'collapsed',   commentObj:any}
+type Props= {   commentObj:any}
 
-function Comment({state, commentObj}: Props) {
+function Comment({ commentObj}: Props) {
   return (
    <>
-   {commentObj && <div className={`flex flex-col gap-1 p-2 ${state === 'expanded' ? 'bg-zinc-800 lg:bg-zinc-900' : 'bg-zinc-900'}  mx-1 max-w-2xl rounded-lg`}>
+   {commentObj && <div className={`flex flex-col gap-1 p-2 bg-zinc-900 mx-1 max-w-2xl rounded-lg`}>
     <div className="flex items-center gap-2 p-2">
       <div className="w-10 h-10 bg-zinc-600 rounded-full">
         {commentObj.dao_members && commentObj.dao_members.photoURL && <Image alt={'avatar'} src={commentObj.dao_members.photoURL} width={40} height={40} className='rounded-full w-full h-full'/>}

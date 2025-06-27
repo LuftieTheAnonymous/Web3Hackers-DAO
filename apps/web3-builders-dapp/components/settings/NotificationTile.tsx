@@ -52,7 +52,7 @@ await upsertWebPushSubscription(address as `0x${string}`, {...defaultNotificatio
    }
 
   return (
-    <div className="flex flex-col justify-between max-w-md w-full bg-zinc-800 border border-(--hacker-green-4) self-center h-[36rem] p-4 rounded-md">
+    <div className="flex flex-col overflow-y-auto justify-between max-w-md w-full bg-zinc-800 border border-(--hacker-green-4) self-center h-[36rem] p-4 rounded-md">
       <div className="flex flex-col gap-4">
                 <p className='text-xl text-white font-semibold flex items-center gap-2'>Theme <SunMoonIcon className='text-(--hacker-green-4)' size={32}/> </p>
              <div className="flex items-center gap-4">

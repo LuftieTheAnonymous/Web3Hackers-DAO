@@ -11,6 +11,7 @@ import { useAccountEffect, useSignMessage } from 'wagmi';
 import { config } from '@/lib/config';
 import { toast } from 'sonner';
 import { TokenState, useStore } from '@/lib/zustandConfig';
+import SlidingSidebar from './SlidingSidebar';
 
 type Props = {}
 
@@ -47,7 +48,7 @@ const token = useStore((state) => (state as TokenState).token);
 
   return (
     <div className='w-full sticky top-0 left-0 h-16 bg-zinc-900 flex p-2 justify-center items-center
-    z-[9999]
+    z-[99]
     '>
 
 <div className="flex items-center justify-between gap-2 w-full max-w-7xl">
@@ -77,7 +78,7 @@ const token = useStore((state) => (state as TokenState).token);
 
 <ConnectKitButton    />
   </div>
-<SidebarTrigger className='hover:bg-(--hacker-green-4) cursor-pointer bg-zinc-800 text-white'/>
+<SlidingSidebar/>
 </div>
 
 

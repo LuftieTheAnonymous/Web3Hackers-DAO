@@ -3,7 +3,6 @@
 import ProposalCallbackItem from '@/components/proposal-item/ProposalCallbackItem'
 import ProposalCommentBar from '@/components/proposal/comment/ProposalCommentBar'
 import { Button } from '@/components/ui/button'
-import { useSidebar } from '@/components/ui/sidebar'
 import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import React, { useState } from 'react'
@@ -125,10 +124,10 @@ if(!proposalData){
         });
     }
 
-    const {state}=useSidebar();
+
   return (
   <>
-    <div className={`mx-auto w-full max-w-[90rem] flex flex-col  ${state === 'expanded' ? ' xl:flex-row': 'lg:flex-row'} p-2 gap-6  lg:py-8 justify-between`}>
+    <div className={`mx-auto w-full max-w-[90rem] flex flex-col lg:flex-row p-2 gap-6  lg:py-8 justify-between`}>
     
     <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto ">
     <div className="w-full bg-zinc-800 max-sm:max-h-80 h-full min-h-96 lg:min-h-[28rem] max-h-[32rem] border-(--hacker-green-4) overflow-y-auto  rounded-lg">
@@ -163,7 +162,7 @@ if(!proposalData){
     {(proposalObj as any).calldata_objects.length > 0 &&
   (  <div className="flex flex-col gap-3 p-2">
       <p className='text-white text-2xl gap-2'><span className='text-(--hacker-green-4)'>@username's </span> Proposal Includes</p>
-      <div className={`grid  grid-cols-1 ${state === 'expanded' ? 'sm:grid-cols-2': 'lg:grid-cols-3'}   bg-zinc-800 rounded-lg p-4 gap-4 w-full max-h-48 h-full overflow-y-auto overflow-x-hidden`}>
+      <div className={`grid  grid-cols-1 lg:grid-cols-3  bg-zinc-800 rounded-lg p-4 gap-4 w-full max-h-48 h-full overflow-y-auto overflow-x-hidden`}>
    {(proposalObj as any).calldata_objects.map((item:any, index:number)=>(<ProposalCallbackItem key={index} callbackText={item.functionDisplayName} />))}
 
 
@@ -248,7 +247,7 @@ castVoteFunction={()=>handleStandardProposalVote(2)}
 
 
     
-{proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={commentsData} state={state}/>}
+{proposalObj && commentsData &&    <ProposalCommentBar proposalId={(proposalObj as any).proposal_id} proposalData={commentsData} />}
     
 
 

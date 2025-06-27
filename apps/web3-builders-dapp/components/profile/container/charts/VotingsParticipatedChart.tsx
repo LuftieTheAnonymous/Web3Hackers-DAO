@@ -55,7 +55,7 @@ const chartConfig = {
     <div className="bg-zinc-800  
 p-6 flex flex-col justify-center text-white border border-(--hacker-green-4) items-center rounded-lg max-w-xs md:max-w-sm h-80 w-full">
 <p className="text-lg font-bold">Votings Participated </p>
-<ChartContainer
+{proposals.length > 0 && <ChartContainer
 config={chartConfig}
   className="w-full h-full">
    <PieChart>
@@ -106,7 +106,8 @@ config={chartConfig}
 </Pie>
 
           </PieChart>
-</ChartContainer>
+</ChartContainer>}
+
     </div>
   )
 }

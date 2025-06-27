@@ -7,7 +7,7 @@ import MemberTile from '@/components/profile/MemberTile'
 import { Button } from '@/components/ui/button'
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
 
-import { useSidebar } from '@/components/ui/sidebar';
+
 import { notFound } from 'next/navigation';
 import MemberProposalsCreated from '../MemberProposalsCreated';
 import { useAccount } from 'wagmi';
@@ -21,7 +21,7 @@ type Props = {
 function ProfilePageContainer({profileData,  walletAddress
 }: Props) {
 
-const {open}=useSidebar();
+
 
     const {objectData}=useRealtimeDocument({initialObj:profileData,tableName:'dao_members'});
 
@@ -29,15 +29,13 @@ const {open}=useSidebar();
       notFound();
     }
 
-    const {address}=useAccount();
-
     const [isProposalsOpen, setIsProposalsOpen] = useState<boolean>(false);
 
   
 
   return (
      <div className='w-full h-full'>
-          <div className={`max-w-6xl w-full mx-auto ${open ? 'flex-col lg:flex-row' : 'flex-col lg:flex-row'}  gap-6 flex justify-between items-center py-6 px-4
+          <div className={`max-w-6xl w-full mx-auto flex-col lg:flex-row  gap-6 flex justify-between items-center py-6 px-4
            `}>
     <MemberTile objectData={objectData}/>
    <MemberDetails objectData={objectData} walletAddress={walletAddress}
@@ -54,8 +52,10 @@ const {open}=useSidebar();
      <Button onClick={()=>setIsProposalsOpen(true)}      className={`cursor-pointer ${isProposalsOpen ? 'bg-(--hacker-green-4) text-zinc-800 hover:bg-zinc-600 hover:text-zinc-100' : 'bg-zinc-800 hover:bg-(--hacker-green-4) hover:text-zinc-800'} transition-all hover:scale-90`}>Proposals</Button>
  
    </div>
-        {isProposalsOpen ? <MemberProposalsCreated proposals={objectData.dao_proposals as any[]} /> :  <MemberStats
-          isOpen={open}
+        {isProposalsOpen && objectData.dao_proposals.length > 0 && <MemberProposalsCreated proposals={objectData.dao_proposals as any[]} /> }
+
+        {!isProposalsOpen && profileData.dao_month_activity.length > 0 &&  <MemberStats
+    
           monthActivities={profileData.dao_month_activity as any[]}
           walletAddress={walletAddress as `0x${string}`}/>}
           </div>
