@@ -70,7 +70,7 @@ flex items-center gap-2 self-center
     </span>
 </div>
 
-<div className="flex items-center sm:flex-row gap-6 justify-center">
+<div className="flex items-center flex-col sm:flex-row gap-6 justify-center">
     
     <div className="bg-zinc-900 px-2 py-6 max-w-44  sm:max-w-64 text-white rounded-md lg:max-w-1/3  w-full flex justify-between items-center gap-2 flex-col">
 
