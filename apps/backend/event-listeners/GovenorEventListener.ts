@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import {format} from "date-fns";
 import {formatDistanceStrict} from "date-fns/formatDistanceStrict"
 import { notifyDAOMembersOnEvent } from "./actions/governor/governor-actions.js";
+import redisClient from "../redis/set-up.js";
 
 
 
@@ -47,6 +48,12 @@ daoContract.on("ProposalCreated", async (proposalId:any) => {
                 await notifyDAOMembersOnEvent(`A new proposal has been created ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
 
 
+                          const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`)
+
+if(redisStoredProposal){
+    const parsedProposal = JSON.parse(redisStoredProposal);
+await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposal.sm_data.dao_members.discord_member_id}`,`proposal_succeeded`, 1);
+  }
 
         }catch(err){
             console.error(err);
@@ -58,6 +65,9 @@ daoContract.on("ProposalActivated", async (id) => {
         console.log("Proposal Created triggered", id);
 
         const proposal = await daoContract.getProposal(id);
+
+        
+
 
   await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
             method: "POST",
@@ -118,6 +128,12 @@ try{
         }),
                 });
 
+                const redisStoredProposal = await redisClient.get(`dao_proposals:${id}:data`)
+
+if(redisStoredProposal){
+    const parsedProposal = JSON.parse(redisStoredProposal);
+await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposal.sm_data.dao_members.discord_member_id}`,`proposal_succeeded`, 1);
+  }
 
 await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Succeeded ! Now wait until it is queued to be executed !`, 'notifyOnSuccess');
 }catch(err){
