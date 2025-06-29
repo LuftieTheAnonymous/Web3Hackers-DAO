@@ -1,3 +1,4 @@
+import HackerEffect from '@/components/HackerEffect'
 import { AuroraText } from '@/components/magicui/aurora-text'
 import { BlurFade } from '@/components/magicui/blur-fade'
 import { BorderBeam } from '@/components/magicui/border-beam'
@@ -65,9 +66,9 @@ function Page({}: Props) {
 
   return (
     <div className="w-full h-full">
-      
+       
         <div className=" max-w-6xl w-full mx-auto flex-col gap-6 flex items-center py-6 px-4">
-
+<HackerEffect />
 <div className="flex flex-col justify-center items-center gap-5 w-full">
 <BlurFade>
 <div className='text-white text-2xl sm:text-3xl text-center lg:text-5xl font-bold flex items-center w-full flex-wrap gap-2'>Welcome to <SparklesText sparklesCount={10} colors={{first:'#05F29B', second: '#03A678'}} className='text-5xl font-bold'>
@@ -83,6 +84,7 @@ function Page({}: Props) {
 
 <div className="flex w-full max-w-6xl my-12 mx-auto justify-between items-center gap-24
 flex-col md:flex-row">
+  
 <BlurFade delay={0.5}>
   <BorderBeam colorFrom='#05F29B' colorTo='#03A678'/>
 <Image alt='' className='max-w-sm w-full rounded-lg' src={'/Web3Builders.png'} width={300} height={300}/>
