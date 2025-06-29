@@ -70,7 +70,7 @@ const token = useStore((state) => (state as TokenState).token);
   hover:text-white
   transition-all 
   '
-  variant={'secondary'}>About Us</Button>
+  variant={'secondary'} onClick={()=>router.push('/about-us')}>About Us</Button>
 </div>
 
 <div className="flex items-end gap-2">
