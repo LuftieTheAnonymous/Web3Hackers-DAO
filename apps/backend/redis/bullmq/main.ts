@@ -17,6 +17,7 @@ await smartContractsInteracionQueue.upsertJobScheduler(
   {
     every: 1000 * 60 * 60 * 24, // codziennie
     startDate: Date.now(), // lub Date.now()
+    utc: true,
   },
   {
 'name': 'monthly-distribution',
