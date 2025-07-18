@@ -2,11 +2,20 @@ import { governorTokenContract } from "../../../../config/ethersConfig.js";
 import { supabaseConfig } from "../../../../config/supabase.js";
 import retry from "async-retry";
 import pLimit from 'p-limit';
+import dayjs from "dayjs";
 export const monthlyTokenDistribution = async () => {
     try {
 const year = new Date().getFullYear();
 const month = new Date().getMonth(); // Note: getMonth() is 0-indexed
 const idPrefix = `${year}-${month}`; // example: "2025-5"
+
+  const today = dayjs();
+  const isLastDay = today.date() === today.endOf("month").date();
+
+  if (!isLastDay) {
+    console.log("Not the last day of the month. Skipping...");
+    return;
+  }
 
         const monthActivities= await supabaseConfig.from('dao_month_activity').select('*, dao_members:dao_members(*)').filter('id', 'ilike', `%-${idPrefix}%`).is('is_rewarded', false);
 

@@ -14,14 +14,22 @@ const worker = new Worker('smart-contracts-jobs', async (job) => {
     switch(job.name) {
         case 'monthly-distribution':
             await monthlyTokenDistribution();
+            break;
         case 'activate-proposals':
             await activateProposals();
+            break;
         case 'queue-proposals':
             await queueProposals();
+            break;
         case 'execute-proposals':
             await executeProposals();
+            break;
         case 'finish-proposals':
             await finishProposals();
+            break;
+        default:
+            console.error('Unknown job name');
+            break;
         }
 },{connection:redisConnection, limiter:{
     'max':20,
