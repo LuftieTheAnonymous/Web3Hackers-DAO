@@ -1,0 +1,6 @@
+{
+    "wake.compiler.solc.remappings": [
+        "@openzeppelin/=node_modules/web3-builders-dapp/node_modules/@openzeppelin/",
+        "@tableland/=node_modules/web3-builders-dapp/node_modules/@tableland/"
+    ]
+}

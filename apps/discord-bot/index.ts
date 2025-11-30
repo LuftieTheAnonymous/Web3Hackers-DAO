@@ -1,8 +1,5 @@
 import {  GatewayIntentBits, Collection, Partials } from 'discord.js';
-import { CustomClient, CustomClientType } from './types/discordBotTypes.js';
-import {  Player } from 'discord-player';
-import {DefaultExtractors} from '@discord-player/extractor';
-
+import { CustomClient, CustomClientType } from './types/discordBotTypes.ts';
 // Require the necessary discord.js classes
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -80,25 +77,4 @@ for (const file of eventFiles) {
     }
 }
 
-export const player =new Player(client);
-
-const playerEventsPath = path.join(__dirname, 'discord-player-events');
-const playerEventFiles = fs.readdirSync(playerEventsPath).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
-
-for (const file of playerEventFiles) {
-    const filePath = path.join(playerEventsPath, file);
-    const event = require(filePath);
-    if (event.once) {
-        player.events.once(event.name, (...args:any) => {
-            event.execute(...args);
-        });
-    }
-    else {
-        player.events.on(event.name, (...args:any) => {
-            event.execute(...args);
-        });
-    }
-}
-
 client.login(token);
-player.extractors.loadMulti(DefaultExtractors);

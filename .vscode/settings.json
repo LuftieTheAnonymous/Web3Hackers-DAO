@@ -1,7 +1,7 @@
 {
     "postman.settings.dotenv-detection-notification-visibility": false,
     "wake.compiler.solc.remappings": [
-        "@openzeppelin/=node_modules/@openzeppelin/",
-        "@tableland/=node_modules/@tableland/"
+        "@openzeppelin/=node_modules/web3-builders-dapp/node_modules/@openzeppelin/",
+        "@tableland/=node_modules/web3-builders-dapp/node_modules/@tableland/"
     ]
 }
