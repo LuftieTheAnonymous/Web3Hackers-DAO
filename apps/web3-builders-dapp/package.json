@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --experimental-https --turbopack",
+    "dev": "next dev --turbopack",
     "build": "set NODE_ENV='production' & next build",
     "start": "next start",
     "lint": "next lint",
