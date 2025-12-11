@@ -15,7 +15,7 @@ const {data:proposals,error} = await supabase.from(`dao_proposals`)
 
 
   return (
-    <div className='max-w-[95rem] w-full mx-auto p-2'>
+    <div className='max-w-380 w-full mx-auto p-2'>
   
       {
       proposals &&
