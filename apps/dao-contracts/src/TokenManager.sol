@@ -17,7 +17,8 @@ contract TokenManager is ReentrancyGuard{
 
     // Errors
     error MonthlyDistributionNotReady();
-        error IntialTokensNotReceived();
+    error IntialTokensNotReceived();
+
 
     // ENUMs in order to determine accurately the level of certain parameter
     enum TokenReceiveLevel {
@@ -87,6 +88,8 @@ contract TokenManager is ReentrancyGuard{
 
 
 
+
+
     mapping(TokenReceiveLevel => uint256) private psrOptions;
     mapping(TokenReceiveLevel => uint256) private jexsOptions;
     mapping(TechnologyKnowledgeLevel => uint256) private tklOptions;
@@ -94,19 +97,18 @@ contract TokenManager is ReentrancyGuard{
     mapping(KnowledgeVerificationTestRate => uint256) private kvtrOptions;
 
 
-constructor(){}
-
 
 // Performed by admin in order to deprive user of his tokens and delist him out of whitelist.
 function kickOutFromDAO(address user) external  {
-  receivedInitialTokens[user] = false;
-whitelist[user] = false;
-_burn(user, balanceOf(user));
+govToken.burn(user, govToken.balanceOf(user));
+govToken.removeFromWhitelist(user);
+receivedInitialTokens[user] = false;
+govToken.addBlacklist(user);
 }
 
 
       // Public functions (User-Interactive)
-    function handInUserInitialTokens(TokenReceiveLevel _psrLevel, TokenReceiveLevel _jexsLevel, TechnologyKnowledgeLevel _tklLevel, TokenReceiveLevel _web3IntrestLevel, KnowledgeVerificationTestRate _kvtrLevel, address receiverAddress) external nonReentrant isAddressNonZero(receiverAddress) onlyWhitelisted(receiverAddress) {
+    function handInUserInitialTokens(TokenReceiveLevel _psrLevel, TokenReceiveLevel _jexsLevel, TechnologyKnowledgeLevel _tklLevel, TokenReceiveLevel _web3IntrestLevel, KnowledgeVerificationTestRate _kvtrLevel, address receiverAddress) external nonReentrant {
         // IMPLEMENT CONSTANT VARIABLE FOR 10
         if (receivedInitialTokens[receiverAddress] == true) {
           uint256 punishmentAmount= INITIAL_TOKEN_USER_AMOUNT / 10;
@@ -123,12 +125,9 @@ _burn(user, balanceOf(user));
      + ((INITIAL_TOKEN_USER_AMOUNT * web3IntrestOptions[_web3IntrestLevel]) / MULTIPLICATION_NORMALIZATION_1E4) + 
     ((INITIAL_TOKEN_USER_AMOUNT * kvtrOptions[_kvtrLevel]) / MULTIPLICATION_NORMALIZATION_1E4 ));
 
-      if (totalSupply() + amountOfTokens > MAX_SUPPLY) {
-            revert SupplySurpassed();
-          }
 
 
-    if(hasRole(MANAGE_ROLE, msg.sender)) {
+    if(govToken.isCallerTokenManager()) {
         amountOfTokens += INITIAL_TOKEN_USER_AMOUNT * (DSR_ADMIN_MULTIPLIER  /  MULTIPLICATION_NORMALIZATION_1E2 );
         } 
           else {
@@ -136,38 +135,38 @@ _burn(user, balanceOf(user));
         }
 
 
-      _mint(receiverAddress, amountOfTokens);
+      govToken.mint(receiverAddress, amountOfTokens);
       receivedInitialTokens[receiverAddress] = true;
     
       emit InitialTokensReceived(receiverAddress);
     }
 
-    function punishMember(address user, uint256 amount) public nonReentrant onlyManageRole onlyForInitialTokensReceivers(user) {
-    _burn(user, amount);
+    function punishMember(address user, uint256 amount) public nonReentrant onlyForInitialTokensReceivers(user) {
+    govToken.burn(user, amount);
     emit UserPunished(user, amount);
     }
 
-    function rewardUser(address user, uint256 amount) external nonReentrant onlyManageRole onlyForInitialTokensReceivers(user) {
-    _mint(user, amount);
+    function rewardUser(address user, uint256 amount) external nonReentrant onlyForInitialTokensReceivers(user) {
+    govToken.mint(user, amount);
     emit UserRewarded(user, amount);
     }
 
     // Allows user to burn all the tokens user has and delist him of whitelist
-function leaveDAO() external isAddressNonZero(msg.sender) {
+function leaveDAO() external {
   receivedInitialTokens[msg.sender] = false;
-  whitelist[msg.sender] = false;
-  _burn(msg.sender, balanceOf(msg.sender));
+ govToken.burnMemberTokens(govToken.balanceOf(msg.sender));
+ govToken.removeFromWhitelist(msg.sender);
 }
 
 // Called in BullMQ recurring monthly token distributions
   function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, 
   uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported,
- uint256 allMonthMessages, address user) external isMonthlyDistributionTime onlyManageRole  {
+ uint256 allMonthMessages, address user) external isMonthlyDistributionTime  {
 
     // IMPLEMENT CONSTANT VARIABLES FOR THE MULTIPLIERS
     uint256 amount = dailyReports * 125e15 + DAOVotingPartcipation * 3e17 + DAOProposalsSucceeded * 175e15 + problemsSolved * 3e16 + issuesReported * 145e16 + allMonthMessages * 1e14;
 
-  _mint(user, amount);
+  govToken.mint(user, amount);
 
   lastClaimedMonthlyDistributionTime[user] = block.timestamp;
 

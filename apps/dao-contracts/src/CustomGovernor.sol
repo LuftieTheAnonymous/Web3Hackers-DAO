@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import {ERC20Votes} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+    import {IVotes} from "../lib/openzeppelin-contracts/contracts/governance/utils/IVotes.sol";
+import {ERC20Votes} from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
+
+ import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+
 
 contract CustomBuilderGovernor is ReentrancyGuard, AccessControl {
 
@@ -163,7 +165,6 @@ uint256 private constant MEDIUM_LEVEL_URGENCY_QUORUM = 60;
 uint256 private constant HIGH_LEVEL_URGENCY_QUORUM = 90;
 
 uint256 private proposalCount;
-IVotes private immutable IVotestoken;
 ERC20Votes private immutable govToken;
 
 
@@ -221,7 +222,6 @@ if(proposals[proposalId].state != ProposalState.Active || block.timestamp < prop
 }
 
 constructor(IVotes _token){
-        IVotestoken = _token;
         govToken = ERC20Votes(address(_token));
         // Set default quorum for each urgency level
         urgencyLevelToQuorum[UrgencyLevel.Low] = LOW_LEVEL_URGENCY_QUORUM;
