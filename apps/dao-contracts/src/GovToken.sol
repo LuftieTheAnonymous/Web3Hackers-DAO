@@ -26,7 +26,7 @@
 
 
 // Constant values
-    uint256 private constant MAX_SUPPLY = 19e24;
+    uint256 public constant MAX_SUPPLY = 19e24;
       bytes32 private constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
       bytes32 private constant GRANTER_ROLE = keccak256("GRANTER_ROLE");
 
@@ -147,6 +147,10 @@ if(successfullyGranted){
 }
 }
 
+function isCallerTokenManager() public view returns (bool){
+return hasRole(MANAGE_ROLE, msg.sender);
+}
+
 // Addition of the user only possible if Admin calls the transaction.
 function addToWhitelist(address user) public onlyManageRole isAddressNonZero(user) {
       whitelist[user] = true;
@@ -169,15 +173,15 @@ function removeFromBlacklist(address user) public onlyManageRole onlyBlacklisted
 
 
 
-function mint(address account, uint256 amount) external mintOnlyBelowMaxSupply(amount) onlyManageRole {
+function mint(address account, uint256 amount) external mintOnlyBelowMaxSupply(amount) isAddressNonZero(account) onlyManageRole {
 _mint(account, amount);
 }
 
-function burn(address account, uint256 amount) external onlyManageRole {
+function burn(address account, uint256 amount) external isAddressNonZero(account) onlyManageRole {
 _burn(account, amount);
 }
 
-function burnMemberTokens (uint256 amount) external {
+function burnMemberTokens (uint256 amount) isAddressNonZero(msg.sender) external {
   _burn(msg.sender, amount);
 }
 
