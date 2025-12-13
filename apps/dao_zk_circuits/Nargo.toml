@@ -1,0 +1,6 @@
+[package]
+name = "dao_zk_circuits"
+type = "bin"
+authors = [""]
+
+[dependencies]
