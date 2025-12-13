@@ -106,6 +106,7 @@ const proposalCreationLimiter= rateLimit({
         if(!memberData || !memberData.userWalletAddress){
           return 0;
         }
+        
         await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress', memberData.userWalletAddress);
         await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'isAdmin', `${memberData.isAdmin}`);
         await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'calledTimes', 1);

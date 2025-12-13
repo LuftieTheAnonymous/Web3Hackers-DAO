@@ -13,7 +13,6 @@ module.exports={
     async execute(member:GuildMember){
 try{
 
-
     const channel =  client.channels.cache.get('1367036582321979423');
 
     console.log(member);

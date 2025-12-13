@@ -4,7 +4,9 @@ dotenv.config();
 
 const data = new SlashCommandBuilder()
 .setName('user-vote-power')
-.setDescription('Get the voting power of a user').addUserOption(option => option.setName('member').setDescription('The member of the server you want to get the voting power of').setRequired(true));
+.setDescription('See the voting power of a user')
+.addUserOption(option => option.setName('member')
+.setDescription('The member of the server you want to get the voting power of').setRequired(true));
 
 module.exports = {
     cooldown:20,

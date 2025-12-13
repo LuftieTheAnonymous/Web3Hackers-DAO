@@ -28,8 +28,8 @@ try{
 
 }
 catch(error) {
-    console.error(`Error executing ${interaction}:`, error);
     await interaction.followUp({ content: 'There was an error while executing this command!' });
+    console.error(`Error executing ${interaction}:`, error);
     }
 }
 }

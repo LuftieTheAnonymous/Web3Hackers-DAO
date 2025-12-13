@@ -1,5 +1,5 @@
 import {  ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { client } from '../..';
+
 
 
 const data = new SlashCommandBuilder()
@@ -30,6 +30,9 @@ try{
 }
 catch(error) {
     console.error(`Error executing ${interaction}:`, error);
+
+    await interaction.reply(`Error occured: ${error}`);
+
     }
 }
 }

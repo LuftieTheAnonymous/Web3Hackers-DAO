@@ -39,7 +39,7 @@ const getProposalState = async (req: Request, res: Response) => {
             
             const stateName=proposalStates[proposal.state];
 
-            res.status(200).send({message:"success", status:200, data:`The proposal (${proposalId}) is ${stateName}`, error:null});
+            res.status(200).send({message:"success", status:200, data:`The proposal (${proposalId}) is in ${stateName}`, error:null});
         }
     catch(error){
         res.status(500).send({message:"error", status:500, data:null, error});

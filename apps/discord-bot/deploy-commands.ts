@@ -29,7 +29,7 @@ for (const folder of commandFolders) {
 }
 
 // Construct and prepare an instance of the REST module
-export const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN || token);
+export const rest = new REST().setToken(token);
 
 
 // and deploy your commands!
@@ -45,6 +45,8 @@ export const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN || token);
 			Routes.applicationGuildCommands(clientId, guildId),
 			{ body: commands },
 		);
+
+		console.log(data);
 
 	} catch (error) {
 		// And of course, make sure you catch and log any errors!
