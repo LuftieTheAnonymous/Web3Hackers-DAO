@@ -365,6 +365,8 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
         return (govToken.totalSupply() * getUrgencyQuorum(proposals[proposalId].urgencyLevel)) / 100;
     }
 
+
+// Action functions
     function castVote(
         bytes32 proposalId,
         string calldata reason,
@@ -532,9 +534,6 @@ if(proposals[proposalId].state != ProposalState.Succeeded ){
 
     emit ProposalQueued(proposalId, msg.sender);
 }
-
-
-
 
 
 function callProposal(Proposal memory proposal) internal {

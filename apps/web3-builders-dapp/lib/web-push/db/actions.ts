@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
 import webpush from 'web-push';
 
 webpush.setVapidDetails(
-    'mailto:kshjssjjs@gmail.com',
+    `mailto:${process.env.NEXT_PUBLIC_EMAIL}`,
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY! as string,
     process.env.NEXT_PUBLIC_VAPID_PRIVATE_KEY! as string
 );
@@ -56,7 +56,6 @@ export async function removeNotificationSettings(address: `0x${string}`){
 const token = cookiesStore.get('supabase_jwt');
  const supabase=  createSupabaseClient(!token ? '' : token.value);
         await supabase.from('notification_settings').delete().eq('userAddress', address);
-        await supabase.from('push_subscriptions').delete().eq('user_address', address);
     }catch(err){
         console.log(err);
     }

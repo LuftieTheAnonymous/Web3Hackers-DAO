@@ -5,17 +5,12 @@ import { upsertWebPushSubscription } from './db/actions';
 import { createSupabaseClient } from '../db/supabaseConfigClient';
 import { cookies } from 'next/headers';
 
-
-
-
-
-
 webpush.setVapidDetails(
-    'mailto:kshjssjjs@gmail.com',
+    `mailto:${process.env.NEXT_PUBLIC_EMAIL}`,
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY! as string,
     process.env.NEXT_PUBLIC_VAPID_PRIVATE_KEY! as string
 );
-let subscription: PushSubscription|null = null;
+let subscription: PushSubscription | null = null;
 
 const subscribeUser=async(sub:PushSubscription, address: `0x${string}`,)=>{
     try{
@@ -75,7 +70,7 @@ const sendNotification=async(message:string, notificationReceivePropertyName:str
     try{  
             const cookiesStore = await cookies();
 const token = cookiesStore.get('supabase_jwt');
- const supabase=  createSupabaseClient(!token ? '' : token.value);
+const supabase = createSupabaseClient(!token ? '' : token.value);
 
         const {data: subscriptionData, error} = await 
         supabase.from('notification_settings').select('endpoint, auth_key, p256h_key, user_address').eq(notificationReceivePropertyName, true);

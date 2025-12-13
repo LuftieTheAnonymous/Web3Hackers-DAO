@@ -60,7 +60,7 @@ const daoProposalCommentType= new GraphQLObjectType({
 const daoMonthActivity= new GraphQLObjectType({
     name:'dao_month_activity',
     fields:{
-         id: { type: new GraphQLNonNull(GraphQLID) },
+    id: { type: new GraphQLNonNull(GraphQLID) },
     reward_month: { type: new GraphQLNonNull(GraphQLString)},
     daily_sent_reports: { type: new GraphQLNonNull(GraphQLInt)},
     general_chat_messages:  { type:new GraphQLNonNull(GraphQLInt)},
