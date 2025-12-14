@@ -101,7 +101,11 @@ if(!proposalData){
           abi: governorContractAbi,
           address: GOVERNOR_CONTRACT_ADDRESS,
           functionName: "castVote",
-          args:[(proposalObj as any).proposal_id, reason, address, proposalNumber, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, (proposalObj as any).isCustom ? isExecuting : false, (proposalObj as any).isCustom ? isDefeating : false, calldataIndicies ? calldataIndicies.map((index) => BigInt(index)) : []],
+          args:[
+            (proposalObj as any).proposal_id,
+             reason, address, proposalNumber, ethers.encodeBytes32String(""), (proposalObj as any).isCustom, 
+             (proposalObj as any).isCustom ? isExecuting : false, (proposalObj as any).isCustom ? isDefeating : false,
+              calldataIndicies ? calldataIndicies.map((index) => BigInt(index)) : []],
         })
     }
 
@@ -127,10 +131,10 @@ if(!proposalData){
 
   return (
   <>
-    <div className={`mx-auto w-full max-w-[90rem] flex flex-col lg:flex-row p-2 gap-6  lg:py-8 justify-between`}>
+    <div className={`mx-auto w-full max-w-360 flex flex-col lg:flex-row p-2 gap-6  lg:py-8 justify-between`}>
     
     <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto ">
-    <div className="w-full bg-zinc-800 max-sm:max-h-80 h-full min-h-96 lg:min-h-[28rem] max-h-[32rem] border-(--hacker-green-4) overflow-y-auto  rounded-lg">
+    <div className="w-full bg-zinc-800 max-sm:max-h-80 h-full min-h-96 lg:min-h-112 max-h-128 border-(--hacker-green-4) overflow-y-auto  rounded-lg">
     <div className="w-full flex justify-between sticky top-0 left-0 items-center bg-zinc-900 rounded-t-lg px-2 md:px-4 py-8 h-14">
     <Link href={`/profile/${(proposalObj as any).dao_members.userWalletAddress}`} className="flex hover:scale-95 transition-all duration-500 items-center gap-2">
       <div className="w-10 h-10 rounded-full bg-zinc-600">

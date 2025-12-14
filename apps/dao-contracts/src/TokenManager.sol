@@ -4,13 +4,15 @@
 
     import {GovernmentToken} from "./GovToken.sol";
 
+    import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
+
 
 pragma solidity ^0.8.24;
 
-contract TokenManager is ReentrancyGuard{
+contract TokenManager is AccessControl, ReentrancyGuard{
 
   // Events
-    event InitialTokensReceived(address indexed account);
+    event InitialTokensReceived(address indexed account, uint256 indexed amount);
     event UserRewarded(address indexed account, uint256 indexed amount);
     event UserPunished(address indexed account, uint256 indexed amount);
     event UserReceivedMonthlyDistribution(address indexed account, uint256 indexed amount);
@@ -57,17 +59,21 @@ contract TokenManager is ReentrancyGuard{
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E2=1e2;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E3=1e3;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E4=1e4;
-    uint256 private constant oneMonth = 30 days;
+    uint256 private constant oneMonth = 30 days; 
 
     // mappings
     mapping(address => bool) private receivedInitialTokens;
     mapping(address => uint256) private lastClaimedMonthlyDistributionTime;
+    mapping(TokenReceiveLevel => uint256) private psrOptions;
+    mapping(TokenReceiveLevel => uint256) private jexsOptions;
+    mapping(TechnologyKnowledgeLevel => uint256) private tklOptions;
+    mapping(TokenReceiveLevel => uint256) private web3IntrestOptions;
+    mapping(KnowledgeVerificationTestRate => uint256) private kvtrOptions;
 
-    constructor(GovernmentToken governmentToken){
-      govToken = governmentToken;
 
-      // Gives all the rights to be called by the smart-contract
-      govToken.transferGranterRole(address(this));
+
+    constructor(address governmentTokenAddr){
+      govToken = GovernmentToken(governmentTokenAddr);
     }
 
 
@@ -87,30 +93,25 @@ contract TokenManager is ReentrancyGuard{
 
 
 
-
-
-
-    mapping(TokenReceiveLevel => uint256) private psrOptions;
-    mapping(TokenReceiveLevel => uint256) private jexsOptions;
-    mapping(TechnologyKnowledgeLevel => uint256) private tklOptions;
-    mapping(TokenReceiveLevel => uint256) private web3IntrestOptions;
-    mapping(KnowledgeVerificationTestRate => uint256) private kvtrOptions;
-
-
-
 // Performed by admin in order to deprive user of his tokens and delist him out of whitelist.
 function kickOutFromDAO(address user) external  {
 govToken.burn(user, govToken.balanceOf(user));
-govToken.removeFromWhitelist(user);
 receivedInitialTokens[user] = false;
+govToken.removeFromWhitelist(user);
 govToken.addBlacklist(user);
 }
 
 
       // Public functions (User-Interactive)
-    function handInUserInitialTokens(TokenReceiveLevel _psrLevel, TokenReceiveLevel _jexsLevel, TechnologyKnowledgeLevel _tklLevel, TokenReceiveLevel _web3IntrestLevel, KnowledgeVerificationTestRate _kvtrLevel, address receiverAddress) external nonReentrant {
+function handInUserInitialTokens
+(TokenReceiveLevel _psrLevel, 
+TokenReceiveLevel _jexsLevel, 
+TechnologyKnowledgeLevel _tklLevel, 
+TokenReceiveLevel _web3IntrestLevel, 
+KnowledgeVerificationTestRate _kvtrLevel, 
+address receiverAddress) external nonReentrant {
         // IMPLEMENT CONSTANT VARIABLE FOR 10
-        if (receivedInitialTokens[receiverAddress] == true) {
+        if (receivedInitialTokens[receiverAddress]) {
           uint256 punishmentAmount= INITIAL_TOKEN_USER_AMOUNT / 10;
         punishMember(receiverAddress, punishmentAmount);
         emit UserPunished(receiverAddress, punishmentAmount);
@@ -138,7 +139,7 @@ govToken.addBlacklist(user);
       govToken.mint(receiverAddress, amountOfTokens);
       receivedInitialTokens[receiverAddress] = true;
     
-      emit InitialTokensReceived(receiverAddress);
+      emit InitialTokensReceived(receiverAddress, amountOfTokens);
     }
 
     function punishMember(address user, uint256 amount) public nonReentrant onlyForInitialTokensReceivers(user) {
@@ -151,10 +152,10 @@ govToken.addBlacklist(user);
     emit UserRewarded(user, amount);
     }
 
-    // Allows user to burn all the tokens user has and delist him of whitelist
+    // Allows member to burn all the tokens user has and delist him of whitelist
 function leaveDAO() external {
+ govToken.burnOwnTokens(govToken.balanceOf(msg.sender));
   receivedInitialTokens[msg.sender] = false;
- govToken.burnMemberTokens(govToken.balanceOf(msg.sender));
  govToken.removeFromWhitelist(msg.sender);
 }
 
