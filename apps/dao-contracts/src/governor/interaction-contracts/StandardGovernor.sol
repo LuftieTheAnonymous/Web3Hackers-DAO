@@ -133,19 +133,23 @@ function succeedProposal(bytes32 proposalId) external onlyActionsManager isPropo
 }
 
 function callProposal(Proposal memory proposal) internal onlyActionsManager nonReentrant {
+
+if(proposal.targets.length > 0 && proposal.targets.length == proposal.calldatas.length){
      for(uint i = 0; i < proposal.targets.length; i++){
              address target = proposal.targets[i];
              bytes memory data = proposal.calldatas[i];
 
              if(target != address(0)){
-                 (bool success, bytes memory returnedData) = target.call(data);
+                 (bool success,) = target.call(data);
                  if(!success){
-                    if (returnedData.length > 0) { assembly { revert(add(returnedData,32), mload(returnedData)) } }
-                     revert ExecutionFailed();
+                     cancelProposal(proposal.id);
+                     return;
                  }
                     emit CalldataExecuted();
              }
 }
+    }
+
         proposals[proposal.id].state = ProposalState.Executed;
         proposals[proposal.id].executedAtBlockNumber = block.number;
         proposals[proposal.id].executed = true;
@@ -161,7 +165,11 @@ Proposal memory proposal = proposals[proposalId];
         revert InvalidProposalState();
     }
 
-        callProposal(proposal);
+    if(proposal.state === ProposalState.Canceled){
+        revert InvalidProposalState();
+    }
+
+    callProposal(proposal);
 
 }
 

@@ -9,14 +9,27 @@ import {AccessControl} from "../../lib/openzeppelin-contracts/contracts/access/A
 contract GovernorBase is ReentrancyGuard, AccessControl{
 
 // Errors
-error InvalidProposalState();
+error InvalidProposalState(); 
+// Gets called once a function is called, 
+// that wants to modify proposal state, that is either not ready to be changed
+// or has higher state of execution
 error VotingNotStarted();
+// Called once user wants to cast a vote before start of the proposal
 error VotingPeriodOver();
+// Called once user votes the proposal as it's executed or it's endTime block has been reached 
 error NotElligibleToPropose();
+// Called when user does not have at least 0.05% of the circulating supply
 error NotReadyToStart();
+// Gets called once the BullMq or the admin by theirself calls the activation Proposal
 error AlreadyVoted();
+// Prevents from changing the decision, if user already voted or vote again
 error ExecutionFailed();
+// Occurs once a calldata is 
 error NoRoleAssigned();
+
+error InAppropriateProposalDuration();
+
+error InAppropriateProposalTimeLock();
 
 // Events
 event ProposalCreated( bytes32 id, address proposer);
@@ -98,6 +111,18 @@ uint256 internal constant LOW_LEVEL_URGENCY_QUORUM = 40;
 uint256 internal  constant MEDIUM_LEVEL_URGENCY_QUORUM = 60;
 uint256 internal  constant HIGH_LEVEL_URGENCY_QUORUM = 90;
 
+
+// MIn Proposal Duration (30 minutes)
+uint256 private constant MIN_PROPOSAL_DURATION_BLOCK_AMOUNT= 150;
+
+// Max Proposal duration (14 days)
+uint256 private constant MAX_PROPOSAL_DURATION_BLOCK_AMOUNT = 100800;
+
+// Max Proposal Time lock duration in blocks
+uint256 private constant MAX_TIMELOCK_DURATION = 7200;
+
+uint256 internal constant AVG_MINED_BLOCK_TIME = 12;
+
 uint256 internal proposalCount;
 ERC20Votes internal immutable govToken;
 
@@ -109,8 +134,6 @@ mapping(bytes32 => mapping(address => Vote)) public proposalVotes;
 // proposalId to user address to vote
 mapping(bytes32 => address[]) public proposalVoters;
 mapping(address => Vote[]) public userVotes; // user address to proposalId to vote
-
-
 
 constructor(address governmentTokenAddress){
 govToken = ERC20Votes(governmentTokenAddress);
@@ -160,6 +183,14 @@ modifier onlyActionsManager(){
     _;
 }
 
+modifier isPendingState(bytes32 proposalId){
+       
+   if(proposals[proposalId].state != ProposalState.Pending){
+            revert InvalidProposalState();
+}
+_;
+}
+
 modifier isProposalReadyToSucceed(bytes32 proposalId) {
 if(proposals[proposalId].state != ProposalState.Active || block.number < proposals[proposalId].endBlockNumber
 ){
@@ -167,6 +198,26 @@ if(proposals[proposalId].state != ProposalState.Active || block.number < proposa
         }
     _;
 }
+
+modifier isProposalTimeProperlySet(uint256 delay, uint256 stopTimestamp, uint256 timelock){
+uint256 delaySecondsTurnedToBlocks = delay / AVG_MINED_BLOCK_TIME;
+
+uint256 startTimestampToBlocks = (block.timestamp + AVG_MINED_BLOCK_TIME) / AVG_MINED_BLOCK_TIME;
+uint256 endTimeTurnedToBlocks = (stopTimestamp + AVG_MINED_BLOCK_TIME) / AVG_MINED_BLOCK_TIME;
+uint256 timeLockTurnedIntoBlocks = (timelock + AVG_MINED_BLOCK_TIME) / AVG_MINED_BLOCK_TIME;
+
+uint256 duration = endTimeTurnedToBlocks - (startTimestampToBlocks + delaySecondsTurnedToBlocks);
+
+if(duration > MAX_PROPOSAL_DURATION_BLOCK_AMOUNT || duration < MIN_PROPOSAL_DURATION_BLOCK_AMOUNT){
+revert InAppropriateProposalDuration();
+}
+
+if(timeLockTurnedIntoBlocks > MAX_TIMELOCK_DURATION){
+    revert InAppropriateProposalTimeLock();
+}
+_;
+}
+
 
     function getProposalCount() external view returns (uint256) {
         return proposalCount;
@@ -201,10 +252,11 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
         uint256 endBlockTimestamp,
         uint256 proposalTimelock,
         uint256 delayInSeconds
-    ) external virtual isElligibleToPropose returns (bytes32)  {
+    ) external virtual isElligibleToPropose isProposalTimeProperlySet(delayInSeconds, endBlockTimestamp, proposalTimelock) returns (bytes32)  {
         bytes32 proposalId = keccak256(abi.encodePacked(proposalCount,description, targets, msg.sender, block.timestamp));
-        uint256 secondsTurnedToBlocks = delayInSeconds / 12;
-        uint256 endTimeTurnedToBlocks = endBlockTimestamp / 12;
+        uint256 secondsTurnedToBlocks = (delayInSeconds + AVG_MINED_BLOCK_TIME) / 12;
+        uint256 endTimeTurnedToBlocks = (endBlockTimestamp + AVG_MINED_BLOCK_TIME) / 12;
+        uint256 timeLockTurnedIntoBlocks = (proposalTimelock + AVG_MINED_BLOCK_TIME) / 12;
         
         Proposal memory proposal = Proposal({
             id:proposalId,
@@ -222,7 +274,7 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
             queuedAtBlockNumber:0,
             executedAtBlockNumber:0,
             succeededAtBlockNumber:0,
-            timelockBlockNumber:proposalTimelock
+            timelockBlockNumber:timeLockTurnedIntoBlocks
         });
 
         proposals[proposalId] = proposal;
@@ -233,7 +285,8 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
      return proposalId;
     }
 
-function activateProposal(bytes32 proposalId) external onlyActionsManager {
+// Activates ability to vote for the members of the DAO
+function activateProposal(bytes32 proposalId) external onlyActionsManager isPendingState(proposalId) {
  if(block.number < proposals[proposalId].startBlockNumber && proposals[proposalId].state == ProposalState.Pending){
      revert NotReadyToStart();
  }
@@ -242,21 +295,23 @@ function activateProposal(bytes32 proposalId) external onlyActionsManager {
  emit ProposalActivated(proposalId);
 }
 
-function cancelProposal(bytes32 proposalId) external onlyActionsManager {
-   
-   if(proposals[proposalId].state != ProposalState.Pending){
+function cancelProposal(bytes32 proposalId) public onlyActionsManager {
+    if(
+    proposals[proposalId].state == ProposalState.Active || 
+    proposals[proposalId].state == ProposalState.Succeeded || 
+    proposals[proposalId].state == ProposalState.Defeated || 
+    proposals[proposalId].state == ProposalState.Executed
+    ){
             revert InvalidProposalState();
 }
 
         proposals[proposalId].state = ProposalState.Canceled;
         proposals[proposalId].canceled = true;
-
-
     emit ProposalCanceled(proposalId, msg.sender, block.timestamp);
 }
 
 function queueProposal(bytes32 proposalId) external onlyActionsManager {
-if(proposals[proposalId].state != ProposalState.Succeeded ){
+if(proposals[proposalId].state != ProposalState.Succeeded){
             revert InvalidProposalState();
 }
 

@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 import {GovernorBase} from "../GovernorBase.sol";
 contract CustomBuilderGovernor is GovernorBase {
 
+// Custom voting option
     enum CustomProposalVote {
         Custom1,
         Custom2,
@@ -12,28 +13,32 @@ contract CustomBuilderGovernor is GovernorBase {
     }
 
 
-struct HighestVotedCustomOption{
+// Gathering of all the data pertaining selected option
+struct SummaryCustomOption{
     uint8 voteOptionId;
     uint256 castedVotes;
     address lastVoter;
     bool isExecutable;
 }
+// Struct for the data to be called once a approving option will
+// have the most votes.
 struct Calldata{
 address target;
 bytes dataBytes;
 }
 
+// VoteOption struct with defined parameters for execution
 struct CustomVoteOption{
  Calldata[] calldataArr;
  bool isDefeatingVote;
  bool isApprovingVote;
+
 }
-
+// Mapping proposalId=> CustomVoteOptionIndex=> CustomVoteOption
 mapping(bytes32=>mapping(CustomProposalVote => CustomVoteOption)) public votesCustomOptions;
-
 constructor(address govTokenAddr) GovernorBase(govTokenAddr){}
 
-
+// Function to create proposal
 function createCustomProposal(
         string calldata description,
         address[] memory targets,
@@ -48,9 +53,8 @@ function createCustomProposal(
     bytes32 proposalId=this.createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelock,delayInSeconds);
    
    for (uint8 i = 0; i < selectiveCalldata.length; i++) {
+    Calldata[] memory optionCalldata = selectiveCalldata[i];
 
-    Calldata[]  memory optionCalldata=selectiveCalldata[i];
-    
     bool isApproving = optionCalldata.length > 0;
 
     votesCustomOptions[proposalId][CustomProposalVote(i)]= CustomVoteOption(
@@ -104,7 +108,7 @@ function createCustomProposal(
 function getCustomProposalVotes(bytes32 proposalId)
     public
     view
-    returns (HighestVotedCustomOption[5] memory customVoteCounts)
+    returns (SummaryCustomOption[5] memory customVoteCounts)
 {
     uint256[5] memory voteSums;
     uint256[5] memory highestVoteWeight;
@@ -131,7 +135,7 @@ function getCustomProposalVotes(bytes32 proposalId)
 
     // Build final result array per option
     for (uint8 j = 0; j < 5; j++) {
-        customVoteCounts[j] = HighestVotedCustomOption(
+        customVoteCounts[j] = SummaryCustomOption(
             j,
             voteSums[j],
             highestVoter[j],
@@ -143,13 +147,13 @@ function getCustomProposalVotes(bytes32 proposalId)
 }
 
 
-function insertionSort(HighestVotedCustomOption[5] memory arr, bytes32 proposalId)
+function insertionSort(SummaryCustomOption[5] memory arr, bytes32 proposalId)
     private view  
     returns (Calldata[] memory mostVotedCustomCalldata
     , bool isExecutable) 
 {
     for (uint i = 1; i < arr.length; i++) {
-        HighestVotedCustomOption memory key = arr[i];
+        SummaryCustomOption memory key = arr[i];
         uint j = i;
 
         while (j > 0 && arr[j - 1].castedVotes < key.castedVotes) {
@@ -166,8 +170,8 @@ function insertionSort(HighestVotedCustomOption[5] memory arr, bytes32 proposalI
 }
 
 
-function getHighestVotedCustomOption(bytes32 proposalId) external view returns (Calldata[] memory callDataArray, bool isCustomExecutable) {
-    HighestVotedCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
+function getSummaryCustomOption(bytes32 proposalId) external view returns (Calldata[] memory callDataArray, bool isCustomExecutable) {
+    SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
     (Calldata[] memory customCalldata, bool isExecutable) = insertionSort(customVoteCounts, proposalId);
 
 callDataArray= customCalldata;
@@ -176,7 +180,7 @@ isCustomExecutable = isExecutable;
 
 function succeedProposal(bytes32 proposalId) external onlyActionsManager isProposalReadyToSucceed(proposalId) nonReentrant {
    uint256 quorumNeeded = getProposalQuorumNeeded(proposalId);
-     HighestVotedCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
+     SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
     uint256 totalVotes = customVoteCounts[0].castedVotes + customVoteCounts[1].castedVotes + customVoteCounts[2].castedVotes + customVoteCounts[3].castedVotes + customVoteCounts[4].castedVotes;
     if(totalVotes < quorumNeeded){
         proposals[proposalId].state = ProposalState.Defeated;
@@ -216,7 +220,7 @@ Proposal memory proposal = proposals[proposalId];
     }
 
   
-    HighestVotedCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
+    SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
     (Calldata[] memory customCalldataArr, bool isExecutable) = insertionSort(customVoteCounts, proposalId);
 
 if(isExecutable && customCalldataArr.length > 0){
@@ -230,4 +234,4 @@ if(isExecutable && customCalldataArr.length > 0){
 }
 
 
-    }
+}
