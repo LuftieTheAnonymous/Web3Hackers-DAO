@@ -23,16 +23,19 @@ error NotReadyToStart();
 // Gets called once the BullMq or the admin by theirself calls the activation Proposal
 error AlreadyVoted();
 // Prevents from changing the decision, if user already voted or vote again
-error ExecutionFailed();
-// Occurs once a calldata is 
-error NoRoleAssigned();
 
-error InAppropriateProposalDuration();
+error NoRoleAssigned(); // Triggered once someone without a role calls a function
 
-error InAppropriateProposalTimeLock();
+error InAppropriateProposalDuration(); // Triggered when endBlockNumber < startBlockNumber or is below min or above max when it comes to duration
+
+error InAppropriateProposalTimeLock(); // Triggered when the proposal timelock (block.number) is above set limit
+
+error NotEqualCalldataAndContractAmount();
+
+error InvalidOptionSelected();
 
 // Events
-event ProposalCreated( bytes32 id, address proposer);
+event ProposalCreated( bytes32 id, address proposer); 
 
 event ProposalCanceled(bytes32 id, address proposer, uint256 canceledAt);
 
@@ -42,7 +45,7 @@ event ProposalExecuted(bytes32 id);
 
 event ProposalQueued(bytes32 id, address proposer);
 
-event CalldataExecuted();
+event CalldataExecuted(bytes returnData);
 
 event ProposalVoted(
         bytes32 id,
@@ -55,6 +58,7 @@ event ProposalSucceeded(bytes32 id);
 
 event ProposalDefeated(bytes32 id, address proposer, uint256 defeatedAt);
 
+// Enums
 enum ProposalState{
         Pending,
         Active,
@@ -63,14 +67,14 @@ enum ProposalState{
         Succeeded,
         Queued,
         Executed
-}
+} // Defines Stages for a DAO-Proposal
 
 
 enum UrgencyLevel{
         Low,
         Medium,
         High
-}
+} // Urgency level - Defines the amount of votes that is demanded to pass the proposal successfully
 
 
 struct Proposal{
@@ -81,32 +85,32 @@ struct Proposal{
     uint256 endBlockNumber; // When to end the voting period
     UrgencyLevel urgencyLevel; // urgency level of the proposal
     ProposalState state; // proposal state
-    address[] targets; // reward addresses or system logic
-    bytes[] calldatas; // reward data or system logic
-    bool executed; // proposal executed
-    bool canceled; // proposal canceled
-    bool defeated; // proposal defeated
-    uint256 queuedAtBlockNumber; // proposal queued at
-    uint256 executedAtBlockNumber; // proposal executed at
-    uint256 succeededAtBlockNumber; // proposal succeeded at
+    address[] targets; // contract addresses to be called
+    bytes[] calldatas; // reward data
+    uint256 queuedAtBlockNumber; // proposal queued block.number
+    uint256 executedAtBlockNumber; // proposal executed block.number
+    uint256 succeededAtBlockNumber; // proposal succeeded block.number
     uint256 timelockBlockNumber; // timelock of the proposal
     }
 
-struct Vote {
-    address voterAddress;
-    address delegatee; // delegatee address
-    uint256 weight;
-    uint8 voteOption;
-    bytes32 votedProposalId; // proposalId
-    bool isDelegated;
-    string reason;
-    uint256 timestamp;
-}
 
+struct Vote {
+    address voterAddress; // Votes address
+    uint256 weight; // The vote power of certain user (amount of tokens)
+    uint8 voteOption; // The index of an option called selected
+    bytes32 votedProposalId; // proposalId
+    string reason; 
+    uint256 timestamp;
+} // The struct for Votes
+
+
+// Role that enables to call the functions related workflow
 
 bytes32 constant private ACTIONS_MANAGER = keccak256("ACTIONS_MANAGER");
 
-uint256 internal  constant THRESHHOLD_DIVIDER = 20;
+// Constant variables for math-operation to get 0.5% of the votes amount (to propose)
+// And the percentage of quorum that needs to appear on the voting 
+uint256 internal constant THRESHHOLD_DIVIDER = 200;
 uint256 internal constant LOW_LEVEL_URGENCY_QUORUM = 40;
 uint256 internal  constant MEDIUM_LEVEL_URGENCY_QUORUM = 60;
 uint256 internal  constant HIGH_LEVEL_URGENCY_QUORUM = 90;
@@ -191,6 +195,7 @@ modifier isPendingState(bytes32 proposalId){
 _;
 }
 
+
 modifier isProposalReadyToSucceed(bytes32 proposalId) {
 if(proposals[proposalId].state != ProposalState.Active || block.number < proposals[proposalId].endBlockNumber
 ){
@@ -199,82 +204,95 @@ if(proposals[proposalId].state != ProposalState.Active || block.number < proposa
     _;
 }
 
-modifier isProposalTimeProperlySet(uint256 delay, uint256 stopTimestamp, uint256 timelock){
-uint256 delaySecondsTurnedToBlocks = delay / AVG_MINED_BLOCK_TIME;
+modifier isProposalTimeProperlySet(uint256 delay, uint256 stopBlock, uint256 timelock){
 
-uint256 startTimestampToBlocks = (block.timestamp + AVG_MINED_BLOCK_TIME) / AVG_MINED_BLOCK_TIME;
-uint256 endTimeTurnedToBlocks = (stopTimestamp + AVG_MINED_BLOCK_TIME) / AVG_MINED_BLOCK_TIME;
-uint256 timeLockTurnedIntoBlocks = (timelock + AVG_MINED_BLOCK_TIME) / AVG_MINED_BLOCK_TIME;
+// Check whether the stopBlock has not been selected as past one
+if(stopBlock < block.number + delay){
+    revert InAppropriateProposalDuration();
+}
 
-uint256 duration = endTimeTurnedToBlocks - (startTimestampToBlocks + delaySecondsTurnedToBlocks);
+uint256 duration = stopBlock - (block.number + timelock);
 
+// Check the duration of the Proposal
 if(duration > MAX_PROPOSAL_DURATION_BLOCK_AMOUNT || duration < MIN_PROPOSAL_DURATION_BLOCK_AMOUNT){
 revert InAppropriateProposalDuration();
 }
 
-if(timeLockTurnedIntoBlocks > MAX_TIMELOCK_DURATION){
+// Checks whether the timelock is not above 7200 blocks (1 day) 
+if(timelock > MAX_TIMELOCK_DURATION){
     revert InAppropriateProposalTimeLock();
 }
+
 _;
 }
 
-
+// Returns the entire amount of proposals in the DAO
     function getProposalCount() external view returns (uint256) {
         return proposalCount;
     }
 
+// Returns the quorum urgency rate (in percentage)
     function getUrgencyQuorum(UrgencyLevel urgencyLevel) internal virtual  view returns (uint256) {
         return urgencyLevelToQuorum[urgencyLevel];
     }
 
+    // Returns amount of votings user took part in
     function getUserVotedCount(address user) external view returns (uint256) {
         return userVotedCount[user];
     }
 
+    // Gets the 0.5% amount of all tokens, which allows users to propose 
+    // (in initial state all users will be elligible it first will be visible once the DAO would have about 150 participants)
     function getProposalThreshold() public view returns (uint256)  {
         return govToken.totalSupply() / THRESHHOLD_DIVIDER;
     }
 
     
+// Returns a proposal details
 function getProposal(bytes32 proposalId) external view returns (Proposal memory)  {
     return proposals[proposalId];
 }
 
+
+// Returns the quorum needed to proceed the voting
 function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint256) {
         return (govToken.totalSupply() * getUrgencyQuorum(proposals[proposalId].urgencyLevel)) / 1e2;
     }
 
+
+// Creates a proposal that can be voted
     function createProposal(
         string calldata description,
         address[] memory targets,
         bytes[] memory calldatas,
         UrgencyLevel urgencyLevel,
-        uint256 endBlockTimestamp,
-        uint256 proposalTimelock,
-        uint256 delayInSeconds
-    ) external virtual isElligibleToPropose isProposalTimeProperlySet(delayInSeconds, endBlockTimestamp, proposalTimelock) returns (bytes32)  {
-        bytes32 proposalId = keccak256(abi.encodePacked(proposalCount,description, targets, msg.sender, block.timestamp));
-        uint256 secondsTurnedToBlocks = (delayInSeconds + AVG_MINED_BLOCK_TIME) / 12;
-        uint256 endTimeTurnedToBlocks = (endBlockTimestamp + AVG_MINED_BLOCK_TIME) / 12;
-        uint256 timeLockTurnedIntoBlocks = (proposalTimelock + AVG_MINED_BLOCK_TIME) / 12;
-        
+        uint256 endBlockNumber,
+        uint256 proposalTimelockInBlocks,
+        uint256 delayInBlocks
+    ) external virtual isElligibleToPropose isProposalTimeProperlySet(delayInBlocks, endBlockNumber, proposalTimelockInBlocks) returns (bytes32)  {
+
+        if(targets.length != calldatas.length){
+            revert NotEqualCalldataAndContractAmount();
+        }
+
+        // Creates a unique, pseudo-random bytes-string for the proposal identification
+        bytes32 proposalId = keccak256(abi.encodePacked(proposalCount,description, targets, msg.sender, block.number));
+   
+   // Creates a struct of Proposal and passes all the details
         Proposal memory proposal = Proposal({
             id:proposalId,
             proposer: msg.sender,
             description: description,
-            startBlockNumber: block.number + secondsTurnedToBlocks,
-            endBlockNumber: endTimeTurnedToBlocks,
+            startBlockNumber: block.number + delayInBlocks,
+            endBlockNumber: endBlockNumber,
             urgencyLevel: urgencyLevel,
             state: ProposalState.Pending,
             targets: targets,
             calldatas: calldatas,
-            executed:false,
-            canceled:false,
-            defeated:false,
             queuedAtBlockNumber:0,
             executedAtBlockNumber:0,
             succeededAtBlockNumber:0,
-            timelockBlockNumber:timeLockTurnedIntoBlocks
+            timelockBlockNumber:proposalTimelockInBlocks
         });
 
         proposals[proposalId] = proposal;
@@ -295,34 +313,41 @@ function activateProposal(bytes32 proposalId) external onlyActionsManager isPend
  emit ProposalActivated(proposalId);
 }
 
+// Cancels the proposal from further execution. This can be the case
+// - Once a unsuccessfull function has been called with target.call(dataBytes); in the execution
+// - A malicious function could be attached to be executed as a final one
 function cancelProposal(bytes32 proposalId) public onlyActionsManager {
+    // If the state of the proposal is active, succeeded, canceled, defeated or executed,
+    // revert with an error
     if(
     proposals[proposalId].state == ProposalState.Active || 
-    proposals[proposalId].state == ProposalState.Succeeded || 
+    proposals[proposalId].state == ProposalState.Succeeded ||
+    proposals[proposalId].state ==  ProposalState.Canceled ||
     proposals[proposalId].state == ProposalState.Defeated || 
     proposals[proposalId].state == ProposalState.Executed
     ){
             revert InvalidProposalState();
 }
 
-        proposals[proposalId].state = ProposalState.Canceled;
-        proposals[proposalId].canceled = true;
-    emit ProposalCanceled(proposalId, msg.sender, block.timestamp);
+// Otherwise cancel the proposal from further procedures
+   proposals[proposalId].state = ProposalState.Canceled;
+    emit ProposalCanceled(proposalId, proposals[proposalId].proposer, block.timestamp);
 }
 
+// Queues succeded proposal to be passed
 function queueProposal(bytes32 proposalId) external onlyActionsManager {
+
+// If the state is not equal to succeeded then revert with an error
 if(proposals[proposalId].state != ProposalState.Succeeded){
             revert InvalidProposalState();
 }
 
+// Otherwise set the state and the queuedBlockNumber and emit an event
     proposals[proposalId].state = ProposalState.Queued;
     proposals[proposalId].queuedAtBlockNumber = block.number;
 
-    emit ProposalQueued(proposalId, msg.sender);
+    emit ProposalQueued(proposalId, proposals[proposalId].proposer);
 }
-
-
-
 
 
 }
