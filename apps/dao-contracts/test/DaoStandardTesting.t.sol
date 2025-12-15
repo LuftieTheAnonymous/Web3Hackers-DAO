@@ -1,23 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
-
-import {CustomBuilderGovernor} from "../src/CustomGovernor.sol";
+import {StandardGovernor} from "../src/governor/interaction-contracts/StandardGovernor.sol";
 import {GovernmentToken} from "../src/GovToken.sol";
 import {TokenManager} from "../src/TokenManager.sol";
-import {DeployContract} from "../script/GovernanceContracts.s.sol";
+import {DeployStandardDaoContracts} from "../script/DeployStandardDaoContracts.s.sol";
 import {Test, console} from "../lib/forge-std/src/Test.sol";
 contract DaoTesting is Test {
-
-CustomBuilderGovernor governor;
+StandardGovernor standardGovernor;
 GovernmentToken govToken;
 TokenManager tokenManager;
-DeployContract deployContract;
+DeployStandardDaoContracts deployContract;
 
 address user = makeAddr("user");
 
 function setUp() public {
-deployContract = new DeployContract();
-(governor, govToken, tokenManager)=deployContract.run();
+deployContract = new DeployStandardDaoContracts();
+(standardGovernor, govToken, tokenManager)=deployContract.run();
 }
 
 function testGranterRole() public view {

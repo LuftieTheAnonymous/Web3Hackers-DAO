@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity ^0.8.24;
     import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
     import {GovernmentToken} from "./GovToken.sol";
 
     import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-
-
-pragma solidity ^0.8.24;
 
 contract TokenManager is AccessControl, ReentrancyGuard{
 

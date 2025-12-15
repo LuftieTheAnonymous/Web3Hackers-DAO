@@ -69,7 +69,6 @@ struct Proposal{
     UrgencyLevel urgencyLevel; // urgency level of the proposal
     ProposalState state; // proposal state
     address[] targets; // reward addresses or system logic
-    uint256[] values; // reward values or system logic
     bytes[] calldatas; // reward data or system logic
     bool executed; // proposal executed
     bool canceled; // proposal canceled
@@ -120,7 +119,7 @@ urgencyLevelToQuorum[UrgencyLevel.Low] = LOW_LEVEL_URGENCY_QUORUM;
 urgencyLevelToQuorum[UrgencyLevel.Medium] = MEDIUM_LEVEL_URGENCY_QUORUM;
 urgencyLevelToQuorum[UrgencyLevel.High] = HIGH_LEVEL_URGENCY_QUORUM;
 
-    _grantRole(ACTIONS_MANAGER, msg.sender);
+_grantRole(ACTIONS_MANAGER, msg.sender);
 }
 
 modifier isElligibleToVote(bytes32 proposalId) {
@@ -197,30 +196,26 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
     function createProposal(
         string calldata description,
         address[] memory targets,
-        uint256[] memory values,
         bytes[] memory calldatas,
         UrgencyLevel urgencyLevel,
         uint256 endBlockTimestamp,
         uint256 proposalTimelock,
         uint256 delayInSeconds
-    ) external virtual nonReentrant isElligibleToPropose returns (bytes32)  {
-        bytes32 proposalId = keccak256(abi.encodePacked(proposalCount,description, targets, values, msg.sender, block.timestamp));
-
+    ) external virtual isElligibleToPropose returns (bytes32)  {
+        bytes32 proposalId = keccak256(abi.encodePacked(proposalCount,description, targets, msg.sender, block.timestamp));
         uint256 secondsTurnedToBlocks = delayInSeconds / 12;
-
         uint256 endTimeTurnedToBlocks = endBlockTimestamp / 12;
         
         Proposal memory proposal = Proposal({
             id:proposalId,
-            proposer:msg.sender,
-            description:description,
-            startBlockNumber:block.number + secondsTurnedToBlocks,
-            endBlockNumber:endTimeTurnedToBlocks,
-            urgencyLevel:urgencyLevel,
-            state:ProposalState.Pending,
-            targets:targets,
-            values:values,
-            calldatas:calldatas,
+            proposer: msg.sender,
+            description: description,
+            startBlockNumber: block.number + secondsTurnedToBlocks,
+            endBlockNumber: endTimeTurnedToBlocks,
+            urgencyLevel: urgencyLevel,
+            state: ProposalState.Pending,
+            targets: targets,
+            calldatas: calldatas,
             executed:false,
             canceled:false,
             defeated:false,
@@ -238,7 +233,7 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
      return proposalId;
     }
 
-function activateProposal(bytes32 proposalId) external onlyActionsManager nonReentrant {
+function activateProposal(bytes32 proposalId) external onlyActionsManager {
  if(block.number < proposals[proposalId].startBlockNumber && proposals[proposalId].state == ProposalState.Pending){
      revert NotReadyToStart();
  }
@@ -260,7 +255,7 @@ function cancelProposal(bytes32 proposalId) external onlyActionsManager {
     emit ProposalCanceled(proposalId, msg.sender, block.timestamp);
 }
 
-function queueProposal(bytes32 proposalId) external onlyActionsManager nonReentrant {
+function queueProposal(bytes32 proposalId) external onlyActionsManager {
 if(proposals[proposalId].state != ProposalState.Succeeded ){
             revert InvalidProposalState();
 }
