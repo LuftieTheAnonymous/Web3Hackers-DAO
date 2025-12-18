@@ -96,7 +96,7 @@ function createProposal(
         StandardProposalVote voteOptionIndex
     ) external nonReentrant
     isVotingActive(proposalId)
-    isElligibleToVote(proposalId)
+    isElligibleToVoteOrUpdateState
      {
 
         // If invalid option gets selected, revert
@@ -132,7 +132,7 @@ function createProposal(
 
 
 
-function succeedProposal(bytes32 proposalId) external onlyActionsManager isProposalReadyToSucceed(proposalId) nonReentrant { 
+function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(proposalId) isElligibleToVoteOrUpdateState nonReentrant { 
 
     // Returns the demanded Quorum frequency (in tokens)
    uint256 quorumNeeded = getProposalQuorumNeeded(proposalId);
@@ -152,7 +152,7 @@ function succeedProposal(bytes32 proposalId) external onlyActionsManager isPropo
 
     // If the votes for is equal or greater than 60% of the required quorum
     // Succeed the proposal 
-    if((votesFor * 1e18) / totalVotes >= 6e18){
+    if((votesFor * 1e18) / totalVotes >= MIN_PROPOSAL_PASS_PERCENTAGE){
         proposals[proposalId].state = ProposalState.Succeeded;
         emit ProposalSucceeded(proposalId);
         return;
@@ -166,7 +166,7 @@ function succeedProposal(bytes32 proposalId) external onlyActionsManager isPropo
 
 // Function to perform a call to the targeted contract with the byte-code data passed
 // If there are any target contracts to be called else set as executed immediately.
-function performProposalExecution(Proposal memory proposal) internal onlyActionsManager nonReentrant {
+function performProposalExecution(Proposal memory proposal) internal nonReentrant {
 // If there are any targets and calldata array length is the same as targets 
 if(proposal.targets.length > 0 && proposal.targets.length == proposal.calldatas.length){
     
@@ -180,7 +180,7 @@ if(proposal.targets.length > 0 && proposal.targets.length == proposal.calldatas.
                  // If there is no success with an call, it means that wrong data has been passed
                  // Which cancels the proposal from further calls (To not exhasust BullMQ)
                  if(!success){
-                     cancelProposal(proposal.id);
+                     _cancelProposal(proposal.id);
                      return;
                  }
                  // Else emit calldata exeucted
@@ -197,12 +197,12 @@ if(proposal.targets.length > 0 && proposal.targets.length == proposal.calldatas.
 }
 
 
-function executeProposal(bytes32 proposalId) external onlyActionsManager nonReentrant {
+function executeProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState() nonReentrant {
 // Get the proposal by it's Id
 Proposal memory proposal = proposals[proposalId];
 
 // If proposal is not equal to queued and the time timelock is not expired, revert
-    if(proposal.state != ProposalState.Queued && proposal.queuedAtBlockNumber + proposal.timelockBlockNumber > block.number){
+if(proposal.state != ProposalState.Queued || (proposal.state == ProposalState.Queued && proposal.queuedAtBlockNumber + proposal.timelockBlockNumber > block.number)){
         revert InvalidProposalState();
     }
 
