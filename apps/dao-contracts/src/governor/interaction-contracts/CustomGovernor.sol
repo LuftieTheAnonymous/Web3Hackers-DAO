@@ -38,84 +38,6 @@ struct CustomVoteOption{
 mapping(bytes32=>mapping(CustomProposalVote => CustomVoteOption)) public votesCustomOptions;
 constructor(address govTokenAddr) GovernorBase(govTokenAddr){}
 
-// Function to create proposal
-function createCustomProposal(
-        string calldata description,
-        address[] memory targets,
-        bytes[] memory calldatas,
-        UrgencyLevel urgencyLevel,
-        uint256 endBlockTimestamp,
-        uint256 proposalTimelockBlocks,
-        uint256 delayBlocks,
-        Calldata[][5] memory selectiveCalldata
-    ) external nonReentrant isElligibleToPropose returns (bytes32)
-     {
-    // Creates a proposal from the inherited base
-    bytes32 proposalId=this.createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelockBlocks, delayBlocks);
-   
-   // Iteration through the calldata provided arrays 
-   for (uint8 i = 0; i < selectiveCalldata.length; i++) {
-    // Retrieves the array with calldata
-    Calldata[] memory optionCalldata = selectiveCalldata[i];
-
-    // Checks if there is any address zero tarrget inside calldata array
-    bool isApproving = true;
-
-    for (uint j = 0; i < optionCalldata.length; i++) {
-        if(optionCalldata[j].target == address(0)){
-            isApproving=false;
-        }
-    }
-    
-    // Add the custom option to the vote options
-    votesCustomOptions[proposalId][CustomProposalVote(i)]= CustomVoteOption(
-      optionCalldata,
-      !isApproving,
-      isApproving
-    );
-   }
-
-    return proposalId;
-}
-
-
-// Action functions
-    function castVote(
-        bytes32 proposalId,
-        string calldata reason,
-        CustomProposalVote voteOption
-    ) external nonReentrant
-    isVotingActive(proposalId)
-    isElligibleToVote(proposalId)
-     {
-// If the index will be higher than 4, revert
-if(uint8(voteOption) > 4){
-    revert InvalidOptionSelected();
-}
-
-// Get the weight of the vote
-        uint256 weight = govToken.getPastVotes(msg.sender, block.number - 1);
-
-// create a vote with all data
-  Vote memory vote=Vote({
-     votedProposalId:proposalId,
-            voterAddress:msg.sender,
-            weight:weight,
-            voteOption:uint8(voteOption),
-            reason:reason,
-            timestamp:block.timestamp
-        });
-
-// Attach to the arrays and increase the state of userVotedCount
-        proposalVotes[proposalId][msg.sender] = vote;
-        proposalVoters[proposalId].push(msg.sender);
-        userVotes[msg.sender].push(vote);
-        
-        userVotedCount[msg.sender]++;
-        emit ProposalVoted(proposalId, msg.sender, weight);
-
-    }
-
 
 
 // Get custom proposal Votes
@@ -200,8 +122,17 @@ function insertionSort(SummaryCustomOption[5] memory arr, bytes32 proposalId) pr
     );
 }
 
-function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCalldataElements ) internal nonReentrant {
 
+// Returns the winning option with it's calldata and if is executable
+function getSummaryCustomOption(bytes32 proposalId) public view returns (Calldata[] memory callDataArray, bool isCustomExecutable) {
+    SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
+    (Calldata[] memory customCalldata, bool isExecutable,) = insertionSort(customVoteCounts, proposalId);
+
+callDataArray= customCalldata;
+isCustomExecutable = isExecutable;
+}
+
+function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCalldataElements ) internal nonReentrant {
     // Iterate through callDataElements
     for(uint i = 0; i < customCalldataElements.length; i++){
              address target =  customCalldataElements[i].target;
@@ -215,26 +146,92 @@ function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCallda
 // Call the contracts and if is not succeeded cancel the proposal        
                  (bool success, bytes memory returnedData) = target.call(data);
                  if(!success){
-                    cancelProposal(proposalId); 
+                    _cancelProposal(proposalId); 
                  }
                   emit CalldataExecuted(returnedData);
-            
-             
+        
      }
 }
 
 
-// Returns the winning option with it's calldata and if is executable
-function getSummaryCustomOption(bytes32 proposalId) external view returns (
-    Calldata[] memory callDataArray, bool isCustomExecutable) {
-    SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
-    (Calldata[] memory customCalldata, bool isExecutable,) = insertionSort(customVoteCounts, proposalId);
+// Function to create proposal
+function createCustomProposal(
+        string calldata description,
+        address[] memory targets,
+        bytes[] memory calldatas,
+        UrgencyLevel urgencyLevel,
+        uint256 endBlockTimestamp,
+        uint256 proposalTimelockBlocks,
+        uint256 delayBlocks,
+        Calldata[][5] memory selectiveCalldata
+    ) external nonReentrant isElligibleToPropose returns (bytes32)
+     {
+    // Creates a proposal from the inherited base
+    bytes32 proposalId=this.createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelockBlocks, delayBlocks);
+   
+   // Iteration through the calldata provided arrays 
+   for (uint8 i = 0; i < selectiveCalldata.length; i++) {
+    // Retrieves the array with calldata
+    Calldata[] memory optionCalldata = selectiveCalldata[i];
 
-callDataArray= customCalldata;
-isCustomExecutable = isExecutable;
+    // Checks if there is any address zero tarrget inside calldata array
+    bool isApproving = true;
+
+    for (uint j = 0; i < optionCalldata.length; i++) {
+        if(optionCalldata[j].target == address(0)){
+            isApproving=false;
+        }
+    }
+    
+    // Add the custom option to the vote options
+    votesCustomOptions[proposalId][CustomProposalVote(i)]= CustomVoteOption(
+      optionCalldata,
+      !isApproving,
+      isApproving
+    );
+   }
+
+    return proposalId;
 }
 
-function succeedProposal(bytes32 proposalId) external onlyActionsManager isProposalReadyToSucceed(proposalId) nonReentrant {
+
+// Action functions
+    function castVote(
+        bytes32 proposalId,
+        string calldata reason,
+        CustomProposalVote voteOption
+    ) external nonReentrant
+    isVotingActive(proposalId)
+    isElligibleToVoteOrUpdateState
+     {
+// If the index will be higher than 4, revert
+if(uint8(voteOption) > 4){
+    revert InvalidOptionSelected();
+}
+
+// Get the weight of the vote
+uint256 weight = govToken.getPastVotes(msg.sender, block.number - 1);
+
+// create a vote with all data
+  Vote memory vote=Vote({
+     votedProposalId:proposalId,
+            voterAddress:msg.sender,
+            weight:weight,
+            voteOption:uint8(voteOption),
+            reason:reason,
+            timestamp:block.timestamp
+        });
+
+// Attach to the arrays and increase the state of userVotedCount
+        proposalVotes[proposalId][msg.sender] = vote;
+        proposalVoters[proposalId].push(msg.sender);
+        userVotes[msg.sender].push(vote);
+        
+        userVotedCount[msg.sender]++;
+        emit ProposalVoted(proposalId, msg.sender, weight);
+    }
+
+function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(proposalId) isElligibleToVoteOrUpdateState nonReentrant {
 
 // Get the quorum
    uint256 quorumNeeded = getProposalQuorumNeeded(proposalId);
@@ -255,7 +252,7 @@ function succeedProposal(bytes32 proposalId) external onlyActionsManager isPropo
         return;
     }
  // // If quorum is matched, but 60% of the quorum is not reached, defeat.
-    if((optionVoteTokens * 1e18) / totalVotes < 6e17){
+    if((optionVoteTokens * 1e18) / totalVotes < MIN_PROPOSAL_PASS_PERCENTAGE){
          proposals[proposalId].state = ProposalState.Defeated;
         emit ProposalDefeated(proposalId, proposals[proposalId].proposer, block.timestamp);
         return;
@@ -267,15 +264,18 @@ function succeedProposal(bytes32 proposalId) external onlyActionsManager isPropo
 }
 
 // Executes proposal and calls contracts that are included as calldata
-function executeProposal(bytes32 proposalId) external onlyActionsManager nonReentrant {
+function executeProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState nonReentrant {
 Proposal memory proposal = proposals[proposalId];
 
-    if(proposal.state != ProposalState.Queued && proposal.queuedAtBlockNumber + proposal.timelockBlockNumber > block.number){
+// If timelock is not passed after being queued, revert with an error of invalid proposal state
+    if(proposal.state != ProposalState.Queued || ( proposal.state == ProposalState.Queued && proposal.queuedAtBlockNumber + proposal.timelockBlockNumber > block.number)){
         revert InvalidProposalState();
     }
-    SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
-    (Calldata[] memory customCalldataArr, bool isExecutable,) = insertionSort(customVoteCounts, proposalId);
 
+    // Retrieve the the first option (the winning one),  that participants all voted for
+    (Calldata[] memory customCalldataArr, bool isExecutable) = getSummaryCustomOption(proposalId);
+
+// Execute is the function is executable (meaning it has some functions to be executed)
 if(isExecutable && customCalldataArr.length > 0){
         callSelectedProposal(proposalId, customCalldataArr);
     }

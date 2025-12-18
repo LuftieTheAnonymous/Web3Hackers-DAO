@@ -110,10 +110,12 @@ bytes32 constant private ACTIONS_MANAGER = keccak256("ACTIONS_MANAGER");
 
 // Constant variables for math-operation to get 0.5% of the votes amount (to propose)
 // And the percentage of quorum that needs to appear on the voting 
-uint256 internal constant THRESHHOLD_DIVIDER = 200;
-uint256 internal constant LOW_LEVEL_URGENCY_QUORUM = 40;
-uint256 internal  constant MEDIUM_LEVEL_URGENCY_QUORUM = 60;
+uint256 internal constant THRESHHOLD_DIVIDER = 2e20;
+uint256 internal constant LOW_LEVEL_URGENCY_QUORUM = 60;
+uint256 internal  constant MEDIUM_LEVEL_URGENCY_QUORUM = 80;
 uint256 internal  constant HIGH_LEVEL_URGENCY_QUORUM = 90;
+
+uint256 internal constant MIN_PROPOSAL_PASS_PERCENTAGE = 6e17;
 
 
 // MIn Proposal Duration (30 minutes)
@@ -149,7 +151,7 @@ urgencyLevelToQuorum[UrgencyLevel.High] = HIGH_LEVEL_URGENCY_QUORUM;
 _grantRole(ACTIONS_MANAGER, msg.sender);
 }
 
-modifier isElligibleToVote(bytes32 proposalId) {
+modifier isElligibleToVoteOrUpdateState() {
     if(govToken.getPastVotes(msg.sender, block.number - 1) == 0){
         revert NotElligibleToPropose();
     }
@@ -244,7 +246,7 @@ _;
     // Gets the 0.5% amount of all tokens, which allows users to propose 
     // (in initial state all users will be elligible it first will be visible once the DAO would have about 150 participants)
     function getProposalThreshold() public view returns (uint256)  {
-        return govToken.totalSupply() / THRESHHOLD_DIVIDER;
+        return (govToken.totalSupply() * 1e18) / THRESHHOLD_DIVIDER;
     }
 
     
@@ -257,7 +259,7 @@ function getProposal(bytes32 proposalId) external view returns (Proposal memory)
 // Returns the quorum needed to proceed the voting
 function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint256) {
         return (govToken.totalSupply() * getUrgencyQuorum(proposals[proposalId].urgencyLevel)) / 1e2;
-    }
+}
 
 
 // Creates a proposal that can be voted
@@ -304,7 +306,7 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
     }
 
 // Activates ability to vote for the members of the DAO
-function activateProposal(bytes32 proposalId) external onlyActionsManager isPendingState(proposalId) {
+function activateProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState isPendingState(proposalId) {
  if(block.number < proposals[proposalId].startBlockNumber && proposals[proposalId].state == ProposalState.Pending){
      revert NotReadyToStart();
  }
@@ -316,7 +318,8 @@ function activateProposal(bytes32 proposalId) external onlyActionsManager isPend
 // Cancels the proposal from further execution. This can be the case
 // - Once a unsuccessfull function has been called with target.call(dataBytes); in the execution
 // - A malicious function could be attached to be executed as a final one
-function cancelProposal(bytes32 proposalId) public onlyActionsManager {
+
+function _cancelProposal(bytes32 proposalId) internal {
     // If the state of the proposal is active, succeeded, canceled, defeated or executed,
     // revert with an error
     if(
@@ -329,14 +332,22 @@ function cancelProposal(bytes32 proposalId) public onlyActionsManager {
             revert InvalidProposalState();
 }
 
+if(proposals[proposalId].state != ProposalState.Queued || (proposals[proposalId].state == ProposalState.Queued && proposals[proposalId].queuedAtBlockNumber + proposals[proposalId].timelockBlockNumber > block.number)){
+        revert InvalidProposalState();
+}
+
 // Otherwise cancel the proposal from further procedures
    proposals[proposalId].state = ProposalState.Canceled;
     emit ProposalCanceled(proposalId, proposals[proposalId].proposer, block.timestamp);
 }
 
-// Queues succeded proposal to be passed
-function queueProposal(bytes32 proposalId) external onlyActionsManager {
 
+function cancelProposal(bytes32 proposalId) external onlyActionsManager {
+ _cancelProposal(proposalId);
+}
+
+// Queues succeded proposal to be passed
+function queueProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState  {
 // If the state is not equal to succeeded then revert with an error
 if(proposals[proposalId].state != ProposalState.Succeeded){
             revert InvalidProposalState();
