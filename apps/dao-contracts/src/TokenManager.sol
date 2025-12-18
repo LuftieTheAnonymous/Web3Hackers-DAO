@@ -1,24 +1,35 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.24;
+
     import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
     import {GovernmentToken} from "./GovToken.sol";
 
     import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
-contract TokenManager is AccessControl, ReentrancyGuard{
+    import {ECDSA} from "../lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+
+    import {EIP712} from "../lib/openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol";
+
+
+
+contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
+    using ECDSA for bytes32;
 
   // Events
     event InitialTokensReceived(address indexed account, uint256 indexed amount);
     event UserRewarded(address indexed account, uint256 indexed amount);
     event UserPunished(address indexed account, uint256 indexed amount);
     event UserReceivedMonthlyDistribution(address indexed account, uint256 indexed amount);
+    event BotSignerRotated(address previousBotSigner, address currentBotSigner);
 
     // Errors
     error MonthlyDistributionNotReady();
     error IntialTokensNotReceived();
-
+    error UnelligibleToCall();
+    error VoucherExpired();
+    error InvalidSigner(address signerAddress, address botSigner);
 
     // ENUMs in order to determine accurately the level of certain parameter
     enum TokenReceiveLevel {
@@ -48,7 +59,21 @@ contract TokenManager is AccessControl, ReentrancyGuard{
       EXPERT_PLUS
     }
 
-    GovernmentToken govToken;
+    // Structs
+
+  struct Voucher {
+        address receiver;
+        uint256 expiryBlock;
+        bool isAdmin;
+        uint8 psrLevel;
+        uint8 jexsLevel;
+        uint8 tklLevel;
+        uint8 web3Level;
+        uint8 kvtrLevel;
+    }
+
+
+
 
     uint256 private constant INITIAL_TOKEN_USER_AMOUNT = 1e21;
     uint256 private constant MALICIOUS_ACTIONS_LIMIT = 3;
@@ -57,7 +82,18 @@ contract TokenManager is AccessControl, ReentrancyGuard{
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E2=1e2;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E3=1e3;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E4=1e4;
-    uint256 private constant oneMonth = 30 days; 
+    uint256 private constant ONE_MONTH_IN_BLOCKS = 84600; 
+
+
+ bytes32 public constant VOUCHER_TYPEHASH = keccak256(
+        "Voucher(address receiver,uint256 expiryBlock,bool isAdmin,uint8 psrLevel,uint8 jexsLevel,uint8 tklLevel,uint8 web3Level,uint8 kvtrLevel)"
+    );
+
+
+    bytes32 private constant controller = keccak256("controller");
+
+    address private botSigner;
+    GovernmentToken govToken;
 
     // mappings
     mapping(address => bool) private receivedInitialTokens;
@@ -69,83 +105,134 @@ contract TokenManager is AccessControl, ReentrancyGuard{
     mapping(KnowledgeVerificationTestRate => uint256) private kvtrOptions;
 
 
-
-    constructor(address governmentTokenAddr){
+    constructor(address governmentTokenAddr, address governorContractAddr, address botAddress) EIP712("Web3HackersDAO", "1") {
       govToken = GovernmentToken(governmentTokenAddr);
+      botSigner = botAddress;
+      _grantRole(controller, governorContractAddr);
+      _grantRole(controller, botAddress);
     }
 
 
     modifier isMonthlyDistributionTime() {
-      if(lastClaimedMonthlyDistributionTime[msg.sender] != 0 && block.timestamp - lastClaimedMonthlyDistributionTime[msg.sender] < oneMonth){
+      if(lastClaimedMonthlyDistributionTime[msg.sender] != 0 && block.number - lastClaimedMonthlyDistributionTime[msg.sender] < ONE_MONTH_IN_BLOCKS){
         revert MonthlyDistributionNotReady();
       }
       _;
     }
-
-            modifier onlyForInitialTokensReceivers(address member) {
+    
+    modifier onlyForInitialTokensReceivers(address member) {
     if(!receivedInitialTokens[member]) {
         revert IntialTokensNotReceived(); 
     }
     _;
         }
 
+modifier onlyGovernor {
+if(!hasRole(controller, msg.sender)){
+  revert UnelligibleToCall();
+}
+  _;
+}
+
+modifier onlyBotSigner(address signerAddress){
+if(signerAddress != botSigner){
+  revert UnelligibleToCall();
+}
+  _;
+}
 
 
 // Performed by admin in order to deprive user of his tokens and delist him out of whitelist.
-function kickOutFromDAO(address user) external  {
+function kickOutFromDAO(address user) external onlyGovernor {
 govToken.burn(user, govToken.balanceOf(user));
 receivedInitialTokens[user] = false;
 govToken.removeFromWhitelist(user);
 govToken.addBlacklist(user);
 }
 
+function burnTokensOnLeave(address user) external onlyBotSigner(msg.sender){
+govToken.burn(user, govToken.balanceOf(user));
+receivedInitialTokens[user] = false;
+govToken.removeFromWhitelist(user);
+}
 
-      // Public functions (User-Interactive)
-function handInUserInitialTokens
-(TokenReceiveLevel _psrLevel, 
-TokenReceiveLevel _jexsLevel, 
-TechnologyKnowledgeLevel _tklLevel, 
-TokenReceiveLevel _web3IntrestLevel, 
-KnowledgeVerificationTestRate _kvtrLevel, 
-address receiverAddress) external nonReentrant {
+function setBotSigner(address newAddress) external onlyBotSigner(msg.sender) {
+address old = botSigner;
+botSigner = newAddress;
+emit BotSignerRotated(old, newAddress);
+}
+
+// Public functions (User-Interactive)
+function handInUserInitialTokens(
+Voucher calldata voucherData,
+bytes calldata signature
+) external  {
+
+if(voucherData.expiryBlock <= block.number){
+ revert VoucherExpired(); 
+}
+
+bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
+  VOUCHER_TYPEHASH,
+      voucherData.receiver,
+              voucherData.expiryBlock,
+              voucherData.isAdmin,
+              voucherData.psrLevel,
+              voucherData.jexsLevel,
+              voucherData.tklLevel,
+              voucherData.web3Level,
+              voucherData.kvtrLevel
+)));
+
+
+    address signer = ECDSA.recover(digest, signature);
+
+    if(signer != botSigner){
+      revert InvalidSigner(signer, botSigner);
+    }
+    
+    
         // IMPLEMENT CONSTANT VARIABLE FOR 10
-        if (receivedInitialTokens[receiverAddress]) {
-          uint256 punishmentAmount= INITIAL_TOKEN_USER_AMOUNT / 10;
-        punishMember(receiverAddress, punishmentAmount);
-        emit UserPunished(receiverAddress, punishmentAmount);
+        if (receivedInitialTokens[voucherData.receiver]) {
+        uint256 punishmentAmount= INITIAL_TOKEN_USER_AMOUNT / 10;
+        punishMember(voucherData.receiver, punishmentAmount);
+        emit UserPunished(voucherData.receiver, punishmentAmount);
         return;
     }
 
+
+
+
       // IMPLEMENT CONSTANT VARIABLE FOR 1E2, 1E3 AND 1E4
     uint256 amountOfTokens = 
-    INITIAL_TOKEN_USER_AMOUNT + (((INITIAL_TOKEN_USER_AMOUNT * psrOptions[_psrLevel]) / MULTIPLICATION_NORMALIZATION_1E2) + 
-    ((INITIAL_TOKEN_USER_AMOUNT * jexsOptions[_jexsLevel]) /  MULTIPLICATION_NORMALIZATION_1E3) + 
-    ((INITIAL_TOKEN_USER_AMOUNT * tklOptions[_tklLevel]) / MULTIPLICATION_NORMALIZATION_1E4)
-     + ((INITIAL_TOKEN_USER_AMOUNT * web3IntrestOptions[_web3IntrestLevel]) / MULTIPLICATION_NORMALIZATION_1E4) + 
-    ((INITIAL_TOKEN_USER_AMOUNT * kvtrOptions[_kvtrLevel]) / MULTIPLICATION_NORMALIZATION_1E4 ));
+    INITIAL_TOKEN_USER_AMOUNT + (((INITIAL_TOKEN_USER_AMOUNT * psrOptions[TokenReceiveLevel(voucherData.psrLevel)]) / MULTIPLICATION_NORMALIZATION_1E2) + 
+    ((INITIAL_TOKEN_USER_AMOUNT * jexsOptions[TokenReceiveLevel(voucherData.jexsLevel)]) /  MULTIPLICATION_NORMALIZATION_1E3) + 
+    ((INITIAL_TOKEN_USER_AMOUNT * tklOptions[TechnologyKnowledgeLevel(voucherData.tklLevel)]) / MULTIPLICATION_NORMALIZATION_1E4)
+     + ((INITIAL_TOKEN_USER_AMOUNT * web3IntrestOptions[TokenReceiveLevel(voucherData.web3Level)]) / MULTIPLICATION_NORMALIZATION_1E4) + 
+    ((INITIAL_TOKEN_USER_AMOUNT * kvtrOptions[KnowledgeVerificationTestRate(voucherData.kvtrLevel)]) / MULTIPLICATION_NORMALIZATION_1E4 ));
 
 
 
-    if(govToken.isCallerTokenManager()) {
-        amountOfTokens += INITIAL_TOKEN_USER_AMOUNT * (DSR_ADMIN_MULTIPLIER  /  MULTIPLICATION_NORMALIZATION_1E2 );
+    if(voucherData.isAdmin) {
+        amountOfTokens += (INITIAL_TOKEN_USER_AMOUNT * DSR_ADMIN_MULTIPLIER) /  MULTIPLICATION_NORMALIZATION_1E2;
         } 
           else {
-        amountOfTokens += INITIAL_TOKEN_USER_AMOUNT * (DSR_USER_MULTIPLIER / MULTIPLICATION_NORMALIZATION_1E2);
+        amountOfTokens += (INITIAL_TOKEN_USER_AMOUNT * DSR_USER_MULTIPLIER) / MULTIPLICATION_NORMALIZATION_1E2;
         }
 
 
-      govToken.mint(receiverAddress, amountOfTokens);
-      receivedInitialTokens[receiverAddress] = true;
+      govToken.mint(voucherData.receiver, amountOfTokens);
+      receivedInitialTokens[voucherData.receiver] = true;
     
-      emit InitialTokensReceived(receiverAddress, amountOfTokens);
+      emit InitialTokensReceived(voucherData.receiver, amountOfTokens);
     }
 
-    function punishMember(address user, uint256 amount) public nonReentrant onlyForInitialTokensReceivers(user) {
+    function punishMember(address user, uint256 amount) public nonReentrant onlyGovernor onlyForInitialTokensReceivers(user) {
     govToken.burn(user, amount);
     emit UserPunished(user, amount);
     }
 
-    function rewardUser(address user, uint256 amount) external nonReentrant onlyForInitialTokensReceivers(user) {
+    function rewardUser(address user, uint256 amount) external nonReentrant onlyGovernor onlyForInitialTokensReceivers(user) {
     govToken.mint(user, amount);
     emit UserRewarded(user, amount);
     }
@@ -160,14 +247,13 @@ function leaveDAO() external {
 // Called in BullMQ recurring monthly token distributions
   function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, 
   uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported,
- uint256 allMonthMessages, address user) external isMonthlyDistributionTime  {
-
-    // IMPLEMENT CONSTANT VARIABLES FOR THE MULTIPLIERS
-    uint256 amount = dailyReports * 125e15 + DAOVotingPartcipation * 3e17 + DAOProposalsSucceeded * 175e15 + problemsSolved * 3e16 + issuesReported * 145e16 + allMonthMessages * 1e14;
+ uint256 allMonthMessages, address user) external nonReentrant onlyBotSigner(msg.sender) onlyForInitialTokensReceivers(user) isMonthlyDistributionTime  {
+    uint256 amount = (dailyReports * 125e15) + (DAOVotingPartcipation * 3e17) + (DAOProposalsSucceeded * 175e15) + (problemsSolved * 3e16) + (issuesReported * 145e16) + (allMonthMessages * 1e14);
 
   govToken.mint(user, amount);
 
-  lastClaimedMonthlyDistributionTime[user] = block.timestamp;
+  lastClaimedMonthlyDistributionTime[user] = block.number;
+
 
   emit UserReceivedMonthlyDistribution(user, amount);
   }

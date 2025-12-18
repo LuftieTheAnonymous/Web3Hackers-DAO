@@ -12,11 +12,11 @@ pragma solidity ^0.8.24;
     contract GovernmentToken is ERC20, ERC20Permit, ERC20Votes, VotesExtended, AccessControl {
 
 // Errors
-    error SupplySurpassed();
-    error AddressNonZero();
+  error SupplySurpassed();
+  error AddressNonZero();
   error NotWhitelisted();
   error NotBlackListed();
-  error NoProperAdminRole();
+  error NoProperAdminRole(address caller);
   error InvalidAmount(uint256 amount);
   
 // Events
@@ -42,7 +42,7 @@ pragma solidity ^0.8.24;
           (bool grantedManager) = _grantRole(MANAGE_ROLE, msg.sender);    
   
   if(!grantedGranterRole || !grantedManager){
-revert NoProperAdminRole();
+revert NoProperAdminRole(msg.sender);
   }
 } 
 
@@ -70,14 +70,14 @@ revert NoProperAdminRole();
 
     modifier onlyManageRole() {
       if(!hasRole(MANAGE_ROLE, msg.sender)) {
-        revert NoProperAdminRole();
+        revert NoProperAdminRole(msg.sender);
       }
       _;
     }
 
     modifier onlyGranterRole() {
       if(!hasRole(GRANTER_ROLE, msg.sender)) {
-        revert NoProperAdminRole();
+        revert NoProperAdminRole(msg.sender);
       }
       _;
     }
@@ -129,10 +129,18 @@ if(amount > balanceOf(memberAddress)){
     (bool grantedManagerRole)= _grantRole(MANAGE_ROLE, account);
     
     if(!grantedManagerRole){
-      revert NoProperAdminRole();
+      revert NoProperAdminRole(msg.sender);
     }
     
      emit AdminRoleGranted(account);
+    }
+
+    function disposeOfManageRole() external onlyManageRole isAddressNonZero(msg.sender)  {
+       (bool successfullyRevoked) =  _revokeRole(MANAGE_ROLE, msg.sender);
+    
+    if(successfullyRevoked){
+     emit AdminRoleRevoked(msg.sender);
+    }
     }
 
 // Revoke manager role
@@ -193,6 +201,12 @@ function burnOwnTokens (uint256 amount) isBalanceExceeded(amount, msg.sender) ex
     return super.nonces(_owner);
     }
 
+    function permit(address owner, address spender, uint256 value, uint256 deadline,  uint8 v,
+     bytes32 r,
+     bytes32 s) public override(ERC20Permit){
+      super.permit(owner, spender, value, deadline, v, r, s);
+     }
+
   function delegate(address delegatee) public onlyWhitelisted(delegatee) override(Votes) {
    _delegate(msg.sender, delegatee);
 
@@ -201,9 +215,7 @@ function burnOwnTokens (uint256 amount) isBalanceExceeded(amount, msg.sender) ex
    }
     }
 
-// Returns value to check whether the caller has a role of manager
-function isCallerTokenManager() public view returns (bool){
-return hasRole(MANAGE_ROLE, msg.sender);
-}
+
+
 
     }

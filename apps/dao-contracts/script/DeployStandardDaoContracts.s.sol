@@ -3,7 +3,6 @@
 pragma solidity ^0.8.24;
 import {Script} from "../lib/forge-std/src/Script.sol";
 
-import {CustomBuilderGovernor} from "../src/governor/interaction-contracts/CustomGovernor.sol";
 
 import {StandardGovernor} from "../src/governor/interaction-contracts/StandardGovernor.sol";
 import {GovernmentToken} from "../src/GovToken.sol";
@@ -19,13 +18,13 @@ is Script {
     function run() public returns(StandardGovernor, GovernmentToken, TokenManager){
 vm.startBroadcast();
 govToken = new GovernmentToken();
-govTokenManager = new TokenManager(address(govToken));
+standardGovernor = new StandardGovernor(address(govToken));
+govTokenManager = new TokenManager(address(govToken), address(standardGovernor), vm.envAddress("BOT_ADDRESS"));
 
-// Gives all the rights to be called by the smart-contract
+govToken.grantManageRole(address(standardGovernor));
+govToken.grantManageRole(vm.envAddress("BOT_ADDRESS"));
 govToken.transferGranterRole(address(govTokenManager));
 
-
-standardGovernor = new StandardGovernor(address(govToken));
 vm.stopBroadcast();
 
 return(standardGovernor, govToken, govTokenManager);

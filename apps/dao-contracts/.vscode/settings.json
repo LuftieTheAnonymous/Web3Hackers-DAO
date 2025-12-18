@@ -8,5 +8,6 @@
         "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
         "openzeppelin-contracts/=lib/openzeppelin-contracts/"
     ],
-    "solidity.compileUsingRemoteVersion": "v0.8.31+commit.fd3a2265"
+    "solidity.compileUsingRemoteVersion": "v0.8.31+commit.fd3a2265",
+    "DockerRun.DisableDockerrc": true
 }
