@@ -142,6 +142,7 @@ function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCallda
                  if(!success){
                     tokenManager.punishMember(proposals[proposalId].proposer, (govToken.balanceOf(proposals[proposalId].proposer) * 1e18) / 25e18);
                     _cancelProposal(proposalId); 
+                    break;
                  }
                   emit CalldataExecuted(returnedData);
         

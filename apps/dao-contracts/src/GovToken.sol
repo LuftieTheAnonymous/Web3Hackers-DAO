@@ -123,14 +123,6 @@ pragma solidity ^0.8.24;
      emit AdminRoleGranted(account);
     }
 
-    function disposeOfManageRole() external onlyManageRole isAddressNonZero(msg.sender)  {
-       (bool successfullyRevoked) =  _revokeRole(MANAGE_ROLE, msg.sender);
-    
-    
-     emit AdminRoleRevoked(msg.sender);
-    
-    }
-
 // Revoke manager role
 function revokeManageRole(address account) external onlyGranterRole isAddressNonZero(account) {
     (bool successfullyRevoked) =  _revokeRole(MANAGE_ROLE, account);
