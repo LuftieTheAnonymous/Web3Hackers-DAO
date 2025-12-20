@@ -19,17 +19,17 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
 
   // Events
     event InitialTokensReceived(address indexed account, uint256 indexed amount);
-    event UserRewarded(address indexed account, uint256 indexed amount);
-    event UserPunished(address indexed account, uint256 indexed amount);
-    event UserReceivedMonthlyDistribution(address indexed account, uint256 indexed amount);
+    event MemberRewarded(address indexed account, uint256 indexed amount);
+    event MemberReceivedMonthlyDistribution(address indexed account, uint256 indexed amount);
     event BotSignerRotated(address previousBotSigner, address currentBotSigner);
-
+    event MemberPunished(address indexed member, uint256 indexed amount);
     // Errors
     error MonthlyDistributionNotReady();
     error IntialTokensNotReceived();
     error UnelligibleToCall();
     error VoucherExpired();
     error InvalidSigner(address signerAddress, address botSigner);
+    error AlreadyReceivedInitialTokens();
 
     // ENUMs in order to determine accurately the level of certain parameter
     enum TokenReceiveLevel {
@@ -113,8 +113,8 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
     }
 
 
-    modifier isMonthlyDistributionTime() {
-      if(lastClaimedMonthlyDistributionTime[msg.sender] != 0 && block.number - lastClaimedMonthlyDistributionTime[msg.sender] < ONE_MONTH_IN_BLOCKS){
+    modifier isMonthlyDistributionTime(address user) {
+      if(lastClaimedMonthlyDistributionTime[user] != 0 && block.number - lastClaimedMonthlyDistributionTime[user] < ONE_MONTH_IN_BLOCKS){
         revert MonthlyDistributionNotReady();
       }
       _;
@@ -146,7 +146,6 @@ if(signerAddress != botSigner){
 function kickOutFromDAO(address user) external onlyGovernor {
 govToken.burn(user, govToken.balanceOf(user));
 receivedInitialTokens[user] = false;
-govToken.removeFromWhitelist(user);
 govToken.addBlacklist(user);
 }
 
@@ -166,7 +165,7 @@ emit BotSignerRotated(old, newAddress);
 function handInUserInitialTokens(
 Voucher calldata voucherData,
 bytes calldata signature
-) external  {
+) external nonReentrant  {
 
 if(voucherData.expiryBlock <= block.number){
  revert VoucherExpired(); 
@@ -190,17 +189,10 @@ bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
     if(signer != botSigner){
       revert InvalidSigner(signer, botSigner);
     }
-    
-    
-        // IMPLEMENT CONSTANT VARIABLE FOR 10
-        if (receivedInitialTokens[voucherData.receiver]) {
-        uint256 punishmentAmount= INITIAL_TOKEN_USER_AMOUNT / 10;
-        punishMember(voucherData.receiver, punishmentAmount);
-        emit UserPunished(voucherData.receiver, punishmentAmount);
-        return;
+
+     if (receivedInitialTokens[voucherData.receiver] == true) {
+       revert AlreadyReceivedInitialTokens();
     }
-
-
 
 
       // IMPLEMENT CONSTANT VARIABLE FOR 1E2, 1E3 AND 1E4
@@ -227,14 +219,14 @@ bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
       emit InitialTokensReceived(voucherData.receiver, amountOfTokens);
     }
 
-    function punishMember(address user, uint256 amount) public nonReentrant onlyGovernor onlyForInitialTokensReceivers(user) {
+    function punishMember(address user, uint256 amount) public onlyGovernor onlyForInitialTokensReceivers(user) {
     govToken.burn(user, amount);
-    emit UserPunished(user, amount);
+    emit MemberPunished(user, amount);
     }
 
-    function rewardUser(address user, uint256 amount) external nonReentrant onlyGovernor onlyForInitialTokensReceivers(user) {
+    function rewardUser(address user, uint256 amount) external onlyGovernor onlyForInitialTokensReceivers(user) {
     govToken.mint(user, amount);
-    emit UserRewarded(user, amount);
+    emit MemberRewarded(user, amount);
     }
 
     // Allows member to burn all the tokens user has and delist him of whitelist
@@ -247,7 +239,7 @@ function leaveDAO() external {
 // Called in BullMQ recurring monthly token distributions
   function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, 
   uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported,
- uint256 allMonthMessages, address user) external nonReentrant onlyBotSigner(msg.sender) onlyForInitialTokensReceivers(user) isMonthlyDistributionTime  {
+ uint256 allMonthMessages, address user) external onlyBotSigner(msg.sender) onlyForInitialTokensReceivers(user) isMonthlyDistributionTime(user) {
     uint256 amount = (dailyReports * 125e15) + (DAOVotingPartcipation * 3e17) + (DAOProposalsSucceeded * 175e15) + (problemsSolved * 3e16) + (issuesReported * 145e16) + (allMonthMessages * 1e14);
 
   govToken.mint(user, amount);
@@ -255,7 +247,7 @@ function leaveDAO() external {
   lastClaimedMonthlyDistributionTime[user] = block.number;
 
 
-  emit UserReceivedMonthlyDistribution(user, amount);
+  emit MemberReceivedMonthlyDistribution(user, amount);
   }
 
 

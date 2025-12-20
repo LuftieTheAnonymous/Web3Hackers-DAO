@@ -1,16 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 import {GovernorBase} from "../GovernorBase.sol";
-contract CustomBuilderGovernor is GovernorBase {
+import {TokenManager} from "../../TokenManager.sol";
 
-// Custom voting option
-    enum CustomProposalVote {
-        Custom1,
-        Custom2,
-        Custom3,
-        Custom4,
-        Custom5
-    }
+contract CustomBuilderGovernor is GovernorBase {
 
 
 // Gathering of all the data pertaining selected option
@@ -35,8 +28,12 @@ struct CustomVoteOption{
 
 }
 // Mapping proposalId=> CustomVoteOptionIndex=> CustomVoteOption
-mapping(bytes32=>mapping(CustomProposalVote => CustomVoteOption)) public votesCustomOptions;
+mapping(bytes32=>mapping(uint8 => CustomVoteOption)) public votesCustomOptions;
+
+
 constructor(address govTokenAddr) GovernorBase(govTokenAddr){}
+
+
 
 
 
@@ -63,19 +60,16 @@ function getCustomProposalVotes(bytes32 proposalId)
         // Get option id
         uint8 option = vote.voteOption;
 
-        if (option < 5) continue;
-
         // Sum weights per option
         voteSums[option] += vote.weight;
 
-        
-
+    
         // Check if this voter has highest weight for the option and attach his values power of the vote and address
         if (vote.weight > highestVoteWeight[option]) {
             highestVoteWeight[option] = vote.weight;
             highestVoter[option] = voters[i];
         }
-            highestIsApproving[option] = votesCustomOptions[proposalId][CustomProposalVote(option)].isApprovingVote;
+            highestIsApproving[option] = votesCustomOptions[proposalId][option].isApprovingVote;
     }
 
     // Build final result array per option
@@ -116,7 +110,7 @@ function insertionSort(SummaryCustomOption[5] memory arr, bytes32 proposalId) pr
         arr[j] = key;
     }
     return (
-        votesCustomOptions[proposalId][CustomProposalVote(proposalVotes[proposalId][arr[0].lastVoter].voteOption)].calldataArr,
+        votesCustomOptions[proposalId][proposalVotes[proposalId][arr[0].lastVoter].voteOption].calldataArr,
         arr[0].isExecutable,
         arr[0].castedVotes
     );
@@ -146,6 +140,7 @@ function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCallda
 // Call the contracts and if is not succeeded cancel the proposal        
                  (bool success, bytes memory returnedData) = target.call(data);
                  if(!success){
+                    tokenManager.punishMember(proposals[proposalId].proposer, (govToken.balanceOf(proposals[proposalId].proposer) * 1e18) / 25e18);
                     _cancelProposal(proposalId); 
                  }
                   emit CalldataExecuted(returnedData);
@@ -163,11 +158,11 @@ function createCustomProposal(
         uint256 endBlockTimestamp,
         uint256 proposalTimelockBlocks,
         uint256 delayBlocks,
-        Calldata[][5] memory selectiveCalldata
-    ) external nonReentrant isElligibleToPropose returns (bytes32)
+        Calldata[][] memory selectiveCalldata
+    ) external isElligibleToPropose returns (bytes32)
      {
     // Creates a proposal from the inherited base
-    bytes32 proposalId=this.createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelockBlocks, delayBlocks);
+    bytes32 proposalId= createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelockBlocks, delayBlocks);
    
    // Iteration through the calldata provided arrays 
    for (uint8 i = 0; i < selectiveCalldata.length; i++) {
@@ -175,16 +170,19 @@ function createCustomProposal(
     Calldata[] memory optionCalldata = selectiveCalldata[i];
 
     // Checks if there is any address zero tarrget inside calldata array
-    bool isApproving = true;
+    bool isApproving = false;
 
-    for (uint j = 0; i < optionCalldata.length; i++) {
-        if(optionCalldata[j].target == address(0)){
-            isApproving=false;
+if(optionCalldata.length > 0){
+      for (uint j = 0; j < optionCalldata.length; j++) {
+        if(optionCalldata[j].target != address(0)){
+            isApproving=true;
         }
     }
     
+
+}
     // Add the custom option to the vote options
-    votesCustomOptions[proposalId][CustomProposalVote(i)]= CustomVoteOption(
+    votesCustomOptions[proposalId][i]= CustomVoteOption(
       optionCalldata,
       !isApproving,
       isApproving
@@ -199,23 +197,19 @@ function createCustomProposal(
     function castVote(
         bytes32 proposalId,
         string calldata reason,
-        CustomProposalVote voteOption
-    ) external nonReentrant
+        uint8 voteOption
+    ) external
     isVotingActive(proposalId)
     isElligibleToVoteOrUpdateState
      {
-// If the index will be higher than 4, revert
-if(uint8(voteOption) > 4){
-    revert InvalidOptionSelected();
-}
-
 // Get the weight of the vote
-uint256 weight = govToken.getPastVotes(msg.sender, block.number - 1);
+uint256 weight = govToken.balanceOf(msg.sender);
 
 // create a vote with all data
   Vote memory vote=Vote({
      votedProposalId:proposalId,
             voterAddress:msg.sender,
+            delegatee: govToken.delegates(msg.sender),
             weight:weight,
             voteOption:uint8(voteOption),
             reason:reason,
@@ -231,7 +225,7 @@ uint256 weight = govToken.getPastVotes(msg.sender, block.number - 1);
         emit ProposalVoted(proposalId, msg.sender, weight);
     }
 
-function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(proposalId) isElligibleToVoteOrUpdateState nonReentrant {
+function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(proposalId) isElligibleToVoteOrUpdateState {
 
 // Get the quorum
    uint256 quorumNeeded = getProposalQuorumNeeded(proposalId);
@@ -264,7 +258,7 @@ function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(p
 }
 
 // Executes proposal and calls contracts that are included as calldata
-function executeProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState nonReentrant {
+function executeProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState {
 Proposal memory proposal = proposals[proposalId];
 
 // If timelock is not passed after being queued, revert with an error of invalid proposal state

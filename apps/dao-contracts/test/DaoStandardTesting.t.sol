@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
+
+import {GovernorBase} from "../src/governor/GovernorBase.sol";
 import {StandardGovernor} from "../src/governor/interaction-contracts/StandardGovernor.sol";
 import {GovernmentToken} from "../src/GovToken.sol";
 import {TokenManager} from "../src/TokenManager.sol";
@@ -15,9 +17,12 @@ GovernmentToken govToken;
 TokenManager tokenManager;
 DeployStandardDaoContracts deployContract;
 
-    uint256 sepoliaEthFork;
+
+uint256 sepoliaEthFork;
 address user = makeAddr("user");
+address user2 = makeAddr("user2");
 address validBotAddress = vm.envAddress("BOT_ADDRESS");
+
 
 function setUp() public {
 sepoliaEthFork=vm.createSelectFork("ETH_ALCHEMY_SEPOLIA_RPC_URL");
@@ -69,20 +74,71 @@ return (signature, expiryTime);
 
 }
 
-function testReceiveInitialTokensAndRevertCases() public {
+
+function testRevertAddressZeroCases() public {
+    vm.startPrank(validBotAddress);
+// Does not have right to revoke the role
+vm.expectRevert();
+govToken.revokeManageRole(address(0));
+
+// Address zero is forbidden to be added
+vm.expectRevert();
+govToken.addBlacklist(address(0));
 
 vm.expectRevert();
+govToken.addToWhitelist(address(0));
+vm.stopPrank();
+}
+
+function testRevertArbitaryUserCallingWhiteListBlacklist() public{
+// No Arbitrary people can call add to whitelist or blacklist
+
+    vm.expectRevert();
 govToken.addToWhitelist(user);
 
 vm.expectRevert();
 govToken.addBlacklist(user);
+}
 
+
+function testCannotMintOverSupplyLimit() public {
+
+    vm.prank(validBotAddress);
+    vm.expectRevert();
+    govToken.mint(user, 21e24 + 1);
+
+    vm.prank(validBotAddress);
+    govToken.addToWhitelist(user);
+
+// No calls from arbitrary people (even people with tokens)
+vm.prank(user);
+vm.expectRevert();
+govToken.mint(user2, 1e18);
+
+vm.prank(user);
+vm.expectRevert();
+govToken.burn(user2, 1e18);
+
+vm.prank(user);
+vm.expectRevert();
+govToken.mint(user2, 1e18);
+
+
+
+
+    
+}
+
+
+
+function testReceiveInitialTokensAndRevertCases() public {
 
 vm.prank(validBotAddress);
 govToken.addToWhitelist(user);
 
 (bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
 
+vm.startPrank(user);
 TokenManager.Voucher memory voucherFlawed = TokenManager.Voucher(
         user,
         expiryBlock,
@@ -108,15 +164,316 @@ TokenManager.Voucher memory voucherCorrect = TokenManager.Voucher(
         0
     );
 
+// Successfull tokens handin
+
 tokenManager.handInUserInitialTokens(voucherCorrect, signature);
 
+// Cannot delegate to not whitelisted member
+vm.expectRevert();
+govToken.delegate(msg.sender);
+
+// Get punished for handing in tokens once again
+// ⚠️ If anyone can call this function it can lead that someone gets an hash of signed-tx and multiple times 
+// And drains the wallet
+// ✅ Fixed by punishing to preventing user from reentrancy and turned to revert
 vm.expectRevert();
 tokenManager.handInUserInitialTokens(voucherCorrect, signature);
 
+
+vm.stopPrank();
+
+
+(bytes memory signature2, uint256 expiryBlock2) = getVoucherSignature(msg.sender, "true", 0, 0, 0, 0, 0);
+TokenManager.Voucher memory voucherCorrect2 = TokenManager.Voucher(
+        msg.sender,
+        expiryBlock2,
+        true,
+        0,
+        0,
+        0,
+        0,
+        0
+    );
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(msg.sender);
+
+// THis
+vm.prank(msg.sender);
+tokenManager.handInUserInitialTokens(voucherCorrect2, signature2);
+
+assert(govToken.balanceOf(msg.sender) > govToken.balanceOf(user));
+}
+
+
+function testCreateProposalAndVotingWorkflow() public {
+
+(bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(user);
+
+vm.startPrank(user);
+TokenManager.Voucher memory voucher = TokenManager.Voucher(
+        user,
+        expiryBlock,
+        false,
+        0,
+        0,
+        0,
+        0,
+        0
+    );
+
+tokenManager.handInUserInitialTokens(voucher, signature);
+
+// Sets invalid data for proposal execution call
+address[] memory targets = new address[](1);
+bytes[] memory byteCodeData= new bytes[](1);
+
+targets[0]=address(tokenManager); 
+byteCodeData[0]= abi.encodeWithSignature("rewarrUser(address,uint256)", user, 15e18);
+
+// Cannot casr vote on a proposal that does not exist
+vm.expectRevert();
+standardGovernor.castVote(0, 'Reason so', StandardGovernor.StandardProposalVote(0));
+
+// Arithmetic error or invalid timelock
+vm.expectRevert();
+bytes32 proposalIdFlawed1 = standardGovernor.createStandardProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 7201, 300);
+
+vm.expectRevert();
+bytes32 proposalIdFlawed2 = standardGovernor.createStandardProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 600, 7200);
+
+// Create a valid proposal
+bytes32 proposalId = standardGovernor.createStandardProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300);
+
+// Revert because the voting has not been activated
+vm.expectRevert();
+standardGovernor.castVote(proposalId, "Because I like this option", StandardGovernor.StandardProposalVote.Yes);
+
+// Cannot activate because time has not passed
+vm.expectRevert();
+standardGovernor.activateProposal(proposalId);
+
+(bytes32 id, address proposer, string memory description, uint256 startBlock,uint256 endBlock, GovernorBase.UrgencyLevel urgency, GovernorBase.ProposalState proposalState,uint256 queuedAtBlockNumber,uint256 executedAtBlockNumber, uint256 succeededAtBlockNumber,uint256 timelockBlockNumber)=standardGovernor.proposals(proposalId);
+
+// Successfull vote cast after activation
+
+vm.roll(startBlock);
+standardGovernor.activateProposal(proposalId);
+
+standardGovernor.castVote(proposalId, "Because I like this option", StandardGovernor.StandardProposalVote.Yes);
+
+// Cannot cast vote again
+vm.expectRevert();
+standardGovernor.castVote(proposalId, "Because I like this option", StandardGovernor.StandardProposalVote.Abstain);
+
+// Get Proposals' informations
+standardGovernor.getStandardProposalVotes(proposalId);
+standardGovernor.getProposalVotes(proposalId);
+standardGovernor.getProposalCount();
+standardGovernor.getProposalThreshold();
+
+// Cannot call succeed or queue 
+vm.expectRevert();
+standardGovernor.succeedProposal(proposalId);
+
+
+vm.expectRevert();
+standardGovernor.queueProposal(proposalId);
+
+
+// Succeed and queue the proposal as it reaches 
+vm.roll(endBlock);
+standardGovernor.succeedProposal(proposalId);
+
+standardGovernor.queueProposal(proposalId);
+
+// Cannot execute proposal until lock time is passed
+vm.expectRevert();
+standardGovernor.executeProposal(proposalId);
+
+// gets called
+vm.roll(block.number + timelockBlockNumber);
+standardGovernor.executeProposal(proposalId);
+vm.stopPrank();
+
+}
+
+function testSuccessfullCallToExternal() public {
+
+(bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(user);
+
+vm.startPrank(user);
+TokenManager.Voucher memory voucher = TokenManager.Voucher(
+        user,
+        expiryBlock,
+        false,
+        0,
+        0,
+        0,
+        0,
+        0
+    );
+
+tokenManager.handInUserInitialTokens(voucher, signature);
+
+address[] memory targets = new address[](1);
+bytes[] memory byteCodeData= new bytes[](1);
+
+targets[0]=address(tokenManager); 
+byteCodeData[0]= abi.encodeWithSignature("setBotSigner(address)", msg.sender);
+
+
+bytes32 proposalId2 = standardGovernor.createStandardProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300);
+
+(bytes32 id2, address proposer2, string memory description2, uint256 startBlock2,uint256 endBlock2, GovernorBase.UrgencyLevel urgency2, GovernorBase.ProposalState proposalState2,uint256 queuedAtBlockNumber2,uint256 executedAtBlockNumber2, uint256 succeededAtBlockNumber2,uint256 timelockBlockNumber2)=standardGovernor.proposals(proposalId2);
+
+vm.roll(startBlock2);
+standardGovernor.activateProposal(proposalId2);
+
+vm.expectRevert();
+standardGovernor.activateProposal(proposalId2);
+
+standardGovernor.castVote(proposalId2, "Because I like this option", StandardGovernor.StandardProposalVote.Yes);
+
+
+vm.stopPrank();
+
+vm.prank(user2);
+vm.expectRevert();
+standardGovernor.cancelProposal(proposalId2);
+
+
+vm.startPrank(user);
+
+vm.roll(endBlock2);
+standardGovernor.succeedProposal(proposalId2);
+
+vm.expectRevert();
+standardGovernor.castVote(proposalId2, "Because I like this option", StandardGovernor.StandardProposalVote.Abstain);
+
+standardGovernor.queueProposal(proposalId2);
+
+vm.expectRevert();
+standardGovernor.executeProposal(proposalId2);
+
+vm.roll(block.number + timelockBlockNumber2);
+standardGovernor.executeProposal(proposalId2);
+
+
+vm.stopPrank();
+}
+
+
+
+function testKickoutFromDao() public {
+
+vm.expectRevert();
+govToken.addToWhitelist(user);
+
+vm.expectRevert();
+govToken.addBlacklist(user);
+
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(user);
+
+(bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
+
+vm.startPrank(user);
+
+TokenManager.Voucher memory voucherCorrect = TokenManager.Voucher(
+        user,
+        expiryBlock,
+        false,
+        0,
+        0,
+        0,
+        0,
+        0
+    );
+
+tokenManager.handInUserInitialTokens(voucherCorrect, signature);
+
+vm.stopPrank();
 
 vm.expectRevert();
 tokenManager.kickOutFromDAO(user);
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(user);
+
+vm.prank(validBotAddress);
+tokenManager.kickOutFromDAO(user);
+
 }
 
+function testRemoveOnLeave() public {
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(user);
+(bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
+
+
+TokenManager.Voucher memory voucherCorrect = TokenManager.Voucher(
+        user,
+        expiryBlock,
+        false,
+        0,
+        0,
+        0,
+        0,
+        0
+    );
+
+tokenManager.handInUserInitialTokens(voucherCorrect, signature);
+
+
+vm.prank(validBotAddress);
+vm.expectRevert();
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user2);
+
+vm.prank(user2);
+vm.expectRevert();
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user2);
+
+vm.prank(validBotAddress);
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user);
+
+
+vm.prank(validBotAddress);
+vm.expectRevert();
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user);
+
+vm.prank(user);
+vm.expectRevert();
+tokenManager.burnTokensOnLeave(user);
+
+vm.prank(validBotAddress);
+tokenManager.burnTokensOnLeave(user);
+
+}
+
+function testReadInfluence() public {
+govToken.readMemberInfluence(user);
+govToken.nonces(user);
+
+vm.prank(validBotAddress);
+vm.expectRevert();
+govToken.removeFromBlacklist(user);
+
+vm.prank(validBotAddress);
+vm.expectRevert();
+govToken.burn(user, 1e18);
+
+vm.prank(address(tokenManager));
+vm.expectRevert();
+govToken.grantManageRole(address(0));
+}
 
 }

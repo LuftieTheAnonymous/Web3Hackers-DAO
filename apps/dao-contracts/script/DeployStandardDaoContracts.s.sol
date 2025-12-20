@@ -21,6 +21,8 @@ govToken = new GovernmentToken();
 standardGovernor = new StandardGovernor(address(govToken));
 govTokenManager = new TokenManager(address(govToken), address(standardGovernor), vm.envAddress("BOT_ADDRESS"));
 
+standardGovernor.setTokenManager(address(govTokenManager));
+
 govToken.grantManageRole(address(standardGovernor));
 govToken.grantManageRole(vm.envAddress("BOT_ADDRESS"));
 govToken.transferGranterRole(address(govTokenManager));
