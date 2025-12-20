@@ -20,6 +20,7 @@ govToken = new GovernmentToken();
 customGovernor = new CustomBuilderGovernor(address(govToken));
 govTokenManager = new TokenManager(address(govToken), address(customGovernor), vm.envAddress("BOT_ADDRESS"));
 
+customGovernor.setTokenManager(address(govTokenManager));
 
 govToken.grantManageRole(address(customGovernor));
 govToken.grantManageRole(vm.envAddress("BOT_ADDRESS"));

@@ -29,7 +29,7 @@ constructor(address govTokenAddr) GovernorBase(govTokenAddr){}
 // Returns followingly the sums of votes (for, abstain, against) in a tuple.
     function getStandardProposalVotes(bytes32 proposalId) public
     view
-    returns (uint256 votesFor, uint256 votesAbstain,uint256 votesAgainst)
+    returns (uint256 votesFor, uint256 votesAbstain, uint256 votesAgainst)
 {
     address[] memory voters = proposalVoters[proposalId];
     for (uint256 i = 0; i < voters.length; i++) {
@@ -46,30 +46,6 @@ constructor(address govTokenAddr) GovernorBase(govTokenAddr){}
 
     return(votesFor, votesAbstain, votesAgainst);
 }
-
-// Inherits from the GovernorBase the function standard
-// and modifies the options of voting 
-
-function createProposal(
-        string calldata description,
-        address[] memory targets,
-        bytes[] memory calldatas,
-        UrgencyLevel urgencyLevel,
-        uint256 endBlockTimestamp,
-        uint256 proposalTimelock,
-        uint256 delayInSeconds
-    ) external nonReentrant isElligibleToPropose override(GovernorBase) returns (bytes32)
-     {
-// Calls the inherited from GovernorBase function
-    bytes32 proposalId=this.createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelock,delayInSeconds);
-
-    // Adds the proposal options
-    votesOptions[proposalId][StandardProposalVote.Yes]= VoteOption(false, true);
-    votesOptions[proposalId][StandardProposalVote.Abstain]= VoteOption(false, false);
-    votesOptions[proposalId][StandardProposalVote.No]= VoteOption(true, false);
-
-    return proposalId;
-     }
 
 
      // Returns the votes on certain proposal
@@ -90,26 +66,52 @@ function createProposal(
     return votes;
 }
 
+
+// Inherits from the GovernorBase the function standard
+// and modifies the options of voting. 
+function createStandardProposal(
+        string calldata description,
+        address[] memory targets,
+        bytes[] memory calldatas,
+        UrgencyLevel urgencyLevel,
+        uint256 endBlock,
+        uint256 proposalTimelock,
+        uint256 delayInSeconds
+    ) external isElligibleToPropose returns (bytes32)
+     {
+// Calls the inherited from GovernorBase function
+    bytes32 proposalId= createProposal(description, targets, calldatas, urgencyLevel, endBlock, proposalTimelock,delayInSeconds);
+
+    // Adds the proposal options
+    votesOptions[proposalId][StandardProposalVote.Yes]= VoteOption(false, true);
+    votesOptions[proposalId][StandardProposalVote.Abstain]= VoteOption(false, false);
+    votesOptions[proposalId][StandardProposalVote.No]= VoteOption(true, false);
+
+    return proposalId;
+     }
+
+
     function castVote(
         bytes32 proposalId,
         string calldata reason,
         StandardProposalVote voteOptionIndex
-    ) external nonReentrant
+    ) external
     isVotingActive(proposalId)
     isElligibleToVoteOrUpdateState
      {
 
         // If invalid option gets selected, revert
-        if(uint8(voteOptionIndex) < 2){
+        if(uint8(voteOptionIndex) > 2){
             revert InvalidOptionSelected();
         }
 
-        uint256 weight = govToken.getPastVotes(msg.sender, block.number - 1);
+        uint256 weight = govToken.balanceOf(msg.sender);
 
 // Creates a vote with all the data
   Vote memory vote=Vote({
             voterAddress:msg.sender,
             weight:weight,
+            delegatee: govToken.delegates(msg.sender),
             voteOption: uint8(voteOptionIndex),
             votedProposalId:proposalId,
             reason:reason,
@@ -132,7 +134,7 @@ function createProposal(
 
 
 
-function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(proposalId) isElligibleToVoteOrUpdateState nonReentrant { 
+function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(proposalId) isElligibleToVoteOrUpdateState { 
 
     // Returns the demanded Quorum frequency (in tokens)
    uint256 quorumNeeded = getProposalQuorumNeeded(proposalId);
@@ -180,6 +182,7 @@ if(proposal.targets.length > 0 && proposal.targets.length == proposal.calldatas.
                  // If there is no success with an call, it means that wrong data has been passed
                  // Which cancels the proposal from further calls (To not exhasust BullMQ)
                  if(!success){
+                    tokenManager.punishMember(proposal.proposer, (govToken.balanceOf(proposal.proposer) * 1e18) / 25e18);
                      _cancelProposal(proposal.id);
                      return;
                  }
@@ -197,7 +200,7 @@ if(proposal.targets.length > 0 && proposal.targets.length == proposal.calldatas.
 }
 
 
-function executeProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState() nonReentrant {
+function executeProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState() {
 // Get the proposal by it's Id
 Proposal memory proposal = proposals[proposalId];
 

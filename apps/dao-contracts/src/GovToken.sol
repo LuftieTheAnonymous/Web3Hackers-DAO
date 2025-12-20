@@ -17,8 +17,7 @@ pragma solidity ^0.8.24;
   error NotWhitelisted();
   error NotBlackListed();
   error NoProperAdminRole(address caller);
-  error InvalidAmount(uint256 amount);
-  
+
 // Events
     event AdminRoleGranted(address indexed account);
     event AdminRoleRevoked(address indexed account);
@@ -29,7 +28,7 @@ pragma solidity ^0.8.24;
     );
 
 // Constant values
-    uint256 public constant MAX_SUPPLY = 19e24;
+    uint256 public constant MAX_SUPPLY = 21e24;
       bytes32 public constant MANAGE_ROLE = keccak256("MANAGE_ROLE");
       bytes32 public constant GRANTER_ROLE = keccak256("GRANTER_ROLE");
 
@@ -41,9 +40,6 @@ pragma solidity ^0.8.24;
           (bool grantedGranterRole)=  _grantRole(GRANTER_ROLE, msg.sender);
           (bool grantedManager) = _grantRole(MANAGE_ROLE, msg.sender);    
   
-  if(!grantedGranterRole || !grantedManager){
-revert NoProperAdminRole(msg.sender);
-  }
 } 
 
 // Modifiers 
@@ -55,7 +51,7 @@ revert NoProperAdminRole(msg.sender);
   }
 
        modifier onlyBlacklisted(address member) {
-          if(!blacklist[member]){
+          if(blacklist[member] == false){
             revert NotBlackListed();
           }
           _;
@@ -88,12 +84,7 @@ revert NoProperAdminRole(msg.sender);
     _;
     }
 
-    modifier isBalanceExceeded(uint256 amount, address memberAddress){
-if(amount > balanceOf(memberAddress)){
-  revert InvalidAmount(amount);
-}
-      _;
-    }
+ 
 
     // Internal functions (Contract Callable)
     function _maxSupply() internal view virtual override(ERC20Votes) returns (uint256) {
@@ -114,7 +105,7 @@ if(amount > balanceOf(memberAddress)){
     }
 
 
-    function _transferVotingUnits(address from, address to, uint256 amount) internal virtual onlyWhitelisted(to) override(Votes, VotesExtended) {
+    function _transferVotingUnits(address from, address to, uint256 amount) internal virtual override(Votes, VotesExtended) {
     super._transferVotingUnits(from, to, amount);
     }
 
@@ -127,10 +118,7 @@ if(amount > balanceOf(memberAddress)){
 // Grant management of the token access roles 
   function grantManageRole(address account) external onlyGranterRole isAddressNonZero(account) {
     (bool grantedManagerRole)= _grantRole(MANAGE_ROLE, account);
-    
-    if(!grantedManagerRole){
-      revert NoProperAdminRole(msg.sender);
-    }
+
     
      emit AdminRoleGranted(account);
     }
@@ -138,28 +126,23 @@ if(amount > balanceOf(memberAddress)){
     function disposeOfManageRole() external onlyManageRole isAddressNonZero(msg.sender)  {
        (bool successfullyRevoked) =  _revokeRole(MANAGE_ROLE, msg.sender);
     
-    if(successfullyRevoked){
+    
      emit AdminRoleRevoked(msg.sender);
-    }
+    
     }
 
 // Revoke manager role
 function revokeManageRole(address account) external onlyGranterRole isAddressNonZero(account) {
     (bool successfullyRevoked) =  _revokeRole(MANAGE_ROLE, account);
-    
-    if(successfullyRevoked){
-     emit AdminRoleRevoked(account);
-    }
+  
 }
 
 // Transfer the elligibility over actions to a new granter (In deployment it is passed to a TokenManager Contract)
 function transferGranterRole(address newGranter) external onlyGranterRole isAddressNonZero(newGranter) {
 (bool succefullGranter) = _grantRole(GRANTER_ROLE, newGranter);
 (bool grantedManager) = _grantRole(MANAGE_ROLE, newGranter);
-
-if(succefullGranter){
  (bool revokedGranter) = _revokeRole(GRANTER_ROLE, msg.sender);
-}
+
 }
 
 // Addition of the user only possible if Admin calls the transaction.
@@ -172,8 +155,10 @@ function removeFromWhitelist(address user) public onlyManageRole onlyWhitelisted
 }
 
 function addBlacklist(address user) public onlyManageRole isAddressNonZero(user) {
-if(whitelist[user]){
+if(whitelist[user] == true){
+   _burn(user, balanceOf(user));
     removeFromWhitelist(user);
+
 }
       blacklist[user] = true;
 }
@@ -184,11 +169,11 @@ function mint(address account, uint256 amount) external mintOnlyBelowMaxSupply(a
 _mint(account, amount);
 }
 
-function burn(address account, uint256 amount) external onlyManageRole isBalanceExceeded(amount, account) onlyWhitelisted(account) {
+function burn(address account, uint256 amount) external onlyManageRole onlyWhitelisted(account) {
 _burn(account, amount);
 }
 
-function burnOwnTokens (uint256 amount) isBalanceExceeded(amount, msg.sender) external {
+function burnOwnTokens (uint256 amount) external {
   _burn(msg.sender, amount);
 }
 
@@ -200,12 +185,6 @@ function burnOwnTokens (uint256 amount) isBalanceExceeded(amount, msg.sender) ex
     function nonces(address _owner) public view override(ERC20Permit, Nonces) returns (uint256) {
     return super.nonces(_owner);
     }
-
-    function permit(address owner, address spender, uint256 value, uint256 deadline,  uint8 v,
-     bytes32 r,
-     bytes32 s) public override(ERC20Permit){
-      super.permit(owner, spender, value, deadline, v, r, s);
-     }
 
   function delegate(address delegatee) public onlyWhitelisted(delegatee) override(Votes) {
    _delegate(msg.sender, delegatee);

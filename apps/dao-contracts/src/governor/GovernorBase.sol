@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import {ERC20Votes} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {ReentrancyGuard} from "../../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {AccessControl} from "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-
+import {TokenManager} from "../../src/TokenManager.sol";
 
 contract GovernorBase is ReentrancyGuard, AccessControl{
 
@@ -96,6 +96,8 @@ struct Proposal{
 
 struct Vote {
     address voterAddress; // Votes address
+
+    address delegatee;
     uint256 weight; // The vote power of certain user (amount of tokens)
     uint8 voteOption; // The index of an option called selected
     bytes32 votedProposalId; // proposalId
@@ -132,6 +134,8 @@ uint256 internal constant AVG_MINED_BLOCK_TIME = 12;
 uint256 internal proposalCount;
 ERC20Votes internal immutable govToken;
 
+TokenManager internal tokenManager;
+
 mapping(UrgencyLevel => uint256) public urgencyLevelToQuorum;
 mapping(address => uint256) public userVotedCount;
 mapping(bytes32 => Proposal) public proposals; // proposalId to proposal
@@ -151,8 +155,9 @@ urgencyLevelToQuorum[UrgencyLevel.High] = HIGH_LEVEL_URGENCY_QUORUM;
 _grantRole(ACTIONS_MANAGER, msg.sender);
 }
 
+
 modifier isElligibleToVoteOrUpdateState() {
-    if(govToken.getPastVotes(msg.sender, block.number - 1) == 0){
+    if(govToken.balanceOf(msg.sender) == 0){
         revert NotElligibleToPropose();
     }
     _;
@@ -176,7 +181,7 @@ if(proposalVotes[proposalId][msg.sender].timestamp != 0){
 }
 
 modifier isElligibleToPropose() {
-  if(govToken.getPastVotes(msg.sender, block.number - 1) <= getProposalThreshold()){
+  if(govToken.balanceOf(msg.sender) <= getProposalThreshold()){
             revert NotElligibleToPropose();
         }
     _;
@@ -184,6 +189,13 @@ modifier isElligibleToPropose() {
 
 modifier onlyActionsManager(){
     if(!hasRole(ACTIONS_MANAGER, msg.sender)){
+        revert NoRoleAssigned();
+    }
+    _;
+}
+
+modifier onlyActionsManagerOrProposalCreator(bytes32 proposalId){
+    if(!hasRole(ACTIONS_MANAGER, msg.sender) || proposals[proposalId].proposer != msg.sender){
         revert NoRoleAssigned();
     }
     _;
@@ -262,6 +274,10 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
 }
 
 
+function setTokenManager(address tokenManagerAddr) public onlyActionsManager(){
+    tokenManager = TokenManager(tokenManagerAddr);
+}
+
 // Creates a proposal that can be voted
     function createProposal(
         string calldata description,
@@ -271,7 +287,7 @@ function getProposalQuorumNeeded(bytes32 proposalId) internal view returns (uint
         uint256 endBlockNumber,
         uint256 proposalTimelockInBlocks,
         uint256 delayInBlocks
-    ) external virtual isElligibleToPropose isProposalTimeProperlySet(delayInBlocks, endBlockNumber, proposalTimelockInBlocks) returns (bytes32)  {
+    ) internal virtual isElligibleToPropose isProposalTimeProperlySet(delayInBlocks, endBlockNumber, proposalTimelockInBlocks) returns (bytes32)  {
 
         if(targets.length != calldatas.length){
             revert NotEqualCalldataAndContractAmount();
@@ -342,7 +358,7 @@ if(proposals[proposalId].state != ProposalState.Queued || (proposals[proposalId]
 }
 
 
-function cancelProposal(bytes32 proposalId) external onlyActionsManager {
+function cancelProposal(bytes32 proposalId) external onlyActionsManagerOrProposalCreator(proposalId) {
  _cancelProposal(proposalId);
 }
 
