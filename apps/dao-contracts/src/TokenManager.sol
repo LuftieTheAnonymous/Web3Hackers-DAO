@@ -85,6 +85,15 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
     uint256 private constant ONE_MONTH_IN_BLOCKS = 84600; 
 
 
+    uint256 private constant DAILY_REPORT_MULTIPLIER = 125e14;
+    uint256 private constant VOTING_PARTICIPATION_MULTIPLIER=3e17;
+
+    uint256 private constant PROBLEMS_SOLVED_MULTIPLIER = 2e17;
+
+    uint256 private constant ISSUES_REPORTED_MULTIPLIER = 145e16;
+
+    uint256 private constant ALL_MONTH_MESSAGES_MULTIPLIER = 1e14;
+
  bytes32 public constant VOUCHER_TYPEHASH = keccak256(
         "Voucher(address receiver,uint256 expiryBlock,bool isAdmin,uint8 psrLevel,uint8 jexsLevel,uint8 tklLevel,uint8 web3Level,uint8 kvtrLevel)"
     );
@@ -236,11 +245,19 @@ function leaveDAO() external {
  govToken.removeFromWhitelist(msg.sender);
 }
 
+function getAnticipatedReward(uint256 dailyReports, uint256 DAOVotingPartcipation, 
+  uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported,
+ uint256 allMonthMessages) public pure returns (uint256){
+  uint256 amount = (dailyReports * DAILY_REPORT_MULTIPLIER) + (DAOVotingPartcipation * VOTING_PARTICIPATION_MULTIPLIER) + (DAOProposalsSucceeded * 175e15) + (problemsSolved * PROBLEMS_SOLVED_MULTIPLIER) + (issuesReported * ISSUES_REPORTED_MULTIPLIER) + (allMonthMessages * ALL_MONTH_MESSAGES_MULTIPLIER);
+return amount;
+}
+
+
 // Called in BullMQ recurring monthly token distributions
   function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, 
   uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported,
  uint256 allMonthMessages, address user) external onlyBotSigner(msg.sender) onlyForInitialTokensReceivers(user) isMonthlyDistributionTime(user) {
-    uint256 amount = (dailyReports * 125e15) + (DAOVotingPartcipation * 3e17) + (DAOProposalsSucceeded * 175e15) + (problemsSolved * 3e16) + (issuesReported * 145e16) + (allMonthMessages * 1e14);
+    uint256 amount = getAnticipatedReward(dailyReports, DAOVotingPartcipation, DAOProposalsSucceeded, problemsSolved, issuesReported, allMonthMessages);
 
   govToken.mint(user, amount);
 

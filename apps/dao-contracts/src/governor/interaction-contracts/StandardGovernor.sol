@@ -184,7 +184,7 @@ if(proposal.targets.length > 0 && proposal.targets.length == proposal.calldatas.
                  if(!success){
                     tokenManager.punishMember(proposal.proposer, (govToken.balanceOf(proposal.proposer) * 1e18) / 25e18);
                      _cancelProposal(proposal.id);
-                     return;
+                      break;
                  }
                  // Else emit calldata exeucted
                     emit CalldataExecuted(returnData);

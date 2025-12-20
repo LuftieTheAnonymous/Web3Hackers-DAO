@@ -322,12 +322,15 @@ TokenManager.Voucher memory voucher = TokenManager.Voucher(
 
 tokenManager.handInUserInitialTokens(voucher, signature);
 
-address[] memory targets = new address[](1);
-bytes[] memory byteCodeData= new bytes[](1);
+address[] memory targets = new address[](3);
+bytes[] memory byteCodeData= new bytes[](3);
 
-targets[0]=address(tokenManager); 
-byteCodeData[0]= abi.encodeWithSignature("setBotSigner(address)", msg.sender);
-
+targets[0]=address(govToken); 
+byteCodeData[0]= abi.encodeWithSignature("addBlacklist(address)", validBotAddress);
+targets[1]= address(tokenManager);
+byteCodeData[1] = abi.encodeWithSignature("rewardUser(address,uint256)", user, 1e18);
+targets[2]= address(tokenManager);
+byteCodeData[2] = abi.encodeWithSignature("rewardUser(address,uint256)", user, 1e18);
 
 bytes32 proposalId2 = standardGovernor.createStandardProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300);
 
