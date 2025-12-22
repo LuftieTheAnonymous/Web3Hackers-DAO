@@ -1,5 +1,5 @@
 
-import {  executeGovenorTokenEvents } from "./event-listeners/GovTokenEventListener.js";
+import {  executeGovenorTokenEvents } from "./event-listeners/TokenManagerEventListeners.js";
 import { executeGovenorContractEvents } from "./event-listeners/GovenorEventListener.js";
 import govTokenRouter from "./routes/GovTokenRouter.js";
 import governanceRouter from "./routes/GovernanceRouter.js";
@@ -20,10 +20,6 @@ import { schema } from './types/graphql/RootQuery.js';
 const app = express();
 dotenv.config();
 
-// Create the GraphQL over HTTP Node request handler
-
-
-
 // contentSecurityPolicy - strict set of rules that only allows resources from the same origin
 // CROSS-ORIGIN OPENER POLICY - mitigates data leaks through shared browsing contexts
 // CORP - Cross-Origin Resource Policy, which allows you to control how your resources are shared across origins
@@ -40,7 +36,7 @@ app.use(helmet({
     dnsPrefetchControl:{ allow: true },
     xDownloadOptions: false,
     frameguard:{action:'sameorigin'},
-xXssProtection:true,
+    xXssProtection:true,
     contentSecurityPolicy:{
         directives: {
             defaultSrc: ["'self'"],
@@ -74,17 +70,14 @@ app.use('/activity', activityRouter);
 
 const server = http.createServer(app);
 
-redisClient.on('error', (err:any) => console.log('Redis Client Error', err));
-
 if (!redisClient.isOpen) await redisClient.connect();
-
-
 await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
+redisClient.on('error', (err:any) => console.log('Redis Client Error', err));
 
 export const runningPort = 2137;
 
-server.listen(8080, async () => {
+server.listen(2137, async () => {
     logger.info(`Server started on port ${runningPort}`, {
         timestamp: new Date().toISOString(),
         port: runningPort,

@@ -1,15 +1,14 @@
 import { ethers } from "ethers";
-import { daoContract, provider } from "../../../../config/ethersConfig.js";
+import { standardGovernorContract, provider } from "../../../../config/ethersConfig.js";
 import pLimit from 'p-limit';
 import { ProposalEventArgs } from "../../../../controllers/GovernanceController.js";
 
 export const activateProposals = async () => {
   try {
-
-                 const lastBlock = await provider.getBlockNumber();
-         const filters = daoContract.filters.ProposalCreated(); 
+        const lastBlock = await provider.getBlockNumber();
+         const filters = standardGovernorContract.filters.ProposalCreated(); 
      
-     const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
+     const events = await standardGovernorContract.queryFilter(filters, lastBlock - 9, lastBlock);
         
 
     if (!events || events.length === 0) {
@@ -21,14 +20,14 @@ return { data: null, error: "No proposals found", message: "error", status: 404 
     const tasks = events.map((event) =>{
         return limit(async () => {
       try {
-        const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]);
+        const proposal = await standardGovernorContract.getProposal((event as ProposalEventArgs).args[0]);
 
 
         const isNotOpenYet = new Date().getTime() >= (Number(proposal.startBlockTimestamp) * 1000) && Number(proposal.state) === 0;
 
 
         if (isNotOpenYet) {
-          const tx = await daoContract.activateProposal(proposal.id, {
+          const tx = await standardGovernorContract.activateProposal(proposal.id, {
               maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
   maxFeePerGas: ethers.parseUnits("10000", "gwei"),
           });
