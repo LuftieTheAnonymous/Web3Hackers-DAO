@@ -33,7 +33,7 @@ const worker = new Worker('smart-contracts-jobs', async (job) => {
         }
 },{connection:redisConnection, limiter:{
     'max':20,
-    'duration':1000 * 60 * 2
+    'duration':1000 * 60 * 5
 }});
 
 worker.on('completed', (job) => console.info(`Job ${job.name} completed`));

@@ -15,13 +15,9 @@ await smartContractsInteracionQueue.setGlobalConcurrency(5);
 await smartContractsInteracionQueue.upsertJobScheduler(
   'monthly-distribution-scheduler',
   {
-    every: 1000 * 60 * 60 * 24, // codziennie
-    startDate: Date.now(), // lub Date.now()
+    every: 1000 * 60 * 60 * 24, 
+    startDate: Date.now(), 
     utc: true,
-  },
-  {
-'name': 'monthly-distribution',
-    data: {},
   }
 );
 
@@ -39,4 +35,4 @@ export const activityInteracionQueue = new Queue("activityJobs", {
 
 await activityInteracionQueue.setGlobalConcurrency(5);
 
-await activityInteracionQueue.add("activity-update", {},{ repeat: {'every': 1000 * 60  * 10 }, removeOnComplete: true,  });
+await activityInteracionQueue.add("activity-update", {},{ repeat: {'every': 1000 * 60  * 15 }, removeOnComplete: true,  });
