@@ -1,4 +1,4 @@
-import { daoContract } from "../config/ethersConfig.js";
+import { standardGovernorContract, customGovernorContract } from "../config/ethersConfig.js";
 import dotenv from "dotenv";
 import {format} from "date-fns";
 import {formatDistanceStrict} from "date-fns/formatDistanceStrict"
@@ -12,12 +12,12 @@ dotenv.config();
 
 export const executeGovenorContractEvents=()=>{
 
-daoContract.on("ProposalCreated", async (proposalId:any) => {
+standardGovernorContract.on("ProposalCreated", async (proposalId:any) => {
         try{
             console.log("Proposal Created triggered", proposalId);
 
             
-            const proposal = await daoContract.getProposal(proposalId);
+            const proposal = await standardGovernorContract.getProposal(proposalId);
         
              await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
                     method: "POST",
@@ -61,10 +61,10 @@ await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposa
 
     });
 
-daoContract.on("ProposalActivated", async (id) => {
+standardGovernorContract.on("ProposalActivated", async (id) => {
         console.log("Proposal Created triggered", id);
 
-        const proposal = await daoContract.getProposal(id);
+        const proposal = await standardGovernorContract.getProposal(id);
 
         
 
@@ -96,11 +96,11 @@ daoContract.on("ProposalActivated", async (id) => {
 
     });
 
-daoContract.on("ProposalSucceeded", async (id) => {
+standardGovernorContract.on("ProposalSucceeded", async (id) => {
 try{
     console.log("Proposal Succeeded triggered", id);
 
-            const proposal = await daoContract.getProposal(id);
+            const proposal = await standardGovernorContract.getProposal(id);
 
     await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
                     method: "POST",
@@ -142,13 +142,13 @@ await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Succeeded ! Now
 }
     });
 
-daoContract.on("ProposalCanceled", async (args) => {
+standardGovernorContract.on("ProposalCanceled", async (args) => {
       try{
           console.log("Proposal Canceled Event Triggered");
           
           const id = args[0];
 
-          const proposal = await daoContract.getProposal(id);
+          const proposal = await standardGovernorContract.getProposal(id);
 
            await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
                     method: "POST",
@@ -182,13 +182,13 @@ await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Canceled. The p
       }
     });
 
-daoContract.on("ProposalQueued", async (args) => {
+standardGovernorContract.on("ProposalQueued", async (args) => {
         try{
             console.log("Proposal Queued triggered");
             console.log("Arguments: ", args);
             const id = args[0];
 
-            const proposal = await daoContract.getProposal(id);
+            const proposal = await standardGovernorContract.getProposal(id);
 
 
                 await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
@@ -224,9 +224,9 @@ daoContract.on("ProposalQueued", async (args) => {
     });
 
 
-daoContract.on("ProposalExecuted", async (id) => {
+standardGovernorContract.on("ProposalExecuted", async (id) => {
         try{
-            const proposal = await daoContract.getProposal(id);
+            const proposal = await standardGovernorContract.getProposal(id);
 
 
                 await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {

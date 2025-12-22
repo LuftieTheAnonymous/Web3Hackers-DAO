@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import dotenv from 'dotenv';
-import { daoContract, proposalStates } from "../config/ethersConfig.js";
+import { standardGovernorContract, customGovernorContract, proposalStates } from "../config/ethersConfig.js";
 import redisClient from "../redis/set-up.js";
 import { supabaseConfig } from "../config/supabase.js";
 dotenv.config();

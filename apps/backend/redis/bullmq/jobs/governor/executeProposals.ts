@@ -1,5 +1,5 @@
 import  pLimit  from 'p-limit';
-import { daoContract, provider } from "../../../../config/ethersConfig.js";
+import { standardGovernorContract, provider } from "../../../../config/ethersConfig.js";
 import retry from 'async-retry';
 import { ProposalEventArgs } from "../../../../controllers/GovernanceController.js";
 import { ethers } from 'ethers';
@@ -7,9 +7,9 @@ import { ethers } from 'ethers';
  export   const executeProposals = async () => {
         try{
     const lastBlock = await provider.getBlockNumber();
-    const filters = daoContract.filters.ProposalQueued();
+    const filters = standardGovernorContract.filters.ProposalQueued();
 
-    const events = await daoContract.queryFilter(filters, lastBlock - 499, lastBlock);
+    const events = await standardGovernorContract.queryFilter(filters, lastBlock - 9, lastBlock);
      console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to execute');
      const limit = pLimit(5);
 
@@ -19,9 +19,9 @@ const receipts =events.map(async (event) => {
      return await limit(async () => {
        return  await retry(async ()=>{
 try{
-  const proposal = await daoContract.getProposal((event as ProposalEventArgs).args[0]); 
+  const proposal = await standardGovernorContract.getProposal((event as ProposalEventArgs).args[0]); 
                 if(Number(proposal.state) === 5){
-                    const tx = await daoContract.executeProposal((event as ProposalEventArgs).args[0], {
+                    const tx = await standardGovernorContract.executeProposal((event as ProposalEventArgs).args[0], {
                         maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
      maxFeePerGas: ethers.parseUnits("10000", "gwei"),
                     });
@@ -39,7 +39,7 @@ try{
 }
             }, {
             retries: 5,
-            maxTimeout: 1 * 1000 * 3600, // 1 hour
+            maxTimeout: 1000 * 30, // 2 minutes
             onRetry(err, attempt) {
                 console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
             }

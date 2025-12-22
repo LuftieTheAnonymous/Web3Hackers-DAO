@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
 
+import logger from "../config/winstonConfig.js";
+import path from "path";
+
+// Implement setting expriy to the activity upsertion
+
 const upsertActivity = async (req: Request, res: Response) => {
     try {
         const methodUsed = req.method;
@@ -13,7 +18,7 @@ const upsertActivity = async (req: Request, res: Response) => {
         // Check if hash exists
         const existing = await redisClient.exists(redisKey);
 
-        console.log(existing);
+    logger.info(`Existing element: ${existing}`);
 
         if (methodUsed === 'POST') {
             // If doesn't exist, set fresh
@@ -25,7 +30,7 @@ const upsertActivity = async (req: Request, res: Response) => {
             } else {
                 // Otherwise, increment
                 await redisClient.hIncrBy(redisKey, activity, 1);
-                console.log('Incremented');
+                logger.info(`Incremented Activity rate`);
             }
         } else {
             // For non-POST, try to decrement
@@ -54,36 +59,5 @@ const upsertActivity = async (req: Request, res: Response) => {
 };
 
 
-const insertVoiceChatActivity=async(req:Request, res:Response)=>{
-    try{
-        const activityData = req.body;
 
-        const {data,error}= await supabaseConfig.from('voice_chat_participation').insert([activityData]);
-
-        if(!data || error){
-            res.status(500).json({
-                message: "error",
-                data: null,
-                error: error instanceof Error ? error.message : JSON.stringify(error),
-                status: 500
-            });
-        }
-
-        res.status(200).json({
-            message: "success",
-            data,
-            error: null,
-            status: 200
-        });
-
-    }catch(err){
-        res.status(500).json({
-            message: "error",
-            data: null,
-            error: err instanceof Error ? err.message : JSON.stringify(err),
-            status: 500
-        });
-    }
-}
-
-export { upsertActivity, insertVoiceChatActivity }
+export { upsertActivity }

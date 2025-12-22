@@ -1,9 +1,13 @@
 import { Request, Response } from "express";
-import { governorTokenContract } from "../config/ethersConfig.js";
+import { governorTokenContract, provider, tokenManagerContract, wallet } from "../config/ethersConfig.js";
 import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
 import { deleteDatabaseElement, getDatabaseElement } from '../db-actions.js';
 import { DaoMember } from "../types/graphql/TypeScriptTypes.js";
+import { TOKEN_MANAGER_CONTRACT_ADDRESS } from "../contracts-data/tokenManager/config.js";
+import { ethers } from "ethers";
+
+const ONE_HOUR_IN_BLOCKS=300;
 
 // Single User Action
 const intialTokenDistribution = async (req: Request, res: Response) => {
@@ -32,16 +36,51 @@ try {
        return;
         }
 
+const currentBlock = await provider.getBlockNumber();
+const chainId = provider._network.chainId;
 
-    const tx = await governorTokenContract.handInUserInitialTokens(PSR, JEXS, W3I, TKL, KVTR, (data as any).userWalletAddress);
+const domain = {
+  name: "Web3HackersDAO",
+  version: "1",
+  chainId,
+  verifyingContract: TOKEN_MANAGER_CONTRACT_ADDRESS
+};
+
+const types = {
+  Voucher: [
+    { name: "receiver", type: "address" },
+    { name: "expiryBlock", type: "uint256" },
+    { name: "isAdmin", type: "bool" },
+    { name: "psrLevel", type: "uint8" },
+    { name: "jexsLevel", type: "uint8" },
+    { name: "tklLevel", type: "uint8" },
+    { name: "web3Level", type: "uint8" },
+    { name: "kvtrLevel", type: "uint8" }
+  ]
+};
+
+const voucher = {
+  receiver: (data as any).userWalletAddress,
+  expiry: currentBlock + ONE_HOUR_IN_BLOCKS,
+  isAdmin: (data as any).isAdmin,
+  psrLevel: PSR,
+  jexsLevel: JEXS,
+  tklLevel: TKL,
+  web3Level: W3I,
+  kvtrLevel: KVTR
+};
+
+const signedTypeTx = await wallet.signTypedData(domain,types, voucher);
+
+const tx = await governorTokenContract.handInUserInitialTokens(voucher,
+        signedTypeTx
+    );
     
     const txReceipt = await tx.wait();
     
     console.log(txReceipt);
     
     res.status(200).json({data:txReceipt, error:null, message:"success", status:200});
-
-    
 } catch (error) {
     console.log(error);
     res.status(500).json({data:null, error:(error as any).shortMessage, message:"error", status:500});
@@ -76,7 +115,7 @@ const punishMember = async (req: Request, res: Response) => {
         const {amount} = req.body;
 
 
-        const redisStoredNickname= await redisClient.hGet(`dao_members:${userAddress}`, 'nickname');
+    const redisStoredNickname= await redisClient.hGet(`dao_members:${userAddress}`, 'nickname');
     const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${userAddress}`, 'userWalletAddress');
 
 if(!redisStoredNickname && !redisStoredWalletAddress){
@@ -124,8 +163,8 @@ try {
 
     const redisStoredNickname= await redisClient.hGet(`dao_members:${dicordMemberId}`, 'nickname');
     const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${dicordMemberId}`, 'userWalletAddress');
-
-if(!redisStoredNickname && !redisStoredWalletAddress){
+    
+    if(!redisStoredNickname && !redisStoredWalletAddress){
     const userDBObject= await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(dicordMemberId));
     
     
@@ -224,9 +263,7 @@ const farewellMember = async (req: Request, res: Response) => {
            return;
         }
 
-        const userTokens = await governorTokenContract.getVotes(userWalletAddress);
-
-        const tx= await governorTokenContract.punishMember(userWalletAddress, userTokens);
+        const tx= await tokenManagerContract.kickOutFromDao(userWalletAddress);
 
         const txReceipt = await tx.wait();
 
