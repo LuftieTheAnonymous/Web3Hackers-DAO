@@ -43,9 +43,11 @@ export const addMember= async (req:Request, res:Response) => {
     console.log(req.body);
 
     console.log(req.headers['x-backend-eligibility'], 'x-backend-eligibility');
-    console.log(req.headers['authorization'], 'authorization');
     try{
-        const {data, error} = await insertDatabaseElement('dao_members', {discord_member_id:discordId, userWalletAddress:walletAddress, nickname, isAdmin, photoURL});
+        const {data, error} = await insertDatabaseElement('dao_members', {
+            discord_member_id:discordId, 
+            userWalletAddress:walletAddress,
+            nickname, isAdmin, photoURL});  
         
         console.log(data, error);
 

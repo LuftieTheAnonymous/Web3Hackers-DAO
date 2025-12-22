@@ -5,31 +5,19 @@ import {Script} from "../lib/forge-std/src/Script.sol";
 
 import {CustomBuilderGovernor} from "../src/governor/interaction-contracts/CustomGovernor.sol";
 import {GovernmentToken} from "../src/GovToken.sol";
-import {TokenManager} from "../src/TokenManager.sol";
 import {IVotes} from "../lib/openzeppelin-contracts/contracts/governance/utils/IVotes.sol";
 
-contract DeployCustomDaoContracts
-is Script {
-    GovernmentToken govToken;
+contract DeployCustomGovernor is Script {
     CustomBuilderGovernor customGovernor;
-    TokenManager govTokenManager;
 
-    function run() public returns(CustomBuilderGovernor, GovernmentToken, TokenManager){
+    function run() public returns(CustomBuilderGovernor){
 vm.startBroadcast();
-govToken = new GovernmentToken();
-customGovernor = new CustomBuilderGovernor(address(govToken));
-govTokenManager = new TokenManager(address(govToken), address(customGovernor), vm.envAddress("BOT_ADDRESS"));
 
-customGovernor.setTokenManager(address(govTokenManager));
-
-govToken.grantManageRole(address(customGovernor));
-govToken.grantManageRole(vm.envAddress("BOT_ADDRESS"));
-govToken.transferGranterRole(address(govTokenManager));
-// Gives all the rights to be called by the smart-contract
+customGovernor = new CustomBuilderGovernor(0x20BFD783d19Ef960991eF27404c8D890Dd57205E);
 
 vm.stopBroadcast();
 
-return(customGovernor, govToken, govTokenManager);
+return(customGovernor);
     }
 
 }

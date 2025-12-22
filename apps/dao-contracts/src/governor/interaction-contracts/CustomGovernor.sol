@@ -11,7 +11,6 @@ struct SummaryCustomOption{
     uint8 voteOptionId;
     uint256 castedVotes;
     address lastVoter;
-    bool isExecutable;
 }
 // Struct for the data to be called once a approving option will
 // have the most votes.
@@ -22,34 +21,25 @@ bytes dataBytes;
 
 // VoteOption struct with defined parameters for execution
 struct CustomVoteOption{
- Calldata[] calldataArr;
- bool isDefeatingVote;
- bool isApprovingVote;
-
+Calldata[] calldataArr;
 }
-// Mapping proposalId=> CustomVoteOptionIndex=> CustomVoteOption
-mapping(bytes32=>mapping(uint8 => CustomVoteOption)) public votesCustomOptions;
 
+// Mapping proposalId=> CustomVoteOptionIndex=> CustomVoteOption
+mapping(bytes32=>mapping(uint8 => CustomVoteOption)) private votesCustomOptions;
 
 constructor(address govTokenAddr) GovernorBase(govTokenAddr){}
-
-
-
 
 
 // Get custom proposal Votes
 function getCustomProposalVotes(bytes32 proposalId)
     public
     view
-    returns (SummaryCustomOption[5] memory customVoteCounts)
+    returns (SummaryCustomOption[5] memory customVoteCounts, uint256 totalVotes)
 {
  // Creates arrays for voteSums, weight of the highestVote, highest voter addresses, highestIsApproving boolean
     uint256[5] memory voteSums;
     uint256[5] memory highestVoteWeight;
     address[5] memory highestVoter;
-    bool[5] memory highestIsApproving;
-
-
     address[] memory voters = proposalVoters[proposalId];
 
 
@@ -62,14 +52,13 @@ function getCustomProposalVotes(bytes32 proposalId)
 
         // Sum weights per option
         voteSums[option] += vote.weight;
-
+        totalVotes += vote.weight;
     
         // Check if this voter has highest weight for the option and attach his values power of the vote and address
         if (vote.weight > highestVoteWeight[option]) {
             highestVoteWeight[option] = vote.weight;
             highestVoter[option] = voters[i];
         }
-            highestIsApproving[option] = votesCustomOptions[proposalId][option].isApprovingVote;
     }
 
     // Build final result array per option
@@ -77,18 +66,19 @@ function getCustomProposalVotes(bytes32 proposalId)
         customVoteCounts[j] = SummaryCustomOption(
             j,
             voteSums[j],
-            highestVoter[j],
-            highestIsApproving[j]
+            highestVoter[j]
         );
     }
 
-    return (customVoteCounts);
+    return (customVoteCounts, totalVotes);
 }
 
 // Sorts elements from the most voted option to the least voted option
-function insertionSort(SummaryCustomOption[5] memory arr, bytes32 proposalId) private view returns 
-(Calldata[] memory mostVotedCustomCalldata, bool isExecutable, uint256 voteTokens) 
+function insertionSort(bytes32 proposalId) private view returns 
+(Calldata[] memory mostVotedCustomCalldata, uint256 voteTokens) 
 {
+(SummaryCustomOption[5] memory arr,) = getCustomProposalVotes(proposalId); 
+
     // Start iteration from second element 
     for (uint8 i = 1; i < arr.length; i++) {
 
@@ -111,22 +101,19 @@ function insertionSort(SummaryCustomOption[5] memory arr, bytes32 proposalId) pr
     }
     return (
         votesCustomOptions[proposalId][proposalVotes[proposalId][arr[0].lastVoter].voteOption].calldataArr,
-        arr[0].isExecutable,
         arr[0].castedVotes
     );
 }
 
 
 // Returns the winning option with it's calldata and if is executable
-function getSummaryCustomOption(bytes32 proposalId) public view returns (Calldata[] memory callDataArray, bool isCustomExecutable) {
-    SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
-    (Calldata[] memory customCalldata, bool isExecutable,) = insertionSort(customVoteCounts, proposalId);
+function getSummaryCustomOption(bytes32 proposalId) private view returns (Calldata[] memory callDataArray) {
+    (Calldata[] memory customCalldata,) = insertionSort(proposalId);
 
 callDataArray= customCalldata;
-isCustomExecutable = isExecutable;
 }
 
-function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCalldataElements ) internal nonReentrant {
+function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCalldataElements) private nonReentrant {
     // Iterate through callDataElements
     for(uint i = 0; i < customCalldataElements.length; i++){
              address target =  customCalldataElements[i].target;
@@ -134,7 +121,7 @@ function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCallda
 
 // If target address is zero or data to be called is bytes32(0), break
     if(target == address(0) || uint256(bytes32(data)) == uint256(bytes32(0)) ){  
-        break;
+        return;
     }
 
 // Call the contracts and if is not succeeded cancel the proposal        
@@ -142,11 +129,13 @@ function callSelectedProposal(bytes32 proposalId, Calldata[] memory customCallda
                  if(!success){
                     tokenManager.punishMember(proposals[proposalId].proposer, (govToken.balanceOf(proposals[proposalId].proposer) * 1e18) / 25e18);
                     _cancelProposal(proposalId); 
-                    break;
+                    return;
                  }
-                  emit CalldataExecuted(returnedData);
-        
      }
+
+        proposals[proposalId].state = ProposalState.Executed;
+    proposals[proposalId].executedAtBlockNumber = block.number;
+    emit ProposalExecuted(proposalId);
 }
 
 
@@ -162,31 +151,19 @@ function createCustomProposal(
         Calldata[][] memory selectiveCalldata
     ) external isElligibleToPropose returns (bytes32)
      {
+    
     // Creates a proposal from the inherited base
-    bytes32 proposalId= createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelockBlocks, delayBlocks);
+     bytes32 proposalId= createProposal(description, targets, calldatas, urgencyLevel, endBlockTimestamp, proposalTimelockBlocks, delayBlocks);
    
    // Iteration through the calldata provided arrays 
-   for (uint8 i = 0; i < selectiveCalldata.length; i++) {
+   for (uint8 i = 0; i < 5; i++) {
     // Retrieves the array with calldata
     Calldata[] memory optionCalldata = selectiveCalldata[i];
 
-    // Checks if there is any address zero tarrget inside calldata array
-    bool isApproving = false;
 
-if(optionCalldata.length > 0){
-      for (uint j = 0; j < optionCalldata.length; j++) {
-        if(optionCalldata[j].target != address(0)){
-            isApproving=true;
-        }
-    }
-    
-
-}
     // Add the custom option to the vote options
     votesCustomOptions[proposalId][i]= CustomVoteOption(
-      optionCalldata,
-      !isApproving,
-      isApproving
+      optionCalldata
     );
    }
 
@@ -203,14 +180,18 @@ if(optionCalldata.length > 0){
     isVotingActive(proposalId)
     isElligibleToVoteOrUpdateState
      {
+
+if(voteOption > 4){
+    revert InvalidOptionSelected();
+}
+
 // Get the weight of the vote
-uint256 weight = govToken.balanceOf(msg.sender);
+uint256 weight = govToken.getVotes(msg.sender);
 
 // create a vote with all data
   Vote memory vote=Vote({
      votedProposalId:proposalId,
             voterAddress:msg.sender,
-            delegatee: govToken.delegates(msg.sender),
             weight:weight,
             voteOption:uint8(voteOption),
             reason:reason,
@@ -232,13 +213,13 @@ function succeedProposal(bytes32 proposalId) external isProposalReadyToSucceed(p
    uint256 quorumNeeded = getProposalQuorumNeeded(proposalId);
    
    // Get all proposal votes
-     SummaryCustomOption[5] memory customVoteCounts = getCustomProposalVotes(proposalId);
+     (, uint256 totalVotes) = getCustomProposalVotes(proposalId);
 
 // Returns option vote
-     (, , uint256 optionVoteTokens) = insertionSort(customVoteCounts, proposalId);
+     (, uint256 optionVoteTokens) = insertionSort(proposalId);
 
 // Count total votes
-    uint256 totalVotes = customVoteCounts[0].castedVotes + customVoteCounts[1].castedVotes + customVoteCounts[2].castedVotes + customVoteCounts[3].castedVotes + customVoteCounts[4].castedVotes;
+     
     
     // // If quorum is not matched, defeat the proposal
     if(totalVotes < quorumNeeded){
@@ -268,16 +249,11 @@ Proposal memory proposal = proposals[proposalId];
     }
 
     // Retrieve the the first option (the winning one),  that participants all voted for
-    (Calldata[] memory customCalldataArr, bool isExecutable) = getSummaryCustomOption(proposalId);
+    (Calldata[] memory customCalldataArr) = getSummaryCustomOption(proposalId);
 
 // Execute is the function is executable (meaning it has some functions to be executed)
-if(isExecutable && customCalldataArr.length > 0){
-        callSelectedProposal(proposalId, customCalldataArr);
-    }
+        callSelectedProposal(proposalId, customCalldataArr);    
 
-    proposals[proposalId].state = ProposalState.Executed;
-    proposals[proposalId].executedAtBlockNumber = block.number;
-    emit ProposalExecuted(proposalId);
 }
 
 }

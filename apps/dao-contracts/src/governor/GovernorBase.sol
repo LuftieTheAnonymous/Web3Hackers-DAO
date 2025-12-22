@@ -7,7 +7,6 @@ import {AccessControl} from "../../lib/openzeppelin-contracts/contracts/access/A
 import {TokenManager} from "../../src/TokenManager.sol";
 
 contract GovernorBase is ReentrancyGuard, AccessControl{
-
 // Errors
 error InvalidProposalState(); 
 // Gets called once a function is called, 
@@ -19,6 +18,8 @@ error VotingPeriodOver();
 // Called once user votes the proposal as it's executed or it's endTime block has been reached 
 error NotElligibleToPropose();
 // Called when user does not have at least 0.05% of the circulating supply
+error NotElligibleToVote();
+
 error NotReadyToStart();
 // Gets called once the BullMq or the admin by theirself calls the activation Proposal
 error AlreadyVoted();
@@ -96,8 +97,6 @@ struct Proposal{
 
 struct Vote {
     address voterAddress; // Votes address
-
-    address delegatee;
     uint256 weight; // The vote power of certain user (amount of tokens)
     uint8 voteOption; // The index of an option called selected
     bytes32 votedProposalId; // proposalId
@@ -107,15 +106,14 @@ struct Vote {
 
 
 // Role that enables to call the functions related workflow
-
 bytes32 constant private ACTIONS_MANAGER = keccak256("ACTIONS_MANAGER");
 
 // Constant variables for math-operation to get 0.5% of the votes amount (to propose)
 // And the percentage of quorum that needs to appear on the voting 
-uint256 internal constant THRESHHOLD_DIVIDER = 2e20;
-uint256 internal constant LOW_LEVEL_URGENCY_QUORUM = 60;
-uint256 internal  constant MEDIUM_LEVEL_URGENCY_QUORUM = 80;
-uint256 internal  constant HIGH_LEVEL_URGENCY_QUORUM = 90;
+uint256 private constant THRESHHOLD_DIVIDER = 2e20;
+uint256 private constant LOW_LEVEL_URGENCY_QUORUM = 60;
+uint256 private  constant MEDIUM_LEVEL_URGENCY_QUORUM = 80;
+uint256 private  constant HIGH_LEVEL_URGENCY_QUORUM = 90;
 
 uint256 internal constant MIN_PROPOSAL_PASS_PERCENTAGE = 6e17;
 
@@ -129,21 +127,21 @@ uint256 private constant MAX_PROPOSAL_DURATION_BLOCK_AMOUNT = 100800;
 // Max Proposal Time lock duration in blocks
 uint256 private constant MAX_TIMELOCK_DURATION = 7200;
 
-uint256 internal constant AVG_MINED_BLOCK_TIME = 12;
+uint256 private constant AVG_MINED_BLOCK_TIME = 12;
 
 uint256 internal proposalCount;
 ERC20Votes internal immutable govToken;
 
 TokenManager internal tokenManager;
 
-mapping(UrgencyLevel => uint256) public urgencyLevelToQuorum;
-mapping(address => uint256) public userVotedCount;
-mapping(bytes32 => Proposal) public proposals; // proposalId to proposal
-mapping(bytes32 => mapping(address => Vote)) public proposalVotes; 
+mapping(UrgencyLevel => uint256) internal urgencyLevelToQuorum;
+mapping(address => uint256) internal userVotedCount;
+mapping(bytes32 => Proposal) internal proposals; // proposalId to proposal
+mapping(bytes32 => mapping(address => Vote)) internal proposalVotes; 
 
 // proposalId to user address to vote
-mapping(bytes32 => address[]) public proposalVoters;
-mapping(address => Vote[]) public userVotes; // user address to proposalId to vote
+mapping(bytes32 => address[]) internal proposalVoters;
+mapping(address => Vote[]) internal userVotes; // user address to proposalId to vote
 
 constructor(address governmentTokenAddress){
 govToken = ERC20Votes(governmentTokenAddress);
@@ -157,8 +155,8 @@ _grantRole(ACTIONS_MANAGER, msg.sender);
 
 
 modifier isElligibleToVoteOrUpdateState() {
-    if(govToken.balanceOf(msg.sender) == 0){
-        revert NotElligibleToPropose();
+    if(govToken.getVotes(msg.sender) == 0 || govToken.delegates(msg.sender) != msg.sender){
+        revert NotElligibleToVote();
     }
     _;
 }
@@ -181,7 +179,7 @@ if(proposalVotes[proposalId][msg.sender].timestamp != 0){
 }
 
 modifier isElligibleToPropose() {
-  if(govToken.balanceOf(msg.sender) <= getProposalThreshold()){
+  if(govToken.getVotes(msg.sender) <= getProposalThreshold() && govToken.delegates(msg.sender) != msg.sender){
             revert NotElligibleToPropose();
         }
     _;

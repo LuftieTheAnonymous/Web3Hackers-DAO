@@ -5,6 +5,7 @@ module.exports = {
   experimental: {
     logging: true
   },
+  cacheComponents: true,
   
   images: {
     remotePatterns: [
