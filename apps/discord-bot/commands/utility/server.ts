@@ -6,7 +6,13 @@ module.exports = {
         .setDescription('Get server information'),
     async execute(interaction:ChatInputCommandInteraction
     ) {
-        if(!interaction.guild) return;
+       try{
+        console.log("Guild interaction", interaction.guild);
+         if(!interaction.guild) return;
         await interaction.reply(`Server name: ${interaction.guild.name}\nMember count: ${interaction.guild.memberCount}`);
+       }
+       catch(err){
+        await interaction.reply(`Error occured: ${err}`)
+       }
     }
 }

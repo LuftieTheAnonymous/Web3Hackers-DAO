@@ -3,13 +3,9 @@
 pragma solidity ^0.8.24;
 
     import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
-
     import {GovernmentToken} from "./GovToken.sol";
-
     import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-
     import {ECDSA} from "../lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
-
     import {EIP712} from "../lib/openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol";
 
 
@@ -60,8 +56,7 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
     }
 
     // Structs
-
-  struct Voucher {
+    struct Voucher {
         address receiver;
         uint256 expiryBlock;
         bool isAdmin;
@@ -72,9 +67,6 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
         uint8 kvtrLevel;
     }
 
-
-
-
     uint256 private constant INITIAL_TOKEN_USER_AMOUNT = 1e21;
     uint256 private constant MALICIOUS_ACTIONS_LIMIT = 3;
     uint256 private constant DSR_ADMIN_MULTIPLIER = 35;
@@ -83,24 +75,15 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E3=1e3;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E4=1e4;
     uint256 private constant ONE_MONTH_IN_BLOCKS = 84600; 
-
-
     uint256 private constant DAILY_REPORT_MULTIPLIER = 125e14;
     uint256 private constant VOTING_PARTICIPATION_MULTIPLIER=3e17;
-
     uint256 private constant PROBLEMS_SOLVED_MULTIPLIER = 2e17;
-
     uint256 private constant ISSUES_REPORTED_MULTIPLIER = 145e16;
-
     uint256 private constant ALL_MONTH_MESSAGES_MULTIPLIER = 1e14;
-
- bytes32 public constant VOUCHER_TYPEHASH = keccak256(
+    bytes32 public constant VOUCHER_TYPEHASH = keccak256(
         "Voucher(address receiver,uint256 expiryBlock,bool isAdmin,uint8 psrLevel,uint8 jexsLevel,uint8 tklLevel,uint8 web3Level,uint8 kvtrLevel)"
     );
-
-
     bytes32 private constant controller = keccak256("controller");
-
     address private botSigner;
     GovernmentToken govToken;
 
@@ -114,10 +97,11 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
     mapping(KnowledgeVerificationTestRate => uint256) private kvtrOptions;
 
 
-    constructor(address governmentTokenAddr, address governorContractAddr, address botAddress) EIP712("Web3HackersDAO", "1") {
+    constructor(address governmentTokenAddr, address standardGovernorContractAddr, address customGovernorContractAddress, address botAddress) EIP712("Web3HackersDAO", "1") {
       govToken = GovernmentToken(governmentTokenAddr);
       botSigner = botAddress;
-      _grantRole(controller, governorContractAddr);
+      _grantRole(controller, standardGovernorContractAddr);
+      _grantRole(controller, customGovernorContractAddress);
       _grantRole(controller, botAddress);
     }
 
@@ -254,8 +238,10 @@ return amount;
 
 
 // Called in BullMQ recurring monthly token distributions
-  function rewardMonthlyTokenDistribution(uint256 dailyReports, uint256 DAOVotingPartcipation, 
-  uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported,
+  function rewardMonthlyTokenDistribution(uint256 dailyReports, 
+  uint256 DAOVotingPartcipation, 
+  uint256 DAOProposalsSucceeded,
+   uint256 problemsSolved, uint256 issuesReported,
  uint256 allMonthMessages, address user) external onlyBotSigner(msg.sender) onlyForInitialTokensReceivers(user) isMonthlyDistributionTime(user) {
     uint256 amount = getAnticipatedReward(dailyReports, DAOVotingPartcipation, DAOProposalsSucceeded, problemsSolved, issuesReported, allMonthMessages);
 

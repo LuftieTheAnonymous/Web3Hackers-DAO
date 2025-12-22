@@ -4,7 +4,7 @@ import {CustomBuilderGovernor} from "../src/governor/interaction-contracts/Custo
 import {GovernorBase} from "../src/governor/GovernorBase.sol";
 import {GovernmentToken} from "../src/GovToken.sol";
 import {TokenManager} from "../src/TokenManager.sol";
-import {DeployCustomDaoContracts} from "../script/DeployCustomDaoContracts.s.sol";
+import {DeployTestingContracts} from "../script/test/DeployDaoContracts.s.sol";
 import {Test, console} from "../lib/forge-std/src/Test.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
@@ -13,7 +13,7 @@ contract DaoTesting is Test {
 CustomBuilderGovernor customGovernor;
 GovernmentToken govToken;
 TokenManager tokenManager;
-DeployCustomDaoContracts deployContract;
+DeployTestingContracts deployContract;
 
 
 address[] targets;
@@ -23,12 +23,12 @@ CustomBuilderGovernor.Calldata[][] calldataArray =new CustomBuilderGovernor.Call
 uint256 sepoliaEthFork;
 address user = makeAddr("user");
 address user2 = makeAddr("user2");
-address validBotAddress = vm.envAddress("BOT_ADDRESS");
+address validBotAddress = 0x7789884c5c88AE84775F266045b96fD6Cb5C734b;
 
 function setUp() public {
 sepoliaEthFork=vm.createSelectFork("ETH_ALCHEMY_SEPOLIA_RPC_URL");
-deployContract = new DeployCustomDaoContracts();
-(customGovernor, govToken, tokenManager)=deployContract.run();
+deployContract = new DeployTestingContracts();
+(,customGovernor, govToken, tokenManager)=deployContract.run();
 
 for (uint i = 0; i < calldataArray.length; i++) {
     calldataArray[i] = new CustomBuilderGovernor.Calldata[](1); // make inner arrays length 1
@@ -77,6 +77,8 @@ return (signature, expiryTime);
 }
 
 function testCreateCustomProposalAndVotingWorkflow() public {
+// Get the amount to
+uint256 amountAnticipatedToBeReceived = tokenManager.getAnticipatedReward(12,42,26,23,346,35);
 
 (bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
 
@@ -97,6 +99,7 @@ TokenManager.Voucher memory voucher = TokenManager.Voucher(
 
 tokenManager.handInUserInitialTokens(voucher, signature);
 
+govToken.delegate(user);
 
 vm.expectRevert();
 customGovernor.castVote(0, 'Reason so', (0));
@@ -115,9 +118,12 @@ customGovernor.castVote(proposalId, "Because I like this option", 0);
 vm.expectRevert();
 customGovernor.activateProposal(proposalId);
 
-(bytes32 id, address proposer, string memory description, uint256 startBlock,uint256 endBlock, GovernorBase.UrgencyLevel urgency, GovernorBase.ProposalState proposalState,uint256 queuedAtBlockNumber,uint256 executedAtBlockNumber, uint256 succeededAtBlockNumber,uint256 timelockBlockNumber)=customGovernor.proposals(proposalId);
-vm.roll(startBlock);
+GovernorBase.Proposal memory proposal =customGovernor.getProposal(proposalId);
+vm.roll(proposal.startBlockNumber);
 customGovernor.activateProposal(proposalId);
+
+vm.expectRevert();
+customGovernor.castVote(proposalId, "Because I like this option", 5);
 
 customGovernor.castVote(proposalId, "Because I like this option", 0);
 
@@ -135,7 +141,7 @@ customGovernor.succeedProposal(proposalId);
 vm.expectRevert();
 customGovernor.queueProposal(proposalId);
 
-vm.roll(endBlock);
+vm.roll(proposal.endBlockNumber);
 customGovernor.succeedProposal(proposalId);
 
 customGovernor.queueProposal(proposalId);
@@ -143,7 +149,7 @@ customGovernor.queueProposal(proposalId);
 vm.expectRevert();
 customGovernor.executeProposal(proposalId);
 
-vm.roll(block.number + timelockBlockNumber);
+vm.roll(block.number + proposal.timelockBlockNumber);
 customGovernor.executeProposal(proposalId);
 
 
@@ -161,6 +167,97 @@ bytes32 proposalId4 = customGovernor.createCustomProposal("This proposal is to f
 
 
 }
+
+
+function testCreateCustomProposalAndVotingWorkflowWithoutCallback() public {
+// Get the amount to
+uint256 amountAnticipatedToBeReceived = tokenManager.getAnticipatedReward(12,42,26,23,346,35);
+
+(bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(user);
+
+vm.startPrank(user);
+TokenManager.Voucher memory voucher = TokenManager.Voucher(
+        user,
+        expiryBlock,
+        false,
+        0,
+        0,
+        0,
+        0,
+        0
+    );
+
+tokenManager.handInUserInitialTokens(voucher, signature);
+
+govToken.delegate(user);
+
+vm.expectRevert();
+customGovernor.castVote(0, 'Reason so', (0));
+
+bytes32 proposalId = customGovernor.createCustomProposal("This proposal is to first vote", 
+targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300,
+calldataArray
+);
+
+vm.expectRevert();
+customGovernor.castVote(proposalId, "Because I like this option", 0);
+
+vm.expectRevert();
+customGovernor.activateProposal(proposalId);
+
+GovernorBase.Proposal memory proposal =customGovernor.getProposal(proposalId);
+vm.roll(proposal.startBlockNumber);
+customGovernor.activateProposal(proposalId);
+
+vm.expectRevert();
+customGovernor.castVote(proposalId, "Because I like this option", 5);
+
+customGovernor.castVote(proposalId, "Because I like this option", 0);
+
+customGovernor.getCustomProposalVotes(proposalId);
+customGovernor.getProposalCount();
+customGovernor.getProposalThreshold();
+
+
+vm.expectRevert();
+customGovernor.castVote(proposalId, "Because I like this option", 1);
+
+vm.expectRevert();
+customGovernor.succeedProposal(proposalId);
+
+vm.expectRevert();
+customGovernor.queueProposal(proposalId);
+
+vm.roll(proposal.endBlockNumber);
+customGovernor.succeedProposal(proposalId);
+
+customGovernor.queueProposal(proposalId);
+
+vm.expectRevert();
+customGovernor.executeProposal(proposalId);
+
+vm.roll(block.number + proposal.timelockBlockNumber);
+customGovernor.executeProposal(proposalId);
+
+
+
+
+vm.stopPrank();
+
+vm.prank(validBotAddress);
+govToken.addToWhitelist(msg.sender);
+
+vm.prank(user);
+govToken.delegate(msg.sender); 
+vm.expectRevert();
+bytes32 proposalId4 = customGovernor.createCustomProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300,calldataArray);
+
+
+}
+
 
 
 function testInvalidByteCodeProvided() public {
@@ -181,27 +278,27 @@ TokenManager.Voucher memory voucher = TokenManager.Voucher(
     );
 
 tokenManager.handInUserInitialTokens(voucher, signature);
-    
 
-calldataArray[0][0]=CustomBuilderGovernor.Calldata(address(tokenManager), abi.encodeWithSignature("rewartUser(address,uint256)", user, 15e18));
+govToken.delegate(user);
+
+calldataArray[0][0]=CustomBuilderGovernor.Calldata(address(tokenManager), abi.encodeWithSignature("rewaraUser(address,uint256)", user, 15e18));
 bytes32 proposalId2 = customGovernor.createCustomProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300,
 calldataArray
 );
+GovernorBase.Proposal memory proposal = customGovernor.getProposal(proposalId2);
 
-(bytes32 id2, address proposer2, string memory description2, uint256 startBlock2,uint256 endBlock2, GovernorBase.UrgencyLevel urgency2, GovernorBase.ProposalState proposalState2,uint256 queuedAtBlockNumber2,uint256 executedAtBlockNumber2, uint256 succeededAtBlockNumber2,uint256 timelockBlockNumber2)=customGovernor.proposals(proposalId2);
-
-vm.roll(startBlock2);
+vm.roll(proposal.startBlockNumber);
 customGovernor.activateProposal(proposalId2);
 
 customGovernor.castVote(proposalId2, "Because I like this option", 0);
 
 
-vm.roll(endBlock2);
+vm.roll(proposal.endBlockNumber);
 customGovernor.succeedProposal(proposalId2);
 
 customGovernor.queueProposal(proposalId2);
 
-vm.roll(block.number + timelockBlockNumber2);
+vm.roll(block.number + proposal.timelockBlockNumber);
 customGovernor.executeProposal(proposalId2);
 
     vm.stopPrank();
@@ -227,18 +324,20 @@ TokenManager.Voucher memory voucher = TokenManager.Voucher(
 
 tokenManager.handInUserInitialTokens(voucher, signature);
 
+govToken.delegate(user);
+
 calldataArray[0][0]=CustomBuilderGovernor.Calldata(address(tokenManager), abi.encodeWithSignature("rewardUser(address,uint256)", user, 15e18));
 bytes32 proposalId3 = customGovernor.createCustomProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300,
 calldataArray
 );
 
-(bytes32 id3, address proposer3, string memory description3, uint256 startBlock3,uint256 endBlock3, GovernorBase.UrgencyLevel urgency3, GovernorBase.ProposalState proposalState3,uint256 queuedAtBlockNumber3,uint256 executedAtBlockNumber3, uint256 succeededAtBlockNumber3,uint256 timelockBlockNumber3)=customGovernor.proposals(proposalId3);
+GovernorBase.Proposal memory proposal = customGovernor.getProposal(proposalId3);
 
-vm.roll(startBlock3);
+vm.roll(proposal.startBlockNumber);
 customGovernor.activateProposal(proposalId3);
 
 
-vm.roll(endBlock3);
+vm.roll(proposal.endBlockNumber);
 customGovernor.succeedProposal(proposalId3);
 
 
@@ -294,7 +393,6 @@ tokenManager.handInUserInitialTokens(voucher3, signature3);
     (bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "true", 0, 0, 0, 0, 0);
 
 vm.startPrank(user);
-
 TokenManager.Voucher memory voucher = TokenManager.Voucher(
         user,
         expiryBlock,
@@ -308,19 +406,29 @@ TokenManager.Voucher memory voucher = TokenManager.Voucher(
 
 tokenManager.handInUserInitialTokens(voucher, signature);
 
+govToken.delegate(user);
+
 calldataArray[0][0]=CustomBuilderGovernor.Calldata(address(tokenManager), abi.encodeWithSignature("rewardUser(address,uint256)", user, 15e18));
 bytes32 proposalId3 = customGovernor.createCustomProposal("This proposal is to first vote", targets, byteCodeData, GovernorBase.UrgencyLevel(0), block.number + 3000, 450, 300,
 calldataArray
 );
 
-(bytes32 id3, address proposer3, string memory description3, uint256 startBlock3,uint256 endBlock3, GovernorBase.UrgencyLevel urgency3, GovernorBase.ProposalState proposalState3,uint256 queuedAtBlockNumber3,uint256 executedAtBlockNumber3, uint256 succeededAtBlockNumber3,uint256 timelockBlockNumber3)=customGovernor.proposals(proposalId3);
+GovernorBase.Proposal memory proposal = customGovernor.getProposal(proposalId3);
 
 
-vm.roll(startBlock3);
+vm.roll(proposal.startBlockNumber);
 customGovernor.activateProposal(proposalId3);
 
 vm.stopPrank();
 
+
+vm.prank(user2);
+vm.expectRevert();
+customGovernor.castVote(proposalId3, "Hello", 1);
+
+
+vm.prank(user2);
+govToken.delegate(user2);
 
 vm.prank(user2);
 customGovernor.castVote(proposalId3, "Hello", 1);
@@ -328,7 +436,7 @@ customGovernor.castVote(proposalId3, "Hello", 1);
 vm.prank(user);
 customGovernor.castVote(proposalId3, "XD", 0);
 
-vm.roll(endBlock3);
+vm.roll(proposal.endBlockNumber);
 
 vm.prank(user);
 customGovernor.succeedProposal(proposalId3);

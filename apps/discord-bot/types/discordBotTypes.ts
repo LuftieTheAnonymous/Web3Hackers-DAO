@@ -1,4 +1,4 @@
-import { Client, Collection } from 'discord.js';
+import { CacheType, ChatInputCommandInteraction, Client, Collection, SlashCommandBuilder } from 'discord.js';
 
 
 export interface CustomClientType extends Client {
@@ -16,4 +16,10 @@ export class CustomClient extends Client {
     this.commands = new Collection();
     this.cooldowns = new Collection();
   }
+}
+
+export interface CommandInterface{
+  cooldown?:number,
+  data: SlashCommandBuilder,
+  execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void>
 }
