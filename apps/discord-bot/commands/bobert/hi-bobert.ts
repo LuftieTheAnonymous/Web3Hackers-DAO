@@ -11,6 +11,7 @@ const data = new SlashCommandBuilder()
         .setDescription('The message you want to send to Bobert 🤖')
         .setRequired(true).setMinLength(10).setMaxLength(500)
 );
+
 module.exports = {
     cooldown:20,
     data: data,
@@ -28,8 +29,8 @@ try{
 
 }
 catch(error) {
-    await interaction.followUp({ content: 'There was an error while executing this command!' });
     console.error(`Error executing ${interaction}:`, error);
+    await interaction.followUp({ content: 'There was an error while executing this command!' });
     }
 }
 }

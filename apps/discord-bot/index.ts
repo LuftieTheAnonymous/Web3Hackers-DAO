@@ -1,8 +1,8 @@
 import {  GatewayIntentBits, Collection, Partials } from 'discord.js';
-import { CustomClient, CustomClientType } from './types/discordBotTypes.ts';
+import { CommandInterface, CustomClient, CustomClientType } from './types/discordBotTypes.ts';
 // Require the necessary discord.js classes
 import dotenv from 'dotenv';
-import fs from 'fs';
+import { readdirSync } from 'fs';
 import path from 'path';
 const { token } = require('./discordConfig.json');
 
@@ -41,18 +41,18 @@ client.on('error', (error:Error)=>{
     console.log(error.message);
 });
 
-
 const folderPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(folderPath);
+const commandFolders = readdirSync(folderPath);
 
 for (const folder of commandFolders) {
     const commandPath = path.join(folderPath, folder);
-const commandFiles = fs.readdirSync(path.join(commandPath)).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
+const commandFiles = readdirSync(path.join(commandPath)).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
 for (const file of commandFiles) {
     const filePath = path.join(commandPath, file);
-    const command = require(filePath);
+    const command:CommandInterface = require(filePath);
     if ('data' in command && 'execute' in command) {
         client.commands.set(command.data.name, command);
+        if(command.cooldown) client.cooldowns.set(command.data.name, command.cooldown);
     } else {
         console.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`);
     }
@@ -60,7 +60,7 @@ for (const file of commandFiles) {
 }
 
 const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
+const eventFiles = readdirSync(eventsPath).filter((file:any) => file.endsWith('.ts') && !file.endsWith('.d.ts'));
 
 for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);

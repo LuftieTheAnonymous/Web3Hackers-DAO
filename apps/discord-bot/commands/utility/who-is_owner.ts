@@ -8,7 +8,6 @@ const data = new SlashCommandBuilder()
 
 
 module.exports = {
-    cooldown:10,
     data: data,
     async execute(interaction:ChatInputCommandInteraction
 ) {

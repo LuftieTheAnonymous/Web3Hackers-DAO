@@ -21,9 +21,11 @@ module.exports={
      });
 
      
+     
+     if(channel.isSendable()){
+     await member.send({content:`Goodbye ${member.user.globalName} ! We hope to see you someday again ! :wave: As you have left the Web3 Builders community, you've been deprived of the tokens and you have been removed from the DAO-DBs !`});
 
- if(channel.isSendable()){
-    await channel.send({content:`Goodbye ${member.user.globalName} !`, embeds:[{
+     await channel.send({content:`Goodbye ${member.user.globalName} !`, embeds:[{
         color:0xff0000,
         title:`Goodbye ${member.user.globalName} ! :wave:`,
         description:`We hope to see you someday again ! As you have left the Web3 Builders community, you've been deprived of the tokens and you have been removed from the DAO-DBs !`
@@ -31,7 +33,6 @@ module.exports={
  }
 
 
-     await member.send({content:`Goodbye ${member.user.globalName} ! We hope to see you someday again ! :wave: As you have left the Web3 Builders community, you've been deprived of the tokens and you have been removed from the DAO-DBs !`});
 
 
     }catch(err){

@@ -100,18 +100,12 @@ function createStandardProposal(
     isElligibleToVoteOrUpdateState
      {
 
-        // If invalid option gets selected, revert
-        if(uint8(voteOptionIndex) > 2){
-            revert InvalidOptionSelected();
-        }
-
-        uint256 weight = govToken.balanceOf(msg.sender);
+        uint256 weight = govToken.getVotes(msg.sender);
 
 // Creates a vote with all the data
   Vote memory vote=Vote({
             voterAddress:msg.sender,
             weight:weight,
-            delegatee: govToken.delegates(msg.sender),
             voteOption: uint8(voteOptionIndex),
             votedProposalId:proposalId,
             reason:reason,
