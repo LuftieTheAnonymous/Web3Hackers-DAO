@@ -80,10 +80,10 @@ if(data.length === 0) {
 }
         const promisesArray=data.map(async (subscription: any) => {
             return Promise.resolve(webpush.sendNotification({endpoint:subscription.endpoint, keys:{auth:subscription.auth_key, p256dh:subscription.p256h_key}}, JSON.stringify({
-                title: 'Web3 Builders DAO Dapp',
+                title: 'Web3 Hackers DAO Dapp',
                 body: message,
-                icon:'/Web3Builders.png',
-                image:'/Web3Builders.png'
+                icon:'/Web3Hackers.png',
+                image:'/Web3Hackers.png'
             })).catch(err => err));
         });
 

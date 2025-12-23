@@ -17,10 +17,10 @@ export const config = createConfig(
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string,
 
     // Required App Info
-    appName: "Web3 Builders DAO Dapp",
+    appName: "Web3 Hackers DAO Dapp",
 
     // Optional App Info
-    appDescription: "Web3 Builders DAO Dapp created for needs of the web3 builders community on discord.", 
+    appDescription: "Web3 Hackers DAO Dapp created for needs of the web3 hackers community on discord.", 
     appUrl: "https://family.co", // your app's url
     appIcon: "https://family.co/logo.png", // your app's icon, no bigger than 1024x1024px (max. 1MB)
   }),

@@ -15,7 +15,7 @@ export const activateProposals = async () => {
 return { data: null, error: "No proposals found", message: "error", status: 404 };
     }
 
-    const limit = pLimit(5); // Run max 5 activations at a time
+    const limit = pLimit(10); 
 
     const tasks = events.map((event) =>{
         return limit(async () => {

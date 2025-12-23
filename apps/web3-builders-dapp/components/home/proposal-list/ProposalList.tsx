@@ -108,7 +108,7 @@ function ProposalList({ proposals }: Props) {
             <p className='text-white text-center text-2xl flex flex-col gap-2 md:text-4xl font-semibold break-words '>
               Welcome to{' '}
               <span className='text-(--hacker-green-4) bg-zinc-700 leading-8 p-2 rounded-lg'>
-                Web3 Builders DAO
+                Web3 Hackers DAO
               </span>
             </p>
 

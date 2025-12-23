@@ -15,6 +15,8 @@ export async function notifyDAOMembersOnEvent(message: string, notificationRecei
     
     const redisStoredNotifcationSubscriptions= JSON.parse(await redisClient.get(`notification_subscriptions:${notificationReceivePropertyName}`)as string);
 
+    console.log('Redis Stored Notification Subs');
+
     try{
         if(!redisStoredNotifcationSubscriptions){
             
@@ -34,10 +36,10 @@ export async function notifyDAOMembersOnEvent(message: string, notificationRecei
 
             const promisesArray=data.map(async (subscription: any) => {
                 return Promise.resolve(webpush.sendNotification({endpoint:subscription.endpoint, keys:{auth:subscription.auth_key, p256dh:subscription.p256h_key},'expirationTime':1300000000000}, JSON.stringify({
-                    title: 'Web3 Builders DAO Dapp',
+                    title: 'Web3 Hackers DAO Dapp',
                     body: message,
-                    icon:'/Web3Builders.png',
-                    image:'/Web3Builders.png'
+                    icon:'/Web3Hackers.png',
+                    image:'/Web3Hackers.png'
                 })).catch(err => err));
             });
     
@@ -48,10 +50,10 @@ export async function notifyDAOMembersOnEvent(message: string, notificationRecei
         }
             const result =  await Promise.allSettled(redisStoredNotifcationSubscriptions.map(async (subscription: any) => {
                 return Promise.resolve(webpush.sendNotification({endpoint:subscription.endpoint, keys:{auth:subscription.auth_key, p256dh:subscription.p256h_key}}, JSON.stringify({
-                    title: 'Web3 Builders DAO Dapp',
+                    title: 'Web3 Hackers DAO Dapp',
                     body: message,
-                    icon:'/Web3Builders.png',
-                    image:'/Web3Builders.png'
+                    icon:'/Web3Hackers.png',
+                    image:'/Web3Hackers.png'
                 })).catch(err => err));
             }));
     

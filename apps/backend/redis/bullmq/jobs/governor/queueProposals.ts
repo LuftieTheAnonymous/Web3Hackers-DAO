@@ -11,8 +11,8 @@ try{
 
      const events = await standardGovernorContract.queryFilter(filters, lastBlock - 9, lastBlock);
 console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to queue');
-     const limit = pLimit(5);
-
+     const limit = pLimit(10);
+0
      
  const receipts =    events.map(async (event) => {
     return limit(async ()=>{
@@ -45,8 +45,7 @@ maxPriorityFeePerGas: ethers.parseUnits("3", "gwei"),
                 console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
             }
     })
-         
-
+        
     })
     });
 

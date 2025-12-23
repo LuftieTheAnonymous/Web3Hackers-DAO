@@ -34,5 +34,4 @@ export const activityInteracionQueue = new Queue("activityJobs", {
 
 
 await activityInteracionQueue.setGlobalConcurrency(5);
-
 await activityInteracionQueue.add("activity-update", {},{ repeat: {'every': 1000 * 60  * 15 }, removeOnComplete: true,  });

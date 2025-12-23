@@ -14,8 +14,6 @@ module.exports = {
     async execute(interaction:ChatInputCommandInteraction
 ) {
 try{
-
-   
     const member = interaction.options.getUser('member');
 
     if(!member){

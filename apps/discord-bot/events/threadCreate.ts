@@ -11,14 +11,6 @@ async execute(thread: AnyThreadChannel) {
     console.log('Thread Parent Parent ID :', thread.parent?.parentId);
 
     if(thread.parentId === '1374756729014718534'){
-          const row = new ActionRowBuilder<ButtonBuilder>()
-    .addComponents(
-        new ButtonBuilder()
-            .setCustomId('solved')
-            .setLabel('Solved')
-            .setStyle(ButtonStyle.Success).setEmoji('✅'),
-    );
-
     const userOptions = thread.messages.cache
   .map(msg => msg.author)
   .filter((user, i, self) => self.findIndex(u => u.id === user.id) === i && !user.bot)

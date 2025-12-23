@@ -5,7 +5,7 @@ import { punishUserLimiter, rewardUserLimiter } from "../middlewares/rateLimiter
 
 const govTokenRouter = Router();
 
-govTokenRouter.get('/influence/:dicordMemberId', getUserTokenBalance);
+govTokenRouter.get('/influence/:discordMemberId', getUserTokenBalance);
 
 govTokenRouter.post('/reward_member/:userAddress', rewardPunishEndpointEligibilityMiddleware, rewardUserLimiter, rewardMember);
 

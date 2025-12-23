@@ -1,4 +1,4 @@
-# 🛠️ Web3 Builders DAO
+# 🥷 Web3 Hackers DAO
 
 > A decentralized builders' hub fostering coordination, contribution, and reputation-based rewards.
 
@@ -8,9 +8,9 @@
 
 ## 🧭 Overview
 
-W3b Builders DAO is a system built to **track** activity, **evaluate** the awards, and **reward** contributors in the discord community for their work, effort put into the work and really dedicate to build the community together.
+W3b Hackers DAO is a system built to **track** activity, **evaluate** the awards, and **reward** contributors in the discord community for their work, effort put into the work and really dedicate to build the community together.
 
-Whether you're a developer, contributor, or Web3 Builders Community member — welcome aboard!
+Whether you're a developer, contributor, or Web3 Hackers Community member — welcome aboard!
 
 ---
 
@@ -42,8 +42,8 @@ This repository consists of 4 layers. Each layer has its own `README` with more 
 > Clone the monorepo and follow instructions in each submodule’s README.
 
 ```bash
-git clone https://github.com/Luftjunkie19/Web3Builders-DAO
-cd Web3Builders-DAO
+git clone https://github.com/Luftjunkie19/Web3Hackers-DAO
+cd Web3Hackers-DAO
 ```
 
 Next up in order to let everything work smoothly install all the dependecies from `package.json` by running:

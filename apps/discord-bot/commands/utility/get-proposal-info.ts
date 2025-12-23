@@ -53,7 +53,7 @@ module.exports = {
 const exampleEmbed= new EmbedBuilder()
    .setColor(0x05F29B)
     .setTitle(`${proposalEmbedDetails.data.db_data.proposal_title}`)
-    .setDescription(`${proposalEmbedDetails.data.sm_data.description}`).setAuthor({'name':`Web3 Builders DAO`,'iconURL':interaction.guild.iconURL() as string});
+    .setDescription(`${proposalEmbedDetails.data.sm_data.description}`).setAuthor({'name':`Web3 Hackers DAO`,'iconURL':interaction.guild.iconURL() as string});
 
     exampleEmbed.addFields([{'name':'Proposal State', value:proposalStates[Number(proposalEmbedDetails.data.sm_data.state)]}]);
 

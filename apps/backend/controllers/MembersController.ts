@@ -3,7 +3,7 @@ import { supabaseConfig } from "../config/supabase.js";
 import { governorTokenContract } from "../config/ethersConfig.js";
 import redisClient from "../redis/set-up.js";
 import { getDatabaseElement, insertDatabaseElement } from "../db-actions.js";
-import { DaoMember } from "../types/graphql/TypeScriptTypes.js";
+import { DaoMember } from "../types/TypeScriptTypes.js";
 
 export const getMembers = async (req:Request, res:Response) => {
 try{
@@ -40,39 +40,47 @@ export const addMember= async (req:Request, res:Response) => {
         photoURL
     }=req.body;
 
-    console.log(req.body);
-
-    console.log(req.headers['x-backend-eligibility'], 'x-backend-eligibility');
     try{
-        const {data, error} = await insertDatabaseElement('dao_members', {
-            discord_member_id:discordId, 
-            userWalletAddress:walletAddress,
-            nickname, isAdmin, photoURL});  
-        
-        console.log(data, error);
+const memberDiscordId = await redisClient.hGet(`dao_members:${discordId}`, `discordId`);
 
-        if(error){
-            res.status(500).json({message:"error", data:null, error:error, status:500 });
-return;
-        }
+if(memberDiscordId){
+    res.status(400).json({message:'error', error:'The user is already added to the database.', data:null, status:400});
+    return;
+}
 
-            const tx = await governorTokenContract.addToWhitelist(walletAddress);
+     const tx = await governorTokenContract.addToWhitelist(walletAddress);
                 
                 const txReceipt = await tx.wait();
                 
-                console.log(txReceipt);
+                console.log(txReceipt);    
+            if(txReceipt.message === 'error'){
+                    res.status(500).json({message:'error', data:null, error:txReceipt.shortMessage, status:500});
+                    return;
+                }
 
-                await redisClient.hSet(`dao_members:${discordId}`, 'userWalletAddress', walletAddress);
-                await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', `${isAdmin}`);
-                await redisClient.hSet(`dao_members:${discordId}`, 'nickname', `${nickname}`);
-                await redisClient.hSet(`dao_members:${discordId}`, 'discordId', `${discordId}`);
-                await redisClient.hSet(`dao_members:${discordId}`, 'photoURL', `${photoURL}`);
+        const {data, error} = await insertDatabaseElement('dao_members', {
+            userWalletAddress:walletAddress,
+            discord_member_id:discordId, 
+            nickname, 
+            isAdmin, 
+            photoURL});  
+        
+        console.log(data, error, 'Supabase Error');
 
+        if(error){
+            res.status(500).json({message:"error", data:null, error:`ERROR: ${error}`, status:500 });
+            return;
+        }
 
+    await redisClient.hSet(`dao_members:${discordId}`, 'userWalletAddress', walletAddress);
+    await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', `${isAdmin}`);
+    await redisClient.hSet(`dao_members:${discordId}`, 'nickname', `${nickname}`);
+    await redisClient.hSet(`dao_members:${discordId}`, 'discordId', `${discordId}`);
+    await redisClient.hSet(`dao_members:${discordId}`, 'photoURL', `${photoURL}`);
 
 res.status(200).json({message:"success", data:{discord_member_id:discordId, userWalletAddress:walletAddress, nickname, isAdmin}, error:null, status:200 });
 }catch(err){
-res.status(500).json({message:"error", data:null, error:err, status:500 });
+res.status(500).json({message:"error", data:null, error:(err as any).shortMessage, status:500 });
 }
 }
 
@@ -86,9 +94,12 @@ export const getMember= async (req:Request, res:Response) => {
     const redisStoredNickname = await redisClient.hGet(`dao_members:${discordId}`, 'nickname');
     const redisStoredDiscordId = await redisClient.hGet(`dao_members:${discordId}`, 'discordId');
     const redisStoredPhotoURL = await redisClient.hGet(`dao_members:${discordId}`, 'photoURL');
+
+    console.log(redisStoredWalletAddr, redisStoredIsAdmin, redisStoredNickname, redisStoredPhotoURL);
+
     try{
         
-        if(!redisStoredWalletAddr && !redisStoredIsAdmin && !redisStoredNickname && !redisStoredDiscordId){
+        if(!redisStoredWalletAddr || !redisStoredIsAdmin || !redisStoredNickname || !redisStoredDiscordId){
             console.log('getting member from supabase');
           
             const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', discordId);
