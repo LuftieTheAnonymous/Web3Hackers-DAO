@@ -81,7 +81,8 @@ function ProposalCard({}: Props) {
 
     </Skeleton> }
 
-    {address && !currentUser && !isLoading && <div className='flex flex-col gap-8 items-center w-full h-screen justify-center p-2'>
+    {address && !currentUser && !isLoading && <div
+     className='flex flex-col gap-8 items-center w-full h-screen justify-center p-2'>
 
 <p className='text-white text-3xl font-semibold text-center'>You are not a member of our Discord Community and DAO member yet !</p>
 

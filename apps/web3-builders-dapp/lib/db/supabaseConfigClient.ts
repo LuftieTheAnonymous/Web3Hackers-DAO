@@ -10,7 +10,7 @@ import { createClient } from "@supabase/supabase-js";
       {
       global: {
         headers: {
-          Authorization: supabaseJwt ? `Bearer ${supabaseJwt}` : "",
+          Authorization: supabaseJwt ? `${supabaseJwt}` : "",
         },
       },
     }

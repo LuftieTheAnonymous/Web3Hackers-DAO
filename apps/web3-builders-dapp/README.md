@@ -1,6 +1,6 @@
-# 🧠 Frontend - Web3Builders-DAO
+# 🧠 Frontend - Web3Hackers-DAO
 
-Welcome to the frontend of **Web3Builders-DAO**. This is the client-facing side, built using **React / Next.js** and styled with **TailwindCSS** + **Shadcn UI**.
+Welcome to the frontend of **Web3Hackers-DAO**. This is the client-facing side, built using **React / Next.js** and styled with **TailwindCSS** + **Shadcn UI**.
 
 > ⚠️ Status: In development
 > Version: `v0.1.0`

@@ -11,7 +11,7 @@ import { ethers } from 'ethers';
 
     const events = await standardGovernorContract.queryFilter(filters, lastBlock - 9, lastBlock);
      console.log(events.map((event) => (event as ProposalEventArgs).args[0]),'events to execute');
-     const limit = pLimit(5);
+     const limit = pLimit(10);
 
 
 const receipts =events.map(async (event) => {

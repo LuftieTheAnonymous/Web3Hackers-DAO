@@ -82,8 +82,8 @@ We believe that jointly, we can create a safe and welcoming environment for all 
 <div className="flex items-center justify-between gap-8 mx-auto max-w-6xl w-full py-4 ">
 
 <div className="flex text-white max-w-3xl gap-2 w-full flex-col">
-<p className='text-4xl font-bold'>How can I be part of <span className='text-(--hacker-green-4)'>Web3Builders</span> ?</p>
-<p className='max-w-xl w-full'>To join Web3Builders, first of all we have to seek for new member. If your interests match our values, and you will get a positive result in voting process, you will be invited to join our community.</p>
+<p className='text-4xl font-bold'>How can I be part of <span className='text-(--hacker-green-4)'>Web3Hackers</span> ?</p>
+<p className='max-w-xl w-full'>To join Web3Hackers, first of all we have to seek for new member. If your interests match our values, and you will get a positive result in voting process, you will be invited to join our community.</p>
 </div>
   
   <div className="max-w-72 w-full">

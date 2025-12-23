@@ -6,19 +6,24 @@ import { PanelLeftIcon } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import { usePathname } from 'next/navigation'
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser'
-import ProposalModal from '../modal/ProposalModal'
 import { ConnectKitButton } from 'connectkit'
-
-import { Home, User, UserCog2Icon, UserRoundPenIcon } from "lucide-react"
+import { Home, User, UserCog2Icon } from "lucide-react"
 import { Button } from '../ui/button'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
+import { useSidebar } from '../ui/sidebar'
 type Props = {}
+
+const ProposalModal = dynamic(()=>import('../modal/ProposalModal'), {
+  ssr:false
+});
 
 function SlidingSidebar({}: Props) {
     
   const {address}=useAccount();
   const pathname=usePathname();
   const {currentUser}=useGetLoggedInUser();
+
 
     const items = [
     {
@@ -39,7 +44,7 @@ function SlidingSidebar({}: Props) {
       title: "Settings",
       url: `/settings/${address}`,
       icon: UserCog2Icon,
-      display:  (address && currentUser ) ? true : false,
+      display:  (address && currentUser) ? true : false,
       isActive: pathname === `/settings/${address}`
     },
     {
@@ -62,9 +67,9 @@ function SlidingSidebar({}: Props) {
   <SheetContent side='left' style={{zIndex:9999999}} className='bg-zinc-800 text-white rounded-r-lg shadow-green-300  border-(--hacker-green-4)  border-r-4  max-w-64 w-full p-2 '>
     
     <SheetHeader className='flex items-center justify-between gap-2 p-2'>
-                  <Image src={'/Web3Builders.png'} alt='logo' width={32} height={32} className='w-8 h-8 rounded-lg'/>
+                  <Image src={'/Web3Hackers.png'} alt='logo' width={32} height={32} className='w-8 h-8 rounded-lg'/>
 
-      <SheetTitle className='text-lg text-white'>Web3 Builders
+      <SheetTitle className='text-lg text-white'>Web3 Hackers
         <span className='text-(--hacker-green-4)'>DAO</span>
 
       </SheetTitle>
@@ -76,7 +81,7 @@ function SlidingSidebar({}: Props) {
   
  {items.map((item) => (
                   <div  key={item.title} className='w-full'>
-                    <Button className={`${item.isActive ? 'bg-(--hacker-green-4) hover:bg-(--hacker-green-2)': 'hover:bg-(--hacker-green-4)'} w-full transition-all ${item.display ? '' : 'hidden'}`} asChild>
+                    <Button className={`cursor-pointer ${item.isActive ? 'bg-(--hacker-green-4) hover:bg-(--hacker-green-2)': 'hover:bg-(--hacker-green-4)'} w-full transition-all ${item.display ? '' : 'hidden'}`} asChild>
                       <a href={item.url}>
                         <item.icon size={48} className=' text-5xl' />
                         <span className=''>{item.title}</span>
@@ -84,7 +89,17 @@ function SlidingSidebar({}: Props) {
                     </Button>
                   </div>
                 ))}
+{
+  currentUser && address &&
+  <ProposalModal>
+<Button
+className='hover:bg-(--hacker-green-4)  w-full transition-all cursor-pointer'>
+  Propose
+</Button>
+  </ProposalModal>
+}
 </div>
+
 
 
     <div className="flex flex-col w-full gap-2 justify-between items-center">

@@ -12,7 +12,7 @@ export const finishProposals= async () => {
 
      const events = await standardGovernorContract.queryFilter(filters, lastBlock - 9, lastBlock);
 
-     const limit = pLimit(5);
+     const limit = pLimit(10);
 
 
  const receipts =  events.map(async (event) => {

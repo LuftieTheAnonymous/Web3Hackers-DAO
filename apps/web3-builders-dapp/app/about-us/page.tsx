@@ -72,7 +72,7 @@ function Page({}: Props) {
 <div className="flex flex-col justify-center items-center gap-5 w-full">
 <BlurFade>
 <div className='text-white text-2xl sm:text-3xl text-center lg:text-5xl font-bold flex items-center w-full flex-wrap gap-2'>Welcome to <SparklesText sparklesCount={10} colors={{first:'#05F29B', second: '#03A678'}} className='text-5xl font-bold'>
-<AuroraText colors={['#2289ff', '#6e2094']}>Web3</AuroraText>Builders 
+<AuroraText colors={['#00ff93', '#007c47']}>Web3</AuroraText>Hackers 
 </SparklesText></div>
 </BlurFade>
 
@@ -87,13 +87,13 @@ flex-col md:flex-row">
   
 <BlurFade delay={0.5}>
   <BorderBeam colorFrom='#05F29B' colorTo='#03A678'/>
-<Image alt='' className='max-w-sm w-full rounded-lg' src={'/Web3Builders.png'} width={300} height={300}/>
+<Image alt='' className='max-w-sm w-full rounded-lg' src={'/Web3Hackers.png'} width={300} height={300}/>
 </BlurFade>
 <BlurFade delay={0.85}>
   <div className="flex  max-w-xl w-full flex-col gap-5 text-white">
-<p className='text-2xl font-bold'>What is <span className='p-2 rounded-lg text-zinc-800 text-animated-first-section'>Web3Builders</span> ?</p>
+<p className='text-2xl font-bold'>What is <span className='p-2 rounded-lg text-zinc-800 text-animated-first-section'>Web3Hackers</span> ?</p>
 <p className=' leading-8'>
-  Web3Builders is a community, focused on builders, developers, and enthusiasts of Web3, technology, programming and most importantly, <span className='p-2 text-(--hacker-green-4) bg-zinc-800 rounded-lg'>Blockchain</span>. 
+  Web3Hackers is a community, focused on builders, developers, and enthusiasts of Web3, technology, programming and most importantly, <span className='p-2 text-(--hacker-green-4) bg-zinc-800 rounded-lg'>Blockchain</span>. 
 </p>
 <p className='leading-8'>Our Community's purpose is to create a safe, friendly, relatively small-sized community and welcoming environment for all our members to grow and learn. What should excel us from the rest ? That you can have influence on the server's decision making process.</p>
   </div>
@@ -129,9 +129,9 @@ p-3
 ">
   <p className='text-4xl font-bold
   '>The Founders</p>
-  <p>Let's introduce the Founders of Web3Builders, the greatest community of developers, builders and enthusiasts of Web3. Real heros and not just sweet-unicorny talkers 🥰</p>
+  <p>Let's introduce the Founders of Web3Hackers, the greatest community of developers, builders and enthusiasts of Web3. Real heros and not just sweet-unicorny talkers 🥰</p>
 
-  <FocusCards cards={[{'title':'Akash Dutta', src:'/founders/Akash.jpg', description:'Founder of Web3Builders, Idea Maker, Web3 Enthusiast'}, {'src':'/founders/Luftie-2.jpg', title:'Luftjunkie', description:"Co-Founder of Web3Builders, DAO Creator, Fullstack Blockchain Developer"},{'title':'Arcane', src:'/founders/Arcane-Jose.jpg', description:'CTO of Web3Builders, Senior Blockchain Developer, Web3 Enthusiast'}]}/>
+  <FocusCards cards={[{'title':'Akash Dutta', src:'/founders/Akash.jpg', description:'Founder of Web3Hackers, Idea Maker, Web3 Enthusiast'}, {'src':'/founders/Luftie-2.jpg', title:'Luftjunkie', description:"Co-Founder of Web3Hackers, DAO Creator, Fullstack Blockchain Developer"},{'title':'Arcane', src:'/founders/Arcane-Jose.jpg', description:'CTO of Web3Hackers, Senior Blockchain Developer, Web3 Enthusiast'}]}/>
 
 </div>
 
@@ -154,7 +154,7 @@ className='text-4xl font-bold text-white'>Frequently Asked Questions</p>
       <p className='flex items-center gap-2 text-wrap flex-wrap'>
       Who can join
  <span className='text-(--hacker-green-4) '>
-  Web3Builders
+  Web3Hackers
  </span>
     ?
       </p>
@@ -176,7 +176,7 @@ className='text-4xl font-bold text-white'>Frequently Asked Questions</p>
       <p className='flex items-center gap-2 text-wrap flex-wrap'>
   How large is
  <span className='text-(--hacker-green-4) '>
-  Web3Builders
+  Web3Hackers
  </span>
  going to be 
     ?
@@ -203,7 +203,7 @@ className='text-4xl font-bold text-white'>Frequently Asked Questions</p>
       <p className='flex items-center gap-2 text-wrap flex-wrap'>
 What are the requirements to join
  <span className='text-(--hacker-green-4) '>
-  Web3Builders
+  Web3Hackers
  </span>
     ?
       </p>
@@ -225,7 +225,7 @@ What are the requirements to join
 </li>
 
     <li>
-   A person who is fully devoted to Web3Builders and doesn't treat this community as a joke or a game.
+   A person who is fully devoted to Web3Hackers and doesn't treat this community as a joke or a game.
     </li>
 
     <li>A person, who

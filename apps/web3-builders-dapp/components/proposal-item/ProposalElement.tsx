@@ -1,6 +1,8 @@
 'use client';
 
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
+import { 
+  CUSTOM_GOVERNOR_ABI, CUSTOM_GOVERNOR_ADDRESS, STANDARD_GOVERNOR_CONTRACT_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS
+ } from '@/contracts/governor/config';
 import { Check, CircleArrowUp, InfoIcon, LucideBatteryFull, LucideBatteryLow, LucideBatteryMedium, X } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react'
@@ -23,15 +25,15 @@ function ProposalElement<T>({
 const {address}=useAccount();
 
     const {data:fullProposalObject}=useReadContract({
-      abi:governorContractAbi,
-      address: GOVERNOR_CONTRACT_ADDRESS,
+      abi:CUSTOM_GOVERNOR_ABI,
+      address: CUSTOM_GOVERNOR_ADDRESS,
       functionName: 'getProposal',
       args:[proposalId],
     });
 
     const {data:proposalVotes}=useReadContract({
-      abi:governorContractAbi,
-      address: GOVERNOR_CONTRACT_ADDRESS,
+      abi: STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
       functionName: 'getStandardProposalVotes',
       args:[proposalId],
     });
@@ -44,8 +46,8 @@ const {address}=useAccount();
     const castVote=async (voteOption:number )=>{
 
         writeContractAsync({
-            abi:governorContractAbi,
-        address: GOVERNOR_CONTRACT_ADDRESS,
+            abi:STANDARD_GOVERNOR_CONTRACT_ABI,
+        address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
         functionName: 'castVote',
         args:[
             (fullProposalObject as any).id, 

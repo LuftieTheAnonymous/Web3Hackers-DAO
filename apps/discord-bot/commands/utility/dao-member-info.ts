@@ -70,7 +70,6 @@ const techstack = member.roles.cache
   )
   .map(role => normalize(role.name));
 
-console.log('techstack', techstack);
 
 const roles = member.roles.cache
   .filter(role =>
@@ -84,12 +83,12 @@ console.log('roles', roles);
     ctx.drawImage(background, 0, 0);
 
     
-        ctx.font= '32px Poppins-Bold';
+        ctx.font= '24px Poppins-Bold';
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.fillText(`${interaction.user.globalName}`, 425, 150, canvas.width);
 
-        ctx.font= '24px Poppins-Thin';
+        ctx.font= '18px Poppins-Regular';
         ctx.fillStyle = '#ffffff';
         ctx.fillText(`ID: ${interaction.user.id}`, 425, 200, canvas.width);
 
@@ -114,7 +113,7 @@ console.log('roles', roles);
                    ctx.font= '16px Poppins-Bold';
             ctx.fillStyle = '#05F29B';
             ctx.textAlign = 'center';
-            ctx.fillText(`Wallet Address: ${memberObject.userDBObject.data.userWalletAddress}`, 400, 250, canvas.width);
+            ctx.fillText(`Wallet Address: ${memberObject.userDBObject.userWalletAddress}`, 400, 250, canvas.width);
 
 
 roles.map((role, index)=>{

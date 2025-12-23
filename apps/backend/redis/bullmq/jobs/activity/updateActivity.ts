@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { supabaseConfig } from "../../../../config/supabase.js";
 import redisClient from "../../../set-up.js";
 
@@ -5,6 +6,8 @@ export const updateMembersActivity = async () => {
     try {
         // Scan Redis keys matching activity:*
         const keys = await redisClient.keys("activity:*");
+
+        console.log(keys, "Keys object");
 
         if(Object.keys(keys).length === 0) return {
             message: "success",
@@ -14,9 +17,11 @@ export const updateMembersActivity = async () => {
         };
 
         for (const key of keys) {
-            console.log(key);
+            console.log(key, "Key in keys");
             const [_, id, memberDiscordId] = key.split(":"); // activity:id:memberDiscordId
             const activityData = await redisClient.hGetAll(key);
+
+            console.log(id, memberDiscordId);
 
             if (!activityData || !activityData.discordId) continue;
 
@@ -27,6 +32,7 @@ export const updateMembersActivity = async () => {
             const parsedActivity = Object.fromEntries(
                 Object.entries(activityData).map(([k, v]) => [k, parseInt(v, 10)])
             );
+            console.log("Parsed Activity", parsedActivity);
 
             // Check if row exists in Supabase
             const { data: existing, error: fetchError } = await supabaseConfig
@@ -51,6 +57,7 @@ export const updateMembersActivity = async () => {
                     .insert({
                         id,
                         member_id: Number(memberDiscordId),
+                        reward_month:`${dayjs().month()}-${dayjs().year()}`,
                         ...parsedActivity
                     });
 

@@ -16,7 +16,6 @@ import logger from "./config/winstonConfig.js";
 import './redis/bullmq/main.js';
 import './redis/bullmq/worker.js';
 import './redis/bullmq/queueEvents.js';
-import { schema } from './types/graphql/RootQuery.js';
 const app = express();
 dotenv.config();
 
@@ -59,7 +58,6 @@ app.use(cors({
 
 
 app.use(express.json());
-app.use('/graphql', createHandler({ schema }));
 app.use('/governance', governanceRouter);
 app.use('/gov_token', govTokenRouter);
 app.use('/members', membersRouter);

@@ -1,6 +1,7 @@
 
 
-import {  Collection, Events, inlineCode, MessageFlags, VoiceBasedChannel} from 'discord.js';
+import {  Collection, Events, inlineCode, MessageFlags } from 'discord.js';
+import { client } from '..';
 
 module.exports={
     name: Events.InteractionCreate,
@@ -55,7 +56,7 @@ module.exports={
               return;
           };
          
-          const {cooldowns}=interaction.client;
+          const {cooldowns}=client;
           
           if(!cooldowns.has(interaction.commandName)) {
               cooldowns.set(interaction.commandName, new Collection());

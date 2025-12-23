@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Input } from '../../ui/input'
 import { Textarea } from '../../ui/textarea'
 import { Button } from '../../ui/button'
@@ -11,7 +11,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ArrowLeft, ArrowRight, CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { createSupabaseClient } from '@/lib/db/supabaseConfigClient'
 import Image from 'next/image'
@@ -73,8 +73,6 @@ setValue('isCustom', value);
             </FormItem>
           )}
         />
-
-
 
 <FormField
           control={control}

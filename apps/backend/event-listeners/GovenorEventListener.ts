@@ -1,267 +1,59 @@
 import { standardGovernorContract, customGovernorContract } from "../config/ethersConfig.js";
 import dotenv from "dotenv";
-import {format} from "date-fns";
-import {formatDistanceStrict} from "date-fns/formatDistanceStrict"
-import { notifyDAOMembersOnEvent } from "./actions/governor/governor-actions.js";
-import redisClient from "../redis/set-up.js";
-
-
+import { onActivatedProposal, onCreateProposal, onProposalCanceled, onProposalExecuted, onProposalQueued, onProposalSucceeded } from "./actions/governor/governorOnEventCallbacks.js";
 
 dotenv.config();
 
 
 export const executeGovenorContractEvents=()=>{
 
-standardGovernorContract.on("ProposalCreated", async (proposalId:any) => {
-        try{
-            console.log("Proposal Created triggered", proposalId);
+standardGovernorContract.on("ProposalCreated", async (proposalId)=>{
+  await onCreateProposal(proposalId, standardGovernorContract);
+});
 
-            
-            const proposal = await standardGovernorContract.getProposal(proposalId);
-        
-             await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                   content: `# New Proposal Announcement 📣 !\n A new proposal has been created ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal[3]) * 1000), new Date())} (${format(new Date(Number(proposal[3]) * 1000),'dd/MM/yyyy')}) !`,
-          "components": [
-              {
-                  "type": 1,
-                  "components": [
-                    {
-                      "type": 2,
-                      "label": "View Proposal",
-                      "style": 5,
-                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposalId}`,
-                    }
-                  ]
-                },
-        
-                
-         
-          ]
-        }),
-                });
-             
-                await notifyDAOMembersOnEvent(`A new proposal has been created ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
+customGovernorContract.on('ProposalCreated', async(proposalId)=>{
+  await onCreateProposal(proposalId, customGovernorContract);
+});
+
+standardGovernorContract.on("ProposalActivated", async(proposalId)=>{
+  await onActivatedProposal(proposalId, standardGovernorContract);
+});
+
+customGovernorContract.on('ProposalCreated', async(proposalId)=>{
+  await onActivatedProposal(proposalId, customGovernorContract);
+});
+
+standardGovernorContract.on("ProposalSucceeded", async (proposalId)=>{
+  await onProposalSucceeded(proposalId, standardGovernorContract);
+});
+
+customGovernorContract.on("ProposalSucceeded", async (proposalId)=>{
+  await onProposalSucceeded(proposalId, customGovernorContract);
+});
+
+standardGovernorContract.on("ProposalCanceled", async(args)=>{
+  await onProposalCanceled(args, standardGovernorContract);
+});
+
+customGovernorContract.on("ProposalCanceled", async(args)=>{
+  await onProposalCanceled(args, customGovernorContract);
+});
 
 
-                          const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`)
+standardGovernorContract.on("ProposalQueued", async(args)=>{
+  await onProposalQueued(args, standardGovernorContract);
+});
 
-if(redisStoredProposal){
-    const parsedProposal = JSON.parse(redisStoredProposal);
-await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposal.sm_data.dao_members.discord_member_id}`,`proposal_succeeded`, 1);
-  }
-
-        }catch(err){
-            console.error(err);
-        }
-
-    });
-
-standardGovernorContract.on("ProposalActivated", async (id) => {
-        console.log("Proposal Created triggered", id);
-
-        const proposal = await standardGovernorContract.getProposal(id);
-
-        
+customGovernorContract.on("ProposalQueued", async(args)=>{
+  await onProposalQueued(args, customGovernorContract);
+});
 
 
-  await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-           content: `# Proposal Activated 🔛 !\n Now the voting period starts now until ${formatDistanceStrict(new Date(Number(proposal.endBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.endBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`,
-"components": [
-      {
-          "type": 1,
-          "components": [
-            {
-              "type": 2,
-              "label": "View Proposal",
-              "style": 5,
-              url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${id}`,
-            }
-]
-        },
-]
-}),
-        });
-        await notifyDAOMembersOnEvent(`The Proposal has been activated ! Now the voting period starts until ${formatDistanceStrict(new Date(Number(proposal.endBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.endBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnVote');
+standardGovernorContract.on("ProposalExecuted", async(id)=>{
+  await onProposalExecuted(id, standardGovernorContract);
+});
 
-
-    });
-
-standardGovernorContract.on("ProposalSucceeded", async (id) => {
-try{
-    console.log("Proposal Succeeded triggered", id);
-
-            const proposal = await standardGovernorContract.getProposal(id);
-
-    await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                   content: `# The Proposal Succeeded 🎉 !\n The Proposal (${proposal.id}) has succeeded ! Now the queue period started and ${formatDistanceStrict(new Date(Number(proposal.endBlockTimestamp) * 1000), new Date())} (${format(new Date((Number(proposal.endBlockTimestamp) + Number(proposal.timelock)) * 1000),'dd/MM/yyyy')}) !`,
-          "components": [
-              {
-                  "type": 1,
-                  "components": [
-                    {
-                      "type": 2,
-                      "label": "View Proposal",
-                      "style": 5,
-                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
-                    }
-                  ]
-                },
-        
-                
-         
-          ]
-        }),
-                });
-
-                const redisStoredProposal = await redisClient.get(`dao_proposals:${id}:data`)
-
-if(redisStoredProposal){
-    const parsedProposal = JSON.parse(redisStoredProposal);
-await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposal.sm_data.dao_members.discord_member_id}`,`proposal_succeeded`, 1);
-  }
-
-await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Succeeded ! Now wait until it is queued to be executed !`, 'notifyOnSuccess');
-}catch(err){
-
-    console.error(err);
-}
-    });
-
-standardGovernorContract.on("ProposalCanceled", async (args) => {
-      try{
-          console.log("Proposal Canceled Event Triggered");
-          
-          const id = args[0];
-
-          const proposal = await standardGovernorContract.getProposal(id);
-
-           await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                   content: `# The Proposal Canceled 🚫 !\n The Proposal (${proposal.id}) has been canceled ! It won't be no longer procedured.`,
-          "components": [
-              {
-                  "type": 1,
-                  "components": [
-                    {
-                      "type": 2,
-                      "label": "View Proposal",
-                      "style": 5,
-                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
-                    }
-                  ]
-                },
-        
-                
-         
-          ]
-        }),
-                });
-
-await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Canceled. The proposal is not going to be voted !`, 'notifyOnCancel');
-      }catch(err){
-        console.error(err);
-      }
-    });
-
-standardGovernorContract.on("ProposalQueued", async (args) => {
-        try{
-            console.log("Proposal Queued triggered");
-            console.log("Arguments: ", args);
-            const id = args[0];
-
-            const proposal = await standardGovernorContract.getProposal(id);
-
-
-                await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                   content: `# Proposal Update 📌 !\n The Proposal (${proposal.id}) has been queued ! And it soon will be executed.`,
-          "components": [
-              {
-                  "type": 1,
-                  "components": [
-                    {
-                      "type": 2,
-                      "label": "View Proposal",
-                      "style": 5,
-                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
-                    }
-                  ]
-                },
-        
-                
-         
-          ]
-        }),
-                });
-
-
-        }catch(err){
-       console.error(err);
-        }
-    });
-
-
-standardGovernorContract.on("ProposalExecuted", async (id) => {
-        try{
-            const proposal = await standardGovernorContract.getProposal(id);
-
-
-                await fetch(`https://discord.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}?with_components=true`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                   content: `# Proposal Update 📌 !\n The Proposal (${proposal.id}) has been successfully executed ! Now the result-decision is supposed to be executed.`,
-          "components": [
-              {
-                  "type": 1,
-                  "components": [
-                    {
-                      "type": 2,
-                      "label": "View Proposal",
-                      "style": 5,
-                      url:`${process.env.FRONTEND_ENDPOINT_1 as string}/proposal/${proposal.id}`,
-                    }
-                  ]
-                },
-        
-                
-         
-          ]
-        }),
-                });
-
-
-
-            console.log("Execution event triggered");
-            await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been executed. The proposal is not going to be voted !`, 'notifyOnExecution');
-        }catch(err){
-            console.error(err);
-        }
-
-    });
+customGovernorContract.on("ProposalExecuted", async(id)=>{
+  await onProposalExecuted(id, customGovernorContract);
+});
 }
