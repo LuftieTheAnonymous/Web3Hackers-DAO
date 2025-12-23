@@ -22,7 +22,8 @@ const getLoggedInUser= useCallback(async()=>{
   if(address){
   setIsLoading(true);
       const {data, error }=await supabase.from('dao_members').select('*').eq('userWalletAddress', address).single();
-      
+      console.log(data, error);
+
       if(!data){
         setCurrentUser(null);
         setIsLoading(false);

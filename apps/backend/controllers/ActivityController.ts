@@ -3,7 +3,6 @@ import { supabaseConfig } from "../config/supabase.js";
 import redisClient from "../redis/set-up.js";
 
 import logger from "../config/winstonConfig.js";
-import path from "path";
 
 // Implement setting expriy to the activity upsertion
 

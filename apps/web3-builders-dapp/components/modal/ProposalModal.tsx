@@ -65,7 +65,8 @@ calldataIndicies: z.array(z.number()).optional(),
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from '../ui/form';
 import { useAccount, useBlockNumber, usePublicClient, useReadContract, useWaitForTransactionReceipt, useWatchContractEvent, useWriteContract } from 'wagmi';
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
+import { STANDARD_GOVERNOR_CONTRACT_ABI, CUSTOM_GOVERNOR_ADDRESS, CUSTOM_GOVERNOR_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS
+ } from '@/contracts/governor/config';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
 import { decodeEventLog, encodeFunctionData } from 'viem';
 import { toast } from 'sonner';
@@ -74,6 +75,7 @@ import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
+import { useSidebar } from '../ui/sidebar';
 
 
 
@@ -83,6 +85,9 @@ const [currentStep, setCurrentStep] = useState<number>(0);
 const {writeContractAsync,writeContract, data, isError: writeContractIsError, error: writeContractError, isPending: writeContractIsPending, isIdle, isPaused, isSuccess: writeContractIsSuccess}=useWriteContract();
 const client = usePublicClient();
 const {currentUser}=useGetLoggedInUser();
+const {toggleSidebar}=useSidebar();
+
+
 const {data:receipt, isError, error, isLoading, isSuccess, isPending, isPaused:waitForTransactionError, isLoadingError, errorUpdatedAt,}=useWaitForTransactionReceipt({
   hash:data as `0x${string}`,
   'onReplaced': async (replaceData) => {
@@ -95,8 +100,18 @@ const {data:receipt, isError, error, isLoading, isSuccess, isPending, isPaused:w
     const token = useStore((state) => (state as TokenState).token);
      const supabase =  createSupabaseClient(!token ? '' : token);
   useWatchContractEvent({
-    'abi': governorContractAbi,
-    'address': GOVERNOR_CONTRACT_ADDRESS,
+    'abi': CUSTOM_GOVERNOR_ABI,
+    'address': CUSTOM_GOVERNOR_ADDRESS,
+    'eventName': 'ProposalCreated',
+    'onLogs': async (logs) => {
+      console.log(logs, 'proposal created logs');
+      toast.success('Proposal created successfully !');
+    }
+  });
+
+    useWatchContractEvent({
+    'abi': STANDARD_GOVERNOR_CONTRACT_ABI,
+    'address': STANDARD_GOVERNOR_CONTRACT_ADDRESS,
     'eventName': 'ProposalCreated',
     'onLogs': async (logs) => {
       console.log(logs, 'proposal created logs');
@@ -179,8 +194,8 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
 
 
   writeContractAsync({
-      abi: governorContractAbi,
-      address: GOVERNOR_CONTRACT_ADDRESS,
+      abi: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
       type:'eip1559',
       functionName:'createProposal',
       args:[
@@ -212,7 +227,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
          const receipt = await client!.waitForTransactionReceipt({hash: data as `0x${string}`});
 
         const log = decodeEventLog({
-          abi: governorContractAbi,
+          abi: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
           'eventName': 'ProposalCreated',
           data: receipt!.logs[0].data,
         'topics': receipt!.logs[0].topics,
@@ -223,8 +238,8 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
         const {id, proposer}=log.args as unknown as {id: BigInt, proposer: `0x${string}`};
 
         const proposalSet = await readContract(config, {
-          abi: governorContractAbi,
-          address: GOVERNOR_CONTRACT_ADDRESS,
+          abi: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+          address: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
           functionName: 'getProposal',
           args:[id],
         });
@@ -363,8 +378,11 @@ const valid = await methods.trigger(currentStep === 0 ? ['title', 'isCustom', 's
 
 
 return (
-<Dialog >
-  <DialogTrigger className='w-full'>
+<Dialog>
+  <DialogTrigger onClick={()=>{
+toggleSidebar();
+  }}
+  className='w-full'>
     {children}
   </DialogTrigger>
   <DialogContent className='bg-zinc-800 border z-[99999999999999999999999999999999999999999999999999999999999999999999999999] border-(--hacker-green-4) drop-shadow-xs shadow-green-400/40'>

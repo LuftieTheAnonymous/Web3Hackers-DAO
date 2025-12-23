@@ -1,4 +1,4 @@
-import { governorTokenContract } from "../../../../config/ethersConfig.js";
+import { governorTokenContract, tokenManagerContract } from "../../../../config/ethersConfig.js";
 import { supabaseConfig } from "../../../../config/supabase.js";
 import retry from "async-retry";
 import pLimit from 'p-limit';
@@ -37,8 +37,15 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
     return await limit(async()=>{
  return await retry((async () => {
  try {
-    const tx = await governorTokenContract.rewardMonthlyTokenDistribution(activity.daily_sent_reports, activity.votings_participated, activity.proposals_accepted, activity.problems_solved, activity.proposals_created, activity.crypto_discussion_messages, activity.resource_share, activity.dao_members.userWalletAddress);
-    console.log(tx);
+    const tx = await tokenManagerContract.rewardMonthlyTokenDistribution(
+    activity.daily_sent_reports,
+    activity.votings_participated,
+    activity.proposals_accepted,
+    activity.problems_solved,
+    activity.crypto_discussion_messages,
+    activity.resource_share, 
+    activity.dao_members.userWalletAddress);
+
     const txReceipt = await tx.wait();
     console.log(txReceipt);
 
@@ -53,7 +60,7 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
 }
           }),{
             retries:5,
-            maxTimeout:  1000 * 60 * 5, // 1 hour
+            maxTimeout:  1000 * 60 * 5, // 5 minutes
             onRetry(err,attempt){
                 console.log(`Retrying... Attempt ${attempt} due to error: ${err}`);
             }
@@ -63,7 +70,6 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
     });
 
 });
-
 
 console.log(promisesArray, "Monthly Distributed Tokens");
 

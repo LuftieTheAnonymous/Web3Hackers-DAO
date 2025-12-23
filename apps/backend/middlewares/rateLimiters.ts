@@ -12,7 +12,7 @@ const rateLimiter = rateLimit({
     message: {'error': 'Too many requests mate, please try again later.'},
     statusCode: 429,
     standardHeaders: 'draft-8', // Enable the `RateLimit-*` headers
-    identifier: 'web3builders-dao-dapp',
+    identifier: 'web3hackers-dao-dapp',
     keyGenerator: async (req: Request, res) => {
        try{
  const authorizationHeader = req.headers.authorization;
@@ -21,7 +21,7 @@ const rateLimiter = rateLimit({
             return `${req.ip}`;
         }
         const headerAuthorizationValue = authorizationHeader.split(" ")[1]; 
-        return `web3builders-dao-dapp-${headerAuthorizationValue}`;
+        return `web3hackers-dao-dapp-${headerAuthorizationValue}`;
         
        }catch(err){
         console.error("Rate limiter keyGenerator error:", err);

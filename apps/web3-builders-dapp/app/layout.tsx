@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar/Navbar";
 
 import { Toaster } from '@/components/ui/sonner';
 import ProvidersWrapper from '@/lib/providers/ProvidersWrapper';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 
 const poppins = Poppins({
@@ -20,8 +21,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Web3 Builders DAO Dapp",
-  description: "An open source web3 builders DAO dapp. Created for needs of the web3 builders community on discord.",
+  title: "Web3 Hackers DAO Dapp",
+  description: "An open source web3 hackers DAO dapp. Created for needs of the web3 hackers community on discord.",
   
   
 };
@@ -41,7 +42,7 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${geistMono.variable} w-full h-full bg-[#0D0D0D]  antialiased`}
       >
-
+<SidebarProvider>
 <ProvidersWrapper>
 
 
@@ -51,6 +52,7 @@ export default function RootLayout({
 <Toaster theme={'system'}  closeButton />
   </div>
 </ProvidersWrapper>
+</SidebarProvider>
 
 
 

@@ -354,7 +354,7 @@ const message = await interaction.reply({
                   }
                   await i.editReply({content:`Great ! Congratulations, you have gone through the initial token distribution process ! Now check your DMs, Bot has sent you a message 💘`, components: []})
 
-            await i.user.send({content:`Hello ${interaction.user.globalName} ! I'm a Builder Bot, I'm here to announce you are officially a part of DAO ! Congrats and wee see us on the proposal creation, voting etc. and more 😎`, components: []});
+            await i.user.send({content:`Hello ${interaction.user.globalName} ! I'm a Hacker Bot, I'm here to announce you are officially a part of DAO ! Congrats and wee see us on the proposal creation, voting etc. and more 😎`, components: []});
                 }
               }catch(err){
                 console.log(err);

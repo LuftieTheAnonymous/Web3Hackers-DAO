@@ -5,7 +5,6 @@ import { Button } from '../ui/button'
 
 import { useRouter } from 'next/navigation';
 import { ConnectKitButton } from 'connectkit';
-import { SidebarTrigger } from '../ui/sidebar';
 import Link from 'next/link';
 import { useAccountEffect, useSignMessage } from 'wagmi';
 import { config } from '@/lib/config';
@@ -52,7 +51,7 @@ const token = useStore((state) => (state as TokenState).token);
     '>
 
 <div className="flex items-center justify-between gap-2 w-full max-w-7xl">
-        <Link href={'/'} className=' @min-xs:text-xl lg:text-2xl text-(--hacker-green-4) font-bold'>Web3 Builders DAO</Link>
+        <Link href={'/'} className=' @min-xs:text-xl lg:text-2xl text-(--hacker-green-4) font-bold'>Web3 Hackers DAO</Link>
 
 
 <div className=" justify-between hidden lg:flex  items-center gap-3">

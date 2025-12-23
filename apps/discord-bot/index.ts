@@ -52,7 +52,6 @@ for (const file of commandFiles) {
     const command:CommandInterface = require(filePath);
     if ('data' in command && 'execute' in command) {
         client.commands.set(command.data.name, command);
-        if(command.cooldown) client.cooldowns.set(command.data.name, command.cooldown);
     } else {
         console.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`);
     }

@@ -23,12 +23,12 @@ module.exports={
      
      
      if(channel.isSendable()){
-     await member.send({content:`Goodbye ${member.user.globalName} ! We hope to see you someday again ! :wave: As you have left the Web3 Builders community, you've been deprived of the tokens and you have been removed from the DAO-DBs !`});
+     await member.send({content:`Goodbye ${member.user.globalName} ! We hope to see you someday again ! :wave: As you have left the Web3 Hackers community, you've been deprived of the tokens and you have been removed from the DAO-DBs !`});
 
      await channel.send({content:`Goodbye ${member.user.globalName} !`, embeds:[{
         color:0xff0000,
         title:`Goodbye ${member.user.globalName} ! :wave:`,
-        description:`We hope to see you someday again ! As you have left the Web3 Builders community, you've been deprived of the tokens and you have been removed from the DAO-DBs !`
+        description:`We hope to see you someday again ! As you have left the Web3 Hackers community, you've been deprived of the tokens and you have been removed from the DAO-DBs !`
     }]})
  }
 

@@ -33,7 +33,7 @@ try{
         ctx.font= '36px Poppins-Bold';
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
-        ctx.fillText(`Welcome to Web3 Builders, ${member.user.globalName ?? member.user.username} !`, canvas.width / 2, canvas.height / 1.5, canvas.width);
+        ctx.fillText(`Welcome to Web3 Hackers, ${member.user.globalName ?? member.user.username} !`, canvas.width / 2, canvas.height / 1.5, canvas.width);
 
 
         ctx.font= '24px Poppins-Regular';

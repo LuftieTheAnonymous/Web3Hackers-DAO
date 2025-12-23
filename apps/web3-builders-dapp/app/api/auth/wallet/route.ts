@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_JWT_SECRET as string,
       {
         expiresIn: '30d',
-        issuer: 'web3-builders-dao-dapp',
+        issuer: 'web3-hackers-dao-dapp',
       }
     );
 

@@ -80,10 +80,10 @@ const supabase = createSupabaseClient(!token ? '' : token.value);
         }
 
    const result =  await webpush.sendNotification(subscription as PushSubscription, JSON.stringify({
-            title: 'Web3 Builders DAO Dapp',
+            title: 'Web3 Hackers DAO Dapp',
             body: message,
-            icon:'/Web3Builders.png',
-            image:'/Web3Builders.png'
+            icon:'/Web3Hackers.png',
+            image:'/Web3Hackers.png'
         }));
         
         const {statusCode, headers, body} = result;
