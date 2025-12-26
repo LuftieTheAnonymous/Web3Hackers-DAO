@@ -94,12 +94,12 @@ console.log('roles', roles);
 
 
         ctx.font= '24px Poppins-Regular';
-        ctx.fillStyle = '#05F29B';
+        ctx.fillStyle = '#7b68ee';
         ctx.textAlign = 'center';
         ctx.fillText(`We hope you'll grow with us here more ! `, canvas.width / 2, canvas.height - 10, canvas.width);
 
         ctx.font= '24px Poppins-Bold';
-        ctx.fillStyle = '#05F29B';
+        ctx.fillStyle = '#7b68ee';
         ctx.textAlign = 'center';
         ctx.fillText(`${convertValueToMln(memberObject.tokenAmount)}`, 175, canvas.height - 125, 250);
 
@@ -111,7 +111,7 @@ console.log('roles', roles);
 
 
                    ctx.font= '16px Poppins-Bold';
-            ctx.fillStyle = '#05F29B';
+            ctx.fillStyle = '#7b68ee';
             ctx.textAlign = 'center';
             ctx.fillText(`Wallet Address: ${memberObject.userDBObject.userWalletAddress}`, 400, 250, canvas.width);
 
@@ -128,7 +128,7 @@ roles.map((role, index)=>{
  ctx.beginPath();
 ctx.arc(175, 150, 75, 0, Math.PI * 2, true); // Y = 150, not 75
 ctx.stroke();
-   ctx.strokeStyle= '#05F29B';
+   ctx.strokeStyle= '#7b68ee';
 ctx.closePath();
 ctx.clip();
 

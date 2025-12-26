@@ -34,7 +34,7 @@ message:'Description must be at least 1 character',
 
 functionsCalldatas:z.array(z.object({
 target: z.string().startsWith('0x').length(42,{message:'Invalid address'}),
-calldata: z.string(),
+calldataName: z.enum(["rewardUser(address,uint256)", "punishMember(address,uint256)", "addToWhiteList(address)", "removeFromWhitelist(address)", "kickOutFromDAO(address)", "addBlacklist(address)"], {message:'Inappropriate calldata has been passed.'}),
 destinationAddress: z.string().startsWith('0x').length(42,{message:'Invalid address'}),
 tokenAmount:z.bigint({'message':'Token Amount must be a number'}).optional(),
 })),
@@ -56,7 +56,7 @@ isCustom: z.enum(['standard', 'custom'],{'message':'value does not pass to the o
 
 customVotesOptions: z.array(z.object({
 title: z.string(),
-calldataIndicies: z.array(z.number()).optional(),
+calldataIndicies: z.array(z.number(), {'message':'The selected functions have wrong type.'}),
 
 })).length(5).optional(),
 
@@ -75,6 +75,7 @@ import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
 import { useSidebar } from '../ui/sidebar';
+import { TOKEN_MANAGER_ABI } from '@/contracts/token-manager/config';
 
 
 function ProposalModal({children}: Props) {
@@ -153,8 +154,6 @@ const methods = useForm<z.infer<typeof proposalObject>>({
 
 async function onSubmit(values: z.infer<typeof proposalObject>) {
  try{
-  console.log(values);
-
   if(!currentUser){
     toast.error('You must be logged in to create a proposal');
     return;
@@ -175,26 +174,30 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     return;
   }
 
-
-
-
   const targets= values['functionsCalldatas'].map((item) => item['target']);
   const calldataValues = values['functionsCalldatas'].map((item) => item['tokenAmount'] && BigInt(item['tokenAmount']));
 
-
-
   const calldataEndodedBytes = values['functionsCalldatas'].map((item) =>  encodeFunctionData({
-    abi: tokenContractAbi,
-    functionName: item.calldata.slice(0, item.calldata.indexOf('(')),
-    args: [item['destinationAddress'], BigInt(Number(item['tokenAmount']) * 1e18)],
+    abi: item.target === TOKEN_CONTRACT_ADDRESS ? tokenContractAbi : TOKEN_MANAGER_ABI,
+    functionName: item.calldataName.slice(0, item.calldataName.indexOf('(')),
+    args: item.calldataName.includes('uint256') ? [item['destinationAddress'], BigInt(Number(item['tokenAmount']) * 1e18)] : [item['destinationAddress']],
     }));
+
+
+    const callBytesObjects= values['customVotesOptions']?.filter((option)=> option.calldataIndicies.length > 0)?.map((item)=>{
+     return (item.calldataIndicies as number[]).map((functionIndex)=>{
+     return {
+       dataBytes: calldataEndodedBytes[functionIndex],
+       target: targets[functionIndex]
+     }
+
+      })
+    })
 
     const currentBlockTimestamp = new Date(blockTimestamp).getTime();
     const endDate= new Date(values['proposalEndTime']).getTime();
 
     const calculatedDistanceInBlocks = BigInt(Math.floor(Math.max(0, endDate - currentBlockTimestamp) / 12));
-
-  
 
     const argumentsForProposals=
     values['isCustom'] === 'standard' ?
@@ -215,8 +218,9 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
       BigInt(blockNumber as bigint + calculatedDistanceInBlocks),
       BigInt(Math.floor(Number(values['timelockPeriod']) * Number(values['timelockUnit']) / 12)),
       BigInt(Math.floor(Number(values['proposalDelay']) * Number(values['proposalDelayUnit']) / 12)),
-
+      callBytesObjects
       ];
+
 
   writeContractAsync({
       abi: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
@@ -298,7 +302,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
   proposal_id: id,
   method_signature: encodeFunctionData({
     abi: tokenContractAbi,
-    functionName: item.calldata.slice(0, item.calldata.indexOf('(')),
+    functionName: item.calldataName.slice(0, item.calldataName.indexOf('(')),
     args: [item.destinationAddress, BigInt(Number(item.tokenAmount) * 1e18)],
   }),
   target_address: item.target,
@@ -307,7 +311,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
   amountParameter: Number(item.tokenAmount),
   isFunctionRewarding: false,
   isFunctionPunishing: false,
-  functionDisplayName: item.calldata,
+  functionDisplayName: item.calldataName,
 }));
 
          const calldataObjs = await supabase.from('calldata_objects').insert(calldataRows); 
