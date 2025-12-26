@@ -10,7 +10,7 @@ export default function manifest():MetadataRoute.Manifest {
 "scope": "/",
     "background_color": "#0D0D0D",
     
-    "theme_color": "#05F29B",
+    "theme_color": "#7b68ee",
     "icons": [
       {
         "src": "/Web3Hackers.png",

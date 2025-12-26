@@ -4,9 +4,8 @@ import React, { useCallback, useState } from 'react'
 import { Input } from '../../ui/input'
 import { Textarea } from '../../ui/textarea'
 import { Button } from '../../ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import OptionToCall from './custom/OptionToCall'
-import { Control, FieldValues, FormState, useFieldArray, UseFormClearErrors, useFormContext, UseFormGetValues, UseFormRegister, UseFormSetError, UseFormSetValue, UseFormWatch, UseFromSubscribe } from 'react-hook-form'
+import { Control, FieldValues, FormState, useFieldArray, UseFormClearErrors, useFormContext, UseFormGetValues, UseFormRegister, UseFormSetError, UseFormSetValue, UseFormWatch, UseFormSubscribe } from 'react-hook-form'
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ArrowLeft, ArrowRight, CalendarIcon } from 'lucide-react'
@@ -16,6 +15,7 @@ import { toast } from 'sonner'
 import { createSupabaseClient } from '@/lib/db/supabaseConfigClient'
 import Image from 'next/image'
 import { TokenState, useStore } from '@/lib/zustandConfig';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 
@@ -27,7 +27,7 @@ type Props = {
   setValue: UseFormSetValue<FieldValues>,
   clearErrors: UseFormClearErrors<FieldValues>,
   setError: UseFormSetError<FieldValues>,
-  subscribe: UseFromSubscribe<FieldValues>
+  subscribe: UseFormSubscribe<FieldValues>
   control: Control<FieldValues, any, FieldValues>
 
 }
@@ -56,10 +56,7 @@ type Props = {
             <FormItem>
               <FormLabel className='text-white text-base font-light'>Voting Type</FormLabel>
               <FormControl>
-              <Select {...field} value={watch("isCustom")} onValueChange={(value) => {
-                console.log(value);
-setValue('isCustom', value);
-  }}>
+              <Select  value={watch('isCustom')} defaultValue='standard' onValueChange={(v)=> setValue('isCustom', v)}>
   <SelectTrigger className="w-full text-white border border-(--hacker-green-4)">
     <SelectValue placeholder="Voting Type" />
   </SelectTrigger>
@@ -130,18 +127,18 @@ const [isLoading, setIsLoading] = useState(false);
 
 const [callDataIndex, setCallDataIndex] = React.useState(0);
 
-const openChangeSetMembers=async ()=>{
+const openChangeSetMembers= useCallback(async ()=>{
   setIsLoading(true);
-const {data}= await supabase.from('dao_members').select('*');
-
-if(data && members.length === 0){
-  setMembers(data);
+  
+  if(members.length === 0){
+  const {data}= await supabase.from('dao_members').select('*');
+  setMembers(data as any[]);
 }
 
 setIsLoading(false);
 
 
-}
+},[]);
 
 
   return (
@@ -194,14 +191,14 @@ setIsLoading(false);
   </Button>
   </div>}
 {fields.map((field, index) => (
-callDataIndex===index && <div key={field.id}>
+callDataIndex === index && <div key={field.id}>
 <FormField
           control={control}
           
           name={`functionsCalldatas.${index}.calldata`}
           render={({ field }) => (
             <FormItem className='py-2'>
-              <FormLabel className='text-white text-base font-light'>Function to call on chain</FormLabel>
+              <FormLabel className='text-white text-base font-light'>Function to call onchain</FormLabel>
               <FormControl>
               <Select 
  onValueChange={
@@ -215,10 +212,14 @@ callDataIndex===index && <div key={field.id}>
     <SelectValue placeholder="Proposal Function" />
   </SelectTrigger>
   <SelectContent className='bg-zinc-800 border flex  border-(--hacker-green-4)'>
-    <SelectItem className='text-white' value="rewardUser(address, uint256)">
+    <SelectItem className='text-white' value="rewardUser(address,uint256)">
       Reward User With Tokens
       </SelectItem>
-    <SelectItem className='text-white' value="punishMember(address, uint256)">Punish User Account</SelectItem>
+    <SelectItem className='text-white' value="punishMember(address,uint256)">Punish User Account</SelectItem>
+    <SelectItem className='text-white' value="addToWhiteList(address)">Add Member To Whitelist</SelectItem>
+    <SelectItem className='text-white' value="removeFromWhitelist(address)">Add Member To Whitelist</SelectItem>
+    <SelectItem className='text-white' value="kickOutFromDAO(address)">Kick Out Member</SelectItem>
+    <SelectItem className='text-white' value="addBlacklist(address)">Add Member To Blacklist</SelectItem>
   </SelectContent>
 </Select>
                 
@@ -292,14 +293,18 @@ callDataIndex===index && <div key={field.id}>
 
 <Button onClick={(e) => {
 e.preventDefault();
+if(fields.length < 5){
+  append({
+    calldata: '',
+    destinationAddress: '',
+    target:'0xA6fE76578f31a1a1e11276514B5E53Df4C458A26',
+    tokenAmount: BigInt(0),
+    value: BigInt(0)
+  });
+  return;
+}
 
-append({
-  calldata: '',
-  destinationAddress: '',
-  target:'0xA6fE76578f31a1a1e11276514B5E53Df4C458A26',
-  tokenAmount: BigInt(0),
-  value: BigInt(0)
-})
+toast.error('You are not able to add any new calldata :(');
 }} className='hover:bg-(--hacker-green-4) hover:scale-95 cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 '>
   Insert New Calldata
   </Button>

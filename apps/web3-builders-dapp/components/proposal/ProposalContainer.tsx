@@ -3,7 +3,7 @@
 import ProposalCallbackItem from '@/components/proposal-item/ProposalCallbackItem'
 import ProposalCommentBar from '@/components/proposal/comment/ProposalCommentBar'
 import { Button } from '@/components/ui/button'
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
+import { CUSTOM_GOVERNOR_ABI, CUSTOM_GOVERNOR_ADDRESS, STANDARD_GOVERNOR_CONTRACT_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS } from '@/contracts/governor/config';
 import useRealtimeDocument from '@/hooks/useRealtimeDocument';
 import React, { useState } from 'react'
 import { FaCheck, FaFlag, FaPencilAlt } from 'react-icons/fa'
@@ -50,23 +50,23 @@ if(!proposalData){
 }
 
     const {data:proposalOnchainData, error}=useReadContract({
-      abi: governorContractAbi,
-      address: GOVERNOR_CONTRACT_ADDRESS,
+      abi: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
       functionName: "getProposal",
       args:[proposalId],
     });
 
 
     useWatchContractEvent({
-      abi: governorContractAbi,
-      address: GOVERNOR_CONTRACT_ADDRESS,
+      abi: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
       eventName: "ProposalVoted",
       'onLogs': (logs) => {
         console.log('ProposalVoted logs:', logs);
  logs.forEach((log) => {
     try{
       const decoded= decodeEventLog({
-        abi: governorContractAbi,
+        abi: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
         eventName: "ProposalVoted",
         data: log.data,
         topics: log.topics,
@@ -98,8 +98,8 @@ if(!proposalData){
         return;
       } 
    writeContract({
-          abi: governorContractAbi,
-          address: GOVERNOR_CONTRACT_ADDRESS,
+   abi: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
           functionName: "castVote",
           args:[
             (proposalObj as any).proposal_id,
@@ -121,8 +121,8 @@ if(!proposalData){
       }
 
       writeContract({
-          abi: governorContractAbi,
-          address: GOVERNOR_CONTRACT_ADDRESS,
+ abi: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: proposalObj && (proposalObj as any).isCustom ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
           functionName: "cancelProposal",
           args:[(proposalObj as any).proposal_id],
         });
