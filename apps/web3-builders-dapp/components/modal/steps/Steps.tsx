@@ -16,6 +16,8 @@ import { createSupabaseClient } from '@/lib/db/supabaseConfigClient'
 import Image from 'next/image'
 import { TokenState, useStore } from '@/lib/zustandConfig';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TOKEN_MANAGER_CONTRACT_ADDRESS } from '@/contracts/token-manager/config';
+import { TOKEN_CONTRACT_ADDRESS } from '@/contracts/token/config';
 
 
 
@@ -195,7 +197,7 @@ callDataIndex === index && <div key={field.id}>
 <FormField
           control={control}
           
-          name={`functionsCalldatas.${index}.calldata`}
+          name={`functionsCalldatas.${index}.calldataName`}
           render={({ field }) => (
             <FormItem className='py-2'>
               <FormLabel className='text-white text-base font-light'>Function to call onchain</FormLabel>
@@ -203,7 +205,12 @@ callDataIndex === index && <div key={field.id}>
               <Select 
  onValueChange={
   (value) => {
-    setValue(`functionsCalldatas.${index}.calldata`, value);
+    setValue(`functionsCalldatas.${index}.calldataName`, value);
+    if(value === 'punishMember(address,uint256)' || value === 'kickOutFromDAO(address)' || value === 'rewardUser(address,uint256)'){
+      setValue(`functionsCalldatas.${index}.target`, TOKEN_MANAGER_CONTRACT_ADDRESS);
+    }else{
+      setValue(`functionsCalldatas.${index}.target`, TOKEN_CONTRACT_ADDRESS);
+    }
   }
  }
  {...field}
@@ -230,7 +237,7 @@ callDataIndex === index && <div key={field.id}>
         />
 
     
-      {watch(`functionsCalldatas.${index}.calldata`) && watch(`functionsCalldatas.${index}.calldata`).trim() !== '' && <>
+      {watch(`functionsCalldatas.${index}.calldataName`) && watch(`functionsCalldatas.${index}.calldataName`).trim() !== '' && <>
     <FormField
               control={control}
               name={`functionsCalldatas.${index}.destinationAddress`}
@@ -270,6 +277,7 @@ callDataIndex === index && <div key={field.id}>
               )}
             />
     
+    {watch(`functionsCalldatas.${index}.calldataName`).includes('uint256)') &&    
     <FormField
               control={control}
               name={`functionsCalldatas.${index}.tokenAmount`}
@@ -285,6 +293,8 @@ callDataIndex === index && <div key={field.id}>
                 </FormItem>
               )}
             />  
+    }
+
       </>}
   </div>
 ))}
@@ -293,18 +303,14 @@ callDataIndex === index && <div key={field.id}>
 
 <Button onClick={(e) => {
 e.preventDefault();
-if(fields.length < 5){
   append({
     calldata: '',
     destinationAddress: '',
-    target:'0xA6fE76578f31a1a1e11276514B5E53Df4C458A26',
+    target:'',
     tokenAmount: BigInt(0),
     value: BigInt(0)
   });
   return;
-}
-
-toast.error('You are not able to add any new calldata :(');
 }} className='hover:bg-(--hacker-green-4) hover:scale-95 cursor-pointer transition-all duration-500  px-6 hover:text-zinc-800 '>
   Insert New Calldata
   </Button>
@@ -329,7 +335,7 @@ const {fields}=useFieldArray({
   name:'functionsCalldatas'
 });
 
-const {fields: customVotesFields, append: customVotesAppend, remove: customVotesRemove, update: customVotesUpdate, prepend: customVotesPrepend}=useFieldArray({
+const {fields: customVotesFields, update: customVotesUpdate}=useFieldArray({
   control,
   name:'customVotesOptions'
 })
@@ -401,8 +407,9 @@ const goForward=useCallback(() => {
                     keyIndex={optionId}
                     data={field}
                     customVotesUpdate={customVotesUpdate}
-                    functionToCall={watch(`functionsCalldatas.${calldataIdx}.calldata`)}
+                    functionToCall={watch(`functionsCalldatas.${calldataIdx}.calldataName`)}
                     tokenAmount={watch(`functionsCalldatas.${calldataIdx}.tokenAmount`)}
+                    destinationAddress={watch(`functionsCalldatas.${calldataIdx}.destinationAddress`)}
                     index={calldataIdx} // This is what the checkbox is tied to
                 title={watch(`customVotesOptions.${customVoteIdx}.title`)}
                   />
@@ -470,6 +477,7 @@ const goForward=useCallback(() => {
                   mode="single"
               {...field}
               required
+              
                     selected={field.value ? new Date(field.value) : undefined}
                     classNames={{
                       day_selected: 'bg-(--hacker-green-4) rounded-md hover:text-zinc-800 py-1 px-2 self-center',
@@ -571,12 +579,16 @@ const goForward=useCallback(() => {
  const endTime = watch('proposalEndTime')?.getTime?.();
     const delayUnit = watch('proposalDelayUnit') || 1;
 
-    let maxDelay = 0;
+    let maxDelayInMiliSecondsSeconds = 86400000;
+    let maxDelay=0;
+    const now = Date.now();
+    const diffInSeconds = (endTime - now) / 1000;
 
-    if (endTime && !isNaN(endTime)) {
-      const now = Date.now();
-      const diffInSeconds = (endTime - now) / 1000;
-      maxDelay = Math.floor((diffInSeconds * 0.2) / delayUnit); // 20% cap, converted to selected unit
+
+    if (endTime && !isNaN(endTime) && diffInSeconds <= maxDelayInMiliSecondsSeconds / 1000) {
+      maxDelay = Math.floor((diffInSeconds) / delayUnit); 
+    }else{
+      maxDelay = Math.floor(((maxDelayInMiliSecondsSeconds)/1000) / delayUnit);
     }
    return     (
             <FormItem>
@@ -635,17 +647,22 @@ const goForward=useCallback(() => {
                   onValueChange={(value) => {
   const unit = Number(value);
   setValue('proposalDelayUnit', unit);
-
   const endTime = watch('proposalEndTime')?.getTime?.();
-  if (endTime && !isNaN(endTime)) {
+    let maxDelayInMiliSecondsSeconds = 86400000;
+    let maxDelay=0;
     const now = Date.now();
     const diffInSeconds = (endTime - now) / 1000;
-    const maxDelay = Math.floor((diffInSeconds * 0.2) / unit);
-    const currentValue = watch('proposalDelay');
+  
+  if (endTime && !isNaN(endTime) && diffInSeconds <= maxDelayInMiliSecondsSeconds / 1000) {
+    const now = Date.now();
+    const diffInSeconds = (endTime - now) / 1000;
+     maxDelay = Math.floor((diffInSeconds) / unit);
 
-    if (currentValue > maxDelay) {
       setValue('proposalDelay', Number(maxDelay));
-    }
+  }else{
+  maxDelay = Math.floor((maxDelayInMiliSecondsSeconds) / unit);
+
+      setValue('proposalDelay', Number(maxDelay));
   }
 }}
                 >

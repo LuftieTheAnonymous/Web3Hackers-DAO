@@ -70,7 +70,7 @@ className='text-white text-sm outline-none border-none bg-neutral-900 p-2 rounde
   </ProposalModal>
 }
     </div>
-    </div> : isLoading && <Skeleton className='max-w-2xl my-6  drop-shadow-green-500 hover:-translate-y-1 transition-all duration-500 drop-shadow-sm mx-auto rounded-lg flex flex-col gap-2  w-full h-96 bg-zinc-800'>
+    </div> : isLoading && <Skeleton className='max-w-2xl my-6  drop-shadow-purple-500 hover:-translate-y-1 transition-all duration-500 drop-shadow-sm mx-auto rounded-lg flex flex-col gap-2  w-full h-96 bg-zinc-800'>
 
 <div className="w-full p-2 h-12 flex items-center gap-2 border-b-(--hacker-green-4) border-b">
   <Skeleton className='w-8 h-8 rounded-full bg-gray-400'/>

@@ -37,12 +37,12 @@ try{
 
 
         ctx.font= '24px Poppins-Regular';
-        ctx.fillStyle = '#05F29B';
+        ctx.fillStyle = '#7b68ee';
         ctx.textAlign = 'center';
         ctx.fillText(`We hope you'll be having a great time here `, canvas.width / 2, canvas.height - 25, canvas.width);
 
 
-           ctx.strokeStyle= '#05F29B';
+        ctx.strokeStyle= '#7b68ee';
         ctx.strokeRect(2, 2, canvas.width, canvas.height);
 
         
