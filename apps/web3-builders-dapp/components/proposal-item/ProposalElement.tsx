@@ -6,11 +6,9 @@ import {
 import { Check, CircleArrowUp, InfoIcon, LucideBatteryFull, LucideBatteryLow, LucideBatteryMedium, X } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react'
-import { useReadContract, useWriteContract, useAccount } from 'wagmi';
+import { useReadContract, useWriteContract, useAccount, useBlockNumber } from 'wagmi';
 import ProposalCallbackItem from './ProposalCallbackItem';
 import { formatDistanceStrict } from 'date-fns/formatDistanceStrict';
-
-import { ethers } from 'ethers';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useSearchParams } from 'next/navigation';
@@ -23,48 +21,40 @@ function ProposalElement<T>({
   proposalObj
 }: Props) {
 const {address}=useAccount();
+const {data:currentBlock}= useBlockNumber();
 
     const {data:fullProposalObject}=useReadContract({
-      abi:CUSTOM_GOVERNOR_ABI,
-      address: CUSTOM_GOVERNOR_ADDRESS,
+      abi: proposalObj.isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: proposalObj.isCustom ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS ,
       functionName: 'getProposal',
       args:[proposalId],
     });
 
     const {data:proposalVotes}=useReadContract({
-      abi: STANDARD_GOVERNOR_CONTRACT_ABI,
-      address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
-      functionName: 'getStandardProposalVotes',
+abi: proposalObj.isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: proposalObj.isCustom ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS ,
+      functionName: proposalObj.isCustom ?  "getCustomProposalVotes" : 'getStandardProposalVotes',
       args:[proposalId],
     });
 
     const {writeContractAsync}=useWriteContract({
-        
-
-    })
+    });
 
     const castVote=async (voteOption:number )=>{
 
         writeContractAsync({
-            abi:STANDARD_GOVERNOR_CONTRACT_ABI,
-        address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
+        abi: proposalObj.isCustom ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+        address: proposalObj.isCustom ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS ,
         functionName: 'castVote',
         args:[
             (fullProposalObject as any).id, 
             "Because I like this proposal", 
-            address, 
-            BigInt(voteOption), 
-            ethers.encodeBytes32String(""), 
-            (fullProposalObject as any).isCustom, 
-            voteOption === 0 ? true : false, 
-            voteOption !== 0 ? true : false, 
-            []],
+            BigInt(voteOption)
+          ],
         })
     }
 
     const convertAmountOfTokensToPercent = (amountOfTokens: number) => {
-
-
    const allOptionsVote=proposalVotes as BigInt[];
 
         const totalTokens = allOptionsVote.reduce((accumulator, currentValue) => Number(accumulator) + Number(currentValue), 0);
@@ -78,7 +68,7 @@ const {address}=useAccount();
 
     const handleVoteClick = (voteOption: number) => {
 
-   if(fullProposalObject && (fullProposalObject as any).state === 1 && new Date(Number(((fullProposalObject as any).startBlockTimestamp)) * 1000).getTime() <= new Date().getTime()) {
+   if(currentBlock && fullProposalObject && (fullProposalObject as any).state === 1 && (fullProposalObject as any).startBlock <= currentBlock) {
      castVote(voteOption);
 return;
     }
@@ -259,13 +249,12 @@ Pending...
 </div>
 
 </div>) : <div className="flex items-center gap-8 text-sm text-white px-3 overflow-x-auto">
-<p>This is a <span className='text-(--hacker-green-4)'>custom proposal</span>, click the proposal content to see options.</p>
+<p>This is a <span className='text-(--hacker-green-4)'>Custom Proposal</span>, click the proposal content to see options.</p>
 </div>
         }
 
-        <div className="flex gap-2 pr-4 items-center">
-          
-         <p className='text-sm flex items-center gap-1 text-white'>
+<div className="flex gap-2 pr-4 items-center">
+<p className='text-sm flex items-center gap-1 text-white'>
 <span className='hidden md:block'>Urgency:</span>
            {fullProposalObject && (fullProposalObject as any).urgencyLevel === 0 ? <LucideBatteryLow className=' text-red-500' /> : (fullProposalObject as any).urgencyLevel === 1 ? <LucideBatteryMedium className=' text-yellow-400' />  : <LucideBatteryFull className='text-(--hacker-green-4)' />}
          </p>

@@ -10,13 +10,8 @@ import { ConnectKitButton } from 'connectkit'
 import { Home, User, UserCog2Icon } from "lucide-react"
 import { Button } from '../ui/button'
 import Image from 'next/image'
-import dynamic from 'next/dynamic'
-import { useSidebar } from '../ui/sidebar'
 type Props = {}
 
-const ProposalModal = dynamic(()=>import('../modal/ProposalModal'), {
-  ssr:false
-});
 
 function SlidingSidebar({}: Props) {
     
@@ -89,15 +84,7 @@ function SlidingSidebar({}: Props) {
                     </Button>
                   </div>
                 ))}
-{
-  currentUser && address &&
-  <ProposalModal>
-<Button
-className='hover:bg-(--hacker-green-4)  w-full transition-all cursor-pointer'>
-  Propose
-</Button>
-  </ProposalModal>
-}
+
 </div>
 
 

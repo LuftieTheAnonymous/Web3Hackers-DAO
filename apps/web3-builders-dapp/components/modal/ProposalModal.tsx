@@ -34,10 +34,9 @@ message:'Description must be at least 1 character',
 
 functionsCalldatas:z.array(z.object({
 target: z.string().startsWith('0x').length(42,{message:'Invalid address'}),
-value: z.bigint(),
 calldata: z.string(),
 destinationAddress: z.string().startsWith('0x').length(42,{message:'Invalid address'}),
-tokenAmount:z.bigint({'message':'Token Amount must be a number'}),
+tokenAmount:z.bigint({'message':'Token Amount must be a number'}).optional(),
 })),
 
 proposalEndTime: z.date({'message':'proposalEndTime must be a date'}),
@@ -53,11 +52,12 @@ timelockUnit: z.number({'message':'timelockUnit must be a number'}),
 
 urgencyLevel: z.bigint({'message':'urgencyLevel must be a number'}),
 
-isCustom: z.string().min(1,{'message':'The voting type must be selected'}),
+isCustom: z.enum(['standard', 'custom'],{'message':'value does not pass to the options available'}),
 
 customVotesOptions: z.array(z.object({
 title: z.string(),
 calldataIndicies: z.array(z.number()).optional(),
+
 })).length(5).optional(),
 
 });
@@ -65,18 +65,16 @@ calldataIndicies: z.array(z.number()).optional(),
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form } from '../ui/form';
 import { useAccount, useBlockNumber, usePublicClient, useReadContract, useWaitForTransactionReceipt, useWatchContractEvent, useWriteContract } from 'wagmi';
-import { STANDARD_GOVERNOR_CONTRACT_ABI, CUSTOM_GOVERNOR_ADDRESS, CUSTOM_GOVERNOR_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS
- } from '@/contracts/governor/config';
+import { STANDARD_GOVERNOR_CONTRACT_ABI, CUSTOM_GOVERNOR_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS, CUSTOM_GOVERNOR_ADDRESS} from '@/contracts/governor/config';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
 import { decodeEventLog, encodeFunctionData } from 'viem';
 import { toast } from 'sonner';
-import { FaCheckCircle, FaTruckLoading } from 'react-icons/fa';
+import { FaCheckCircle } from 'react-icons/fa';
 
 import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
 import { useSidebar } from '../ui/sidebar';
-
 
 
 function ProposalModal({children}: Props) {
@@ -86,13 +84,12 @@ const {writeContractAsync,writeContract, data, isError: writeContractIsError, er
 const client = usePublicClient();
 const {currentUser}=useGetLoggedInUser();
 const {toggleSidebar}=useSidebar();
+const {data:blockNumber, dataUpdatedAt:blockTimestamp }=useBlockNumber();
 
 
 const {data:receipt, isError, error, isLoading, isSuccess, isPending, isPaused:waitForTransactionError, isLoadingError, errorUpdatedAt,}=useWaitForTransactionReceipt({
   hash:data as `0x${string}`,
   'onReplaced': async (replaceData) => {
-
-
     console.log(replaceData, 'replaced transaction data');
   },
   
@@ -126,7 +123,7 @@ const methods = useForm<z.infer<typeof proposalObject>>({
     title: "",
     longDescription: "",
     shortDescripton: "",
-    isCustom: '',
+    isCustom: 'standard',
     functionsCalldatas: [],
     urgencyLevel: BigInt(0),
     customVotesOptions: [
@@ -182,33 +179,51 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
 
 
   const targets= values['functionsCalldatas'].map((item) => item['target']);
-  const calldataValues = values['functionsCalldatas'].map((item) => BigInt(item['value']));
+  const calldataValues = values['functionsCalldatas'].map((item) => item['tokenAmount'] && BigInt(item['tokenAmount']));
 
-  console.log(calldataValues);
+
 
   const calldataEndodedBytes = values['functionsCalldatas'].map((item) =>  encodeFunctionData({
     abi: tokenContractAbi,
     functionName: item.calldata.slice(0, item.calldata.indexOf('(')),
-      args: [item['destinationAddress'], BigInt(Number(item['tokenAmount']) * 1e18)],
+    args: [item['destinationAddress'], BigInt(Number(item['tokenAmount']) * 1e18)],
     }));
 
+    const currentBlockTimestamp = new Date(blockTimestamp).getTime();
+    const endDate= new Date(values['proposalEndTime']).getTime();
 
-  writeContractAsync({
-      abi: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
-      address: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
-      type:'eip1559',
-      functionName:'createProposal',
-      args:[
+    const calculatedDistanceInBlocks = BigInt(Math.floor(Math.max(0, endDate - currentBlockTimestamp) / 12));
+
+  
+
+    const argumentsForProposals=
+    values['isCustom'] === 'standard' ?
+    [
       values['shortDescripton'],
       targets,
       calldataValues,
       calldataEndodedBytes,
       BigInt(values['urgencyLevel']),
-      values['isCustom'] === 'standard' ? false : true,
-      BigInt(new Date(values['proposalEndTime']).getTime()) / BigInt(1000),
-      BigInt(Number(values['timelockPeriod']) * Number(values['timelockUnit'])),
-      BigInt(Number(values['proposalDelay']) * Number(values['proposalDelayUnit']))
-      ],
+      BigInt(blockNumber as bigint + calculatedDistanceInBlocks),
+      BigInt(Math.floor(Number(values['timelockPeriod']) * Number(values['timelockUnit']) / 12)),
+      BigInt(Math.floor(Number(values['proposalDelay']) * Number(values['proposalDelayUnit']) / 12)),
+      ] : [
+      values['shortDescripton'],
+      targets,
+      calldataValues,
+      BigInt(values['urgencyLevel']),
+      BigInt(blockNumber as bigint + calculatedDistanceInBlocks),
+      BigInt(Math.floor(Number(values['timelockPeriod']) * Number(values['timelockUnit']) / 12)),
+      BigInt(Math.floor(Number(values['proposalDelay']) * Number(values['proposalDelayUnit']) / 12)),
+
+      ];
+
+  writeContractAsync({
+      abi: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
+      address: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ADDRESS : STANDARD_GOVERNOR_CONTRACT_ADDRESS,
+      type:'eip1559',
+      functionName:values['isCustom'] === 'custom' ? 'createCustomProposal' : 'createStandardProposal',
+      args:argumentsForProposals,
     },{
      onError: (error) => {
         console.log(error);
@@ -287,7 +302,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     args: [item.destinationAddress, BigInt(Number(item.tokenAmount) * 1e18)],
   }),
   target_address: item.target,
-  value: Number(item.value),
+  value: Number(item.tokenAmount),
   addressParameter: item.destinationAddress,
   amountParameter: Number(item.tokenAmount),
   isFunctionRewarding: false,
@@ -332,7 +347,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
 
 }
 
-const {data:blockNumber}=useBlockNumber();
+
 
 const {
   data: delegateData,
@@ -382,13 +397,13 @@ return (
   <DialogTrigger onClick={()=>{
 toggleSidebar();
   }}
-  className='w-full'>
+  className='w-full max-w-32 px-2'>
     {children}
   </DialogTrigger>
-  <DialogContent className='bg-zinc-800 border z-[99999999999999999999999999999999999999999999999999999999999999999999999999] border-(--hacker-green-4) drop-shadow-xs shadow-green-400/40'>
+  <DialogContent className='bg-zinc-800 border z-[99999999999999999999999999999999999999999999999999999999999999999999999999] border-(--hacker-green-4) drop-shadow-xs shadow-purple-600/40'>
     <DialogHeader>
       <DialogTitle className='text-white'>DAO Proposal</DialogTitle>
-      <DialogDescription onClick={()=>{console.log(token)}}>
+      <DialogDescription>
         Make a proposal to the DAO, and vote for it to be implemented in the future.
       </DialogDescription>
 

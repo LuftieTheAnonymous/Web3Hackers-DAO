@@ -1,6 +1,6 @@
 import { QueueEvents } from "bullmq";
 import { redisConnection } from "../set-up.js";
-import winston from "winston/lib/winston/config/index.js";
+
 
 const updateQueueEvents = new QueueEvents('smart-contracts-jobs', {connection:redisConnection});
 

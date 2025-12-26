@@ -9,8 +9,8 @@ import { useAccount, useWatchContractEvent } from 'wagmi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLottie } from 'lottie-react';
 import cryptoLottieAnimation from '@/public/gifs/Decentalized-Lottie.json';
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
-import { decodeEventLog } from 'viem';
+import { CUSTOM_GOVERNOR_ADDRESS, CUSTOM_GOVERNOR_ABI, STANDARD_GOVERNOR_CONTRACT_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS } from '@/contracts/governor/config';
+// import { decodeEventLog } from 'viem';
 import { toast } from 'sonner';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 
@@ -35,40 +35,33 @@ function ProposalList({ proposals }: Props) {
 
   const { View } = useLottie({ animationData: cryptoLottieAnimation, loop: true });
 
-  // useWatchContractEvent({
-  //   abi: governorContractAbi,
-  //   address: GOVERNOR_CONTRACT_ADDRESS,
-  //   eventName: 'ProposalVoted',
-  //   onLogs: (logs) => {
-  //     console.log('ProposalVoted logs:', logs);
-  //     logs.forEach((log) => {
-  //       try {
-  //         const decoded = decodeEventLog({
-  //           abi: governorContractAbi,
-  //           eventName: 'ProposalVoted',
-  //           data: log.data,
-  //           topics: log.topics,
-  //         });
+  useWatchContractEvent({
+    abi: STANDARD_GOVERNOR_CONTRACT_ABI,
+    address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
+    eventName: 'ProposalVoted',
+    onLogs: (logs) => {
+      console.log('ProposalVoted logs:', logs);
+      
+      toast.success("Proposal Vote Has been successfully passed");
+    },
+    onError(error) {
+      toast.error(`Error casting vote: ${error.message}`);
+    },
+  });
 
-  //         console.log('Decoded ProposalVoted log:', decoded);
-  //         if (
-  //           decoded &&
-  //           decoded.args &&
-  //           decoded.args.find((log) => (log as any).voter === address)
-  //         ) {
-  //           toast.success('Your vote has been cast successfully!', {
-  //             classNames: { toast: 'bg-zinc-800 text-white' },
-  //           });
-  //         }
-  //       } catch (e) {
-  //         console.error('Error decoding ProposalVoted log:', e);
-  //       }
-  //     });
-  //   },
-  //   onError(error) {
-  //     toast.error(`Error casting vote: ${error.message}`);
-  //   },
-  // });
+    useWatchContractEvent({
+    abi: CUSTOM_GOVERNOR_ABI,
+    address: CUSTOM_GOVERNOR_ADDRESS,
+    eventName: 'ProposalVoted',
+    onLogs: (logs) => {
+      console.log('ProposalVoted logs:', logs);
+      
+      toast.success("Proposal Vote Has been successfully passed");
+    },
+    onError(error) {
+      toast.error(`Error casting vote: ${error.message}`);
+    },
+  });
 
 
 

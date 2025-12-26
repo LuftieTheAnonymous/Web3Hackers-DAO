@@ -1,6 +1,6 @@
 'use client';
 
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
+import { CUSTOM_GOVERNOR_ABI, CUSTOM_GOVERNOR_ADDRESS, STANDARD_GOVERNOR_CONTRACT_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS } from '@/contracts/governor/config';
 import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
 
 import { CoinsIcon, FilePlus2Icon, LucideVote, SmartphoneChargingIcon } from 'lucide-react'
@@ -21,9 +21,14 @@ const tokenContractData =   {
     abi:tokenContractAbi
 } as const;
 
-const governorContractData= {
-    address: GOVERNOR_CONTRACT_ADDRESS,
-    abi:governorContractAbi
+const customGovernorContractData= {
+    address:  CUSTOM_GOVERNOR_ADDRESS,
+    abi: CUSTOM_GOVERNOR_ABI
+} as const;
+
+const standardGovernorContractData={
+  address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
+  abi: STANDARD_GOVERNOR_CONTRACT_ABI
 } as const;
 
     const {data}=useReadContracts({
@@ -36,13 +41,17 @@ const governorContractData= {
               {
                 ...tokenContractData,
                 functionName:'totalSupply',
-              }, 
-                {
-                    ...governorContractData,
-                    functionName:'getUserVotedCount',
-                    args:[walletAddress]
-                }
-             
+              },
+              {
+                ...standardGovernorContractData,
+                functionName:'getUserVotedCount',
+                args:[walletAddress],
+              },
+              {
+                ...customGovernorContractData,
+                       functionName:'getUserVotedCount',
+                args:[walletAddress],
+              }
         ]
     });
 
@@ -81,12 +90,8 @@ text-(--hacker-green-4)
 '
 />
 
-<span onClick={()=>{console.log(data)}} className='
-text-2xl
-lg:text-3xl
-font-bold
-'>
-{isNaN(Number(data?.[2].result)) ? 0 : Number(data?.[2].result)}
+<span className='text-2xl lg:text-3xl font-bold'> 
+{data && data[2] && data[3] && (Number(data[2]) + Number(data[3]))}
 </span>
 
 <span
@@ -113,10 +118,7 @@ text-(--hacker-green-4)
 '
 />
 
-<span className='
-text-lg md:text-2xl
-font-bold
-'>
+<span className='text-lg md:text-2xl font-bold'>
   {isNaN((Number(data?.[0].result) / Number(data?.[1].result) * 100)) ? 0 : (Number(data?.[0].result) / Number(data?.[1].result) * 100).toFixed(2)}%
 </span>
 
@@ -127,26 +129,13 @@ font-bold
 
     </div>
 
-    <div className="
-      bg-zinc-900 px-2
-    py-6
-    text-white rounded-md lg:max-w-1/3 max-w-44  sm:max-w-64 w-full
-    flex justify-between
-     items-center gap-2 flex-col
-    ">
-
+    <div className="bg-zinc-900 px-2 py-6 text-white rounded-md lg:max-w-1/3 max-w-44  sm:max-w-64 w-full flex justify-between items-center gap-2 flex-col">
 <FilePlus2Icon
-    
 size={24}
-className='
-text-(--hacker-green-4)
-'
+className='text-(--hacker-green-4)'
 />
 
-<span className='
-text-2xl lg:text-3xl
-font-bold
-'>
+<span className='text-2xl lg:text-3xl font-bold'>
     <p >{objectData && objectData.dao_proposals.length}</p>
 </span>
 

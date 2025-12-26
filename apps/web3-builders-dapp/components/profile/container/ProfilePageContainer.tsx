@@ -6,11 +6,9 @@ import MemberStats from '@/components/profile/MemberStats'
 import MemberTile from '@/components/profile/MemberTile'
 import { Button } from '@/components/ui/button'
 import useRealtimeDocument from '@/hooks/useRealtimeDocument'
-
-
 import { notFound } from 'next/navigation';
 import MemberProposalsCreated from '../MemberProposalsCreated';
-import { useAccount } from 'wagmi';
+
 
 type Props = {
     profileData:any,

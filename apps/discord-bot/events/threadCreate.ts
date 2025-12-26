@@ -48,10 +48,9 @@ selectCollector.on('collect', async (i:SelectMenuInteraction)=>{
    try{
     if(i.customId === 'solved-user'){
 
-        console.log(i.values);
+        console.log(i.values, 'Member selected');
 
         i.values.forEach(async (value) => {
-            
  await fetch(`${process.env.BACKEND_ENDPOINT}/activity/update/${value}`,{
             method:'POST',
          headers: {

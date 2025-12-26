@@ -71,13 +71,13 @@ function Page({}: Props) {
 <HackerEffect />
 <div className="flex flex-col justify-center items-center gap-5 w-full">
 <BlurFade>
-<div className='text-white text-2xl sm:text-3xl text-center lg:text-5xl font-bold flex items-center w-full flex-wrap gap-2'>Welcome to <SparklesText sparklesCount={10} colors={{first:'#05F29B', second: '#03A678'}} className='text-5xl font-bold'>
-<AuroraText colors={['#00ff93', '#007c47']}>Web3</AuroraText>Hackers 
+<div className='text-white text-2xl sm:text-3xl text-center lg:text-5xl font-bold flex items-center w-full flex-wrap gap-2'>Welcome to <SparklesText sparklesCount={10} colors={{first:'#7b68ee', second: '#6a5acd'}} className='text-5xl font-bold'>
+<AuroraText colors={['#7b68ee', '#6a5acd']}>Web3</AuroraText>Hackers 
 </SparklesText></div>
 </BlurFade>
 
 <BlurFade>
-  <div className="text-white text-2xl font-medium flex flex-wrap gap-2 text-center items-center">A community where Your <AuroraText className='font-bold ' colors={['#05F29B', '#03A678']}>Impact</AuroraText> is proportional to your <AuroraText className='font-bold ' colors={['#05F29B', '#03A678']}>Actions</AuroraText>.</div>
+  <div className="text-white text-2xl font-medium flex flex-wrap gap-2 text-center items-center">A community where Your <AuroraText className='font-bold ' colors={['#7b68ee', '#6a5acd']}>Impact</AuroraText> is proportional to your <AuroraText className='font-bold ' colors={['#7b68ee', '#6a5acd']}>Actions</AuroraText>.</div>
 </BlurFade>
         </div>
 
@@ -86,7 +86,7 @@ function Page({}: Props) {
 flex-col md:flex-row">
   
 <BlurFade delay={0.5}>
-  <BorderBeam colorFrom='#05F29B' colorTo='#03A678'/>
+  <BorderBeam colorFrom='#7289DA' colorTo='#4b0082'/>
 <Image alt='' className='max-w-sm w-full rounded-lg' src={'/Web3Hackers.png'} width={300} height={300}/>
 </BlurFade>
 <BlurFade delay={0.85}>
