@@ -4,11 +4,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --hacker-green-1: #03A678;
-  --hacker-green-2: #04BF58;
-  --hacker-green-3: #027353;
-  --hacker-green-4: #05F29B;
-  --hacker-green-5: #04BF7B;
+  --hacker-green-1: #7b68ee;
+  --hacker-green-2: #663399;
+  --hacker-green-3: #4b0082 ;
+  --hacker-green-4: #6a5acd;
+  --hacker-green-5: #69359c;
   --discord-colour: #7289DA;
 
   --bg-black:#0D0D0D;
@@ -123,7 +123,7 @@
   --accent: oklch(0.967 0.001 286.375);
   --accent-foreground: oklch(0.21 0.006 285.885);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #05F29B;
+  --border: #7289DA;
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -140,22 +140,24 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
 
-  --hacker-green-1: #03A678;
-  --hacker-green-2: #04BF58;
-  --hacker-green-3: #027353;
-  --hacker-green-4: #05F29B;
-  --hacker-green-5: #04BF7B;
+  --hacker-green-1: #7b68ee;
+  --hacker-green-2: #663399;
+  --hacker-green-3: #4b0082 ;
+  --hacker-green-4: #6a5acd;
+  --hacker-green-5: #69359c;
+  --discord-colour: #7289DA;
 
   --bg-black:#0D0D0D;
 
 }
 
 .dark {
-  --hacker-green-1: #03A678;
-  --hacker-green-2: #04BF58;
-  --hacker-green-3: #027353;
-  --hacker-green-4: #05F29B;
-  --hacker-green-5: #04BF7B;
+  --hacker-green-1: #7b68ee;
+  --hacker-green-2: #663399;
+  --hacker-green-3: #4b0082 ;
+  --hacker-green-4: #6a5acd;
+  --hacker-green-5: #69359c;
+  --discord-colour: #7289DA;
 
   --bg-black:#0D0D0D;
   --background: oklch(0.141 0.005 285.823);
@@ -234,7 +236,7 @@ body:after{
   left: 15%;
   width: 100%;
   height: 16rem;
-  background: radial-gradient(circle, rgba(5, 240, 154, 0.861) 21%, rgba(255, 255, 255, 0.695) 52%, rgba(4, 190, 88, 0.861) 82%);
+  background: radial-gradient(circle, rgba(116, 0, 170, 0.993) 21%, rgba(181, 91, 255, 0.695) 52%, rgba(168, 38, 255, 0.861) 82%);
   border-radius: 50%;
   z-index: -1;
   filter: blur(240px);

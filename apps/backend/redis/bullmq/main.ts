@@ -3,28 +3,33 @@ import { redisConnection } from '../set-up.js';
 import dotenv from "dotenv";
 dotenv.config();
 
-
-
-
 export const smartContractsInteracionQueue = new Queue("smart-contracts-jobs", {
     connection:redisConnection
 });
 
 await smartContractsInteracionQueue.setGlobalConcurrency(5);
 
+
 await smartContractsInteracionQueue.upsertJobScheduler(
   'monthly-distribution-scheduler',
   {
     every: 1000 * 60 * 60 * 24, 
-    startDate: Date.now(), 
+    startDate: Date.now(),     
     utc: true,
+  },{
+    name:'monthly-distribution',
   }
 );
 
-await smartContractsInteracionQueue.add("activate-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, removeOnComplete: true, });
-await smartContractsInteracionQueue.add("finish-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, 'delay':1000, removeOnComplete: true,  });
-await smartContractsInteracionQueue.add("queue-proposals", {},{ repeat: {'every': 1000 * 60 * 2  }, 'delay': 2000 , removeOnComplete: true, });
-await smartContractsInteracionQueue.add("execute-proposals", {},{ repeat: {'every': 1000 * 60 * 2  }, 'delay': 3000,removeOnComplete: true,  });
+await smartContractsInteracionQueue.add(
+  'monthly-distribution',
+  {},
+  { repeat: { every: 1000 * 60 * 60 * 24 }, removeOnComplete: true, removeOnFail: true }
+);
+await smartContractsInteracionQueue.add("activate-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, removeOnComplete: true, removeOnFail:true });
+await smartContractsInteracionQueue.add("finish-proposals", {},{ repeat: {'every': 1000 * 60 * 2 }, 'delay':1000, removeOnComplete: true, removeOnFail:true  });
+await smartContractsInteracionQueue.add("queue-proposals", {},{ repeat: {'every': 1000 * 60 * 2  }, 'delay': 2000 , removeOnComplete: true, removeOnFail:true});
+await smartContractsInteracionQueue.add("execute-proposals", {},{ repeat: {'every': 1000 * 60 * 2  }, 'delay': 3000,removeOnComplete: true, removeOnFail:true });
 
 
 

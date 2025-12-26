@@ -74,6 +74,7 @@
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.3",
     "redis": "^4.7.0",
+    "shadcn": "^3.6.2",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
     "three": "^0.176.0",

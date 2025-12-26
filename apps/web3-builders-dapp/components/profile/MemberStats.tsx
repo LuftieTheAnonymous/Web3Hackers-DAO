@@ -1,7 +1,7 @@
 import React from 'react'
 import VotingsParticipatedChart from './container/charts/VotingsParticipatedChart'
 import { useReadContract } from 'wagmi'
-import { GOVERNOR_CONTRACT_ADDRESS, governorContractAbi } from '@/contracts/governor/config';
+import { CUSTOM_GOVERNOR_ADDRESS, CUSTOM_GOVERNOR_ABI, STANDARD_GOVERNOR_CONTRACT_ABI, STANDARD_GOVERNOR_CONTRACT_ADDRESS } from '@/contracts/governor/config';
 import VotesTypesCastedChart from './container/charts/VotesTypesCastedChart';
 import { Button } from '../ui/button';
 import  format  from 'date-fns/format';
@@ -17,24 +17,38 @@ type Props = {walletAddress:`0x${string}`, monthActivities:any[]
 function MemberStats({walletAddress, monthActivities}: Props) {
 
 const [isCustom, setIsCustom] = React.useState(false);
-  const {data:userVotedProposalsCount} = useReadContract({
-    abi: governorContractAbi,
-    address: GOVERNOR_CONTRACT_ADDRESS,
+  const {data:userCustomVotedProposalsCount} = useReadContract({
+    abi: CUSTOM_GOVERNOR_ABI,
+    address: CUSTOM_GOVERNOR_ADDRESS,
     functionName: 'getUserVotedCount',
     args:[walletAddress]
   });
 
-  const {data:userVotes} = useReadContract({
-    abi: governorContractAbi,
-    address: GOVERNOR_CONTRACT_ADDRESS,
+  const {data:userCustomVotes} = useReadContract({
+    abi: CUSTOM_GOVERNOR_ABI,
+    address: CUSTOM_GOVERNOR_ADDRESS,
     functionName: 'getUserVotes',
     args:[walletAddress]
   });
 
 
+    const {data:userStandardVotedProposalsCount} = useReadContract({
+    abi: STANDARD_GOVERNOR_CONTRACT_ABI,
+    address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
+    functionName: 'getUserVotedCount',
+    args:[walletAddress]
+  });
+
+  const {data:userStandardVotes} = useReadContract({
+    abi: STANDARD_GOVERNOR_CONTRACT_ABI,
+    address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
+    functionName: 'getUserVotes',
+    args:[walletAddress]
+  });
+
 
   return (
-    <div className='max-w-[97.5rem] p-3 w-full mx-auto'>
+    <div className='max-w-390 p-3 w-full mx-auto'>
 
 <div  className="flex flex-col gap-1">
 <p className='text-white text-2xl font-semibold'>Member's Statistics </p>
@@ -48,16 +62,16 @@ gap-3 py-4`}>
   <Button onClick={()=>{setIsCustom(false)}} className={`cursor-pointer ${!isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Standard</Button>
 </div>
 
-{userVotes && userVotedProposalsCount  && (userVotedProposalsCount as any) && Number((userVotedProposalsCount as any)) !== 0 &&   Number((userVotedProposalsCount as BigInt)) !== 0 &&
+{userStandardVotes && userStandardVotedProposalsCount  && (userStandardVotedProposalsCount as any) && Number((userStandardVotedProposalsCount as any)) !== 0 &&   Number((userStandardVotedProposalsCount as BigInt)) !== 0 &&
 <div className=
 {`flex  gap-6 w-full max-w-6xl mx-auto
  flex-col sm:flex-row
 items-center  justify-center py-2`}>
 
- <VotingsParticipatedChart proposals={(userVotes as any[])}/>
+ <VotingsParticipatedChart proposals={(userStandardVotes as any[])}/>
 
 
- <VotesTypesCastedChart isCustom={isCustom} proposals={(userVotes as any[])}  />
+ <VotesTypesCastedChart isCustom={isCustom} proposals={(userStandardVotes as any[])}  />
 
 </div>
 }
