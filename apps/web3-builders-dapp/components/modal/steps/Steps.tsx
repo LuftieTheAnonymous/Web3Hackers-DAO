@@ -576,20 +576,20 @@ const goForward=useCallback(() => {
           name="proposalDelay"
           render={({ field }) => {
 
- const endTime = watch('proposalEndTime')?.getTime?.();
-    const delayUnit = watch('proposalDelayUnit') || 1;
+const delayUnit = watch('proposalDelayUnit') || 1; // seconds per unit
+const ONE_DAY_SEC = 24 * 60 * 60;
 
-    let maxDelayInMiliSecondsSeconds = 86400000;
-    let maxDelay=0;
-    const now = Date.now();
-    const diffInSeconds = (endTime - now) / 1000;
+let maxDelay = 0;
+const now = Date.now();
+const endTime = watch('proposalEndTime')?.getTime?.();
 
-
-    if (endTime && !isNaN(endTime) && diffInSeconds <= maxDelayInMiliSecondsSeconds / 1000) {
-      maxDelay = Math.floor((diffInSeconds) / delayUnit); 
-    }else{
-      maxDelay = Math.floor(((maxDelayInMiliSecondsSeconds)/1000) / delayUnit);
-    }
+if (endTime && !isNaN(endTime)) {
+  const diffSec = Math.max(0, (endTime - now) / 1000);
+  const effectiveSec = Math.min(diffSec, ONE_DAY_SEC);
+  maxDelay = Math.floor(effectiveSec / delayUnit);
+} else {
+  maxDelay = Math.floor(ONE_DAY_SEC / delayUnit);
+}
    return     (
             <FormItem>
               <FormLabel className='text-white text-base font-light'>
@@ -645,25 +645,24 @@ const goForward=useCallback(() => {
                   {...field}
                   value={String(field.value)}
                   onValueChange={(value) => {
-  const unit = Number(value);
-  setValue('proposalDelayUnit', unit);
-  const endTime = watch('proposalEndTime')?.getTime?.();
-    let maxDelayInMiliSecondsSeconds = 86400000;
-    let maxDelay=0;
-    const now = Date.now();
-    const diffInSeconds = (endTime - now) / 1000;
-  
-  if (endTime && !isNaN(endTime) && diffInSeconds <= maxDelayInMiliSecondsSeconds / 1000) {
-    const now = Date.now();
-    const diffInSeconds = (endTime - now) / 1000;
-     maxDelay = Math.floor((diffInSeconds) / unit);
+setValue('proposalDelayUnit', Number(value) || 1);
 
-      setValue('proposalDelay', Number(maxDelay));
-  }else{
-  maxDelay = Math.floor((maxDelayInMiliSecondsSeconds) / unit);
+                    
+const endTime = watch('proposalEndTime')?.getTime?.();
+  const delayUnit = watch('proposalDelayUnit') || 1; // seconds per unit (default 1s)
 
-      setValue('proposalDelay', Number(maxDelay));
+  let maxDelay = 0;
+
+  if (endTime && !isNaN(endTime)) {
+    const now = Date.now();
+    const diffInSeconds = Math.max(0, (endTime - now) / 1000); // never negative
+
+    const oneDayInSeconds = 24 * 60 * 60;
+    const maxDelaySeconds = Math.min(diffInSeconds, oneDayInSeconds);
+
+    maxDelay = Math.floor(maxDelaySeconds / delayUnit);
   }
+
 }}
                 >
                   <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">
@@ -690,16 +689,20 @@ const goForward=useCallback(() => {
           name="timelockPeriod"
           render={({ field }) => {
 
-             const endTime = watch('proposalEndTime')?.getTime();
-    const delayUnit = watch('timelockUnit') || 1;
+const endTime = watch('proposalEndTime')?.getTime?.();
+const delayUnit = Number(watch('timelockUnit')) || 1; // seconds per unit
+const ONE_DAY_SEC = 24 * 60 * 60;
 
-    let maxTimelock = 0;
+let maxTimelock = 0;
 
-    if (endTime && !isNaN(endTime)) {
-      const now = Date.now();
-      const diffInSeconds = (endTime - now) / 1000;
-      maxTimelock = Math.floor((diffInSeconds * 0.2) / Number(delayUnit)); // 20% cap, converted to selected unit
-    }
+if (endTime && !isNaN(endTime)) {
+  const now = Date.now();
+  const diffSec = Math.max(0, (endTime - now) / 1000);
+  const effectiveSec = Math.min(diffSec, ONE_DAY_SEC);
+  maxTimelock = Math.floor(effectiveSec / delayUnit);
+} else {
+  maxTimelock = Math.floor(ONE_DAY_SEC / delayUnit);
+}
 
 
             return (
@@ -741,20 +744,30 @@ const goForward=useCallback(() => {
                   {...field}
                   value={String(field.value)}
                  onValueChange={(value) => {
-  const unit = Number(value);
-  setValue('timelockUnit', unit);
+const unit = Number(value) || 1;
+setValue('timelockUnit', unit);
 
-  const endTime = watch('proposalEndTime')?.getTime();
-  if (endTime && !isNaN(endTime)) {
-    const now = Date.now();
-    const diffInSeconds = (endTime - now) / 1000;
-    const maxTimelock = Math.floor((diffInSeconds * 0.2) / unit);
-    const currentValue = watch('timelockPeriod');
+const endTime = watch('proposalEndTime')?.getTime?.();
+const ONE_DAY_SEC = 24 * 60 * 60;
 
-    if (currentValue > maxTimelock) {
-      setValue('timelockPeriod', maxTimelock);
-    }
+if (endTime && !isNaN(endTime)) {
+  const now = Date.now();
+  const diffSec = Math.max(0, (endTime - now) / 1000);
+  const effectiveSec = Math.min(diffSec, ONE_DAY_SEC);
+  const maxTimelock = Math.floor(effectiveSec / unit);
+
+  const currentValue = Number(watch('timelockPeriod')) || 0;
+  if (currentValue > maxTimelock) {
+    setValue('timelockPeriod', maxTimelock);
   }
+} else {
+  // if no endTime, ensure timelock doesn't exceed 1 day
+  const maxTimelock = Math.floor(ONE_DAY_SEC / unit);
+  const currentValue = Number(watch('timelockPeriod')) || 0;
+  if (currentValue > maxTimelock) {
+    setValue('timelockPeriod', maxTimelock);
+  }
+}
 }}
                 >
                   <SelectTrigger className="w-full max-w-32 text-white border border-(--hacker-green-4)">

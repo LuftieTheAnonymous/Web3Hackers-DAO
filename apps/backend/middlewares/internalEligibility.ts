@@ -43,6 +43,10 @@ next();
 export async function Membership_ProposalCancel_Middleware(req:Request, res:Response, next:NextFunction) {
     const headers = req.headers['authorization'];
     const proposalId = req.params.proposalId;
+    const isCustomGovernor = req.query.customGovernor;
+
+    const daoContract = isCustomGovernor === 'true' ? customGovernorContract : standardGovernorContract;
+
     if(!headers) {
         res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
         return;
