@@ -8,6 +8,7 @@ import { FormProvider, useForm
 import { StepContainer } from './steps/Steps';
 import {readContract} from "@wagmi/core";
 import {config} from '@/lib/config';
+import {zeroAddress} from "viem";
 import {AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 type Props = {children: React.ReactNode}
@@ -158,8 +159,8 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     toast.error('You must be logged in to create a proposal');
     return;
   }
-
-  const proposalEligility = await fetch(`${process.env.BACKEND_ENDPOINT}/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
+console.log(process.env.NEXT_PUBLIC_BACKEND_ENDPOINT);
+  const proposalEligility = await fetch(`http://localhost:2137/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
     method:'POST',
     headers:{
       'x-backend-eligibility': process.env.NEXT_PUBLIC_FRONTEND_ACCESS_SECRET as string,
@@ -169,6 +170,8 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
 
   const res=await proposalEligility.json();
   console.log(res);
+
+  
   if(res.error && !res.data){
     toast.error(`${res.error.code}: ${res.error}`);
     return;
@@ -177,22 +180,25 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
   const targets= values['functionsCalldatas'].map((item) => item['target']);
   const calldataValues = values['functionsCalldatas'].map((item) => item['tokenAmount'] && BigInt(item['tokenAmount']));
 
+  console.log(targets, 'targets');
+  console.log(calldataValues, 'calldataValues');
+
   const calldataEndodedBytes = values['functionsCalldatas'].map((item) =>  encodeFunctionData({
     abi: item.target === TOKEN_CONTRACT_ADDRESS ? tokenContractAbi : TOKEN_MANAGER_ABI,
     functionName: item.calldataName.slice(0, item.calldataName.indexOf('(')),
     args: item.calldataName.includes('uint256') ? [item['destinationAddress'], BigInt(Number(item['tokenAmount']) * 1e18)] : [item['destinationAddress']],
     }));
 
+    const callBytesObjects= values['customVotesOptions'].map((item)=>{
+      if(!item.calldataIndicies || item.calldataIndicies.length === 0){
+      return [zeroAddress, '0x'];
+      }
 
-    const callBytesObjects= values['customVotesOptions']?.filter((option)=> option.calldataIndicies.length > 0)?.map((item)=>{
      return (item.calldataIndicies as number[]).map((functionIndex)=>{
-     return {
-       dataBytes: calldataEndodedBytes[functionIndex],
-       target: targets[functionIndex]
-     }
+     return [targets[functionIndex], calldataEndodedBytes[functionIndex]];
 
       })
-    })
+    });
 
     const currentBlockTimestamp = new Date(blockTimestamp).getTime();
     const endDate= new Date(values['proposalEndTime']).getTime();
@@ -204,7 +210,6 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     [
       values['shortDescripton'],
       targets,
-      calldataValues,
       calldataEndodedBytes,
       BigInt(values['urgencyLevel']),
       BigInt(blockNumber as bigint + calculatedDistanceInBlocks),
@@ -213,7 +218,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
       ] : [
       values['shortDescripton'],
       targets,
-      calldataValues,
+      calldataEndodedBytes,
       BigInt(values['urgencyLevel']),
       BigInt(blockNumber as bigint + calculatedDistanceInBlocks),
       BigInt(Math.floor(Number(values['timelockPeriod']) * Number(values['timelockUnit']) / 12)),
@@ -221,6 +226,10 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
       callBytesObjects
       ];
 
+
+      console.log(
+        argumentsForProposals
+      );
 
   writeContractAsync({
       abi: values['isCustom'] === 'custom' ? CUSTOM_GOVERNOR_ABI : STANDARD_GOVERNOR_CONTRACT_ABI,
@@ -240,7 +249,6 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
       onSettled: async (data, error, variables, context)=> {
         console.log(data);
         console.log(error);
-        console.log(variables);
         console.log(context);
 
          const receipt = await client!.waitForTransactionReceipt({hash: data as `0x${string}`});
@@ -285,7 +293,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
           }
 
 
-   await fetch(`${process.env.BACKEND_ENDPOINT}/activity/update/${currentUser.discord_member_id}`, {
+   await fetch(`http://localhost:2137/activity/update/${currentUser.discord_member_id}`, {
     method:'POST',
     headers:{
       'x-backend-eligibility': process.env.NEXT_PUBLIC_BACKEND_ACCESS_SECRET as string,
@@ -300,17 +308,10 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
 
           const calldataRows = values.functionsCalldatas.map((item) => ({
   proposal_id: id,
-  method_signature: encodeFunctionData({
-    abi: tokenContractAbi,
-    functionName: item.calldataName.slice(0, item.calldataName.indexOf('(')),
-    args: [item.destinationAddress, BigInt(Number(item.tokenAmount) * 1e18)],
-  }),
   target_address: item.target,
   value: Number(item.tokenAmount),
   addressParameter: item.destinationAddress,
   amountParameter: Number(item.tokenAmount),
-  isFunctionRewarding: false,
-  isFunctionPunishing: false,
   functionDisplayName: item.calldataName,
 }));
 
@@ -326,10 +327,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
    if (values.isCustom === 'custom' && values.customVotesOptions && values.customVotesOptions?.length > 0) {
   const voteOptionRows = values.customVotesOptions.map((item, index) => ({
     proposal_id: id,
-    calldata_indicies: item.calldataIndicies && item.calldataIndicies.map((index) => Number(index)),
     voteOptionIndex: index,
-    isExecuting: item.calldataIndicies && item.calldataIndicies?.length > 0,
-    isDefeating: item.calldataIndicies && item.calldataIndicies?.length === 0,
     voting_option_text: item.title,
   }));
 
@@ -354,7 +352,7 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
 
 
 const {
-  data: delegateData,
+  data: delegateData
 }=useReadContract({
   abi: tokenContractAbi,
   address: TOKEN_CONTRACT_ADDRESS,
