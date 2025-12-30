@@ -49,7 +49,7 @@ export default function RootLayout({
   <div className="flex flex-col w-full h-full gap-2">
 <Navbar/>
 {children}
-<Toaster theme={'system'}  closeButton />
+<Toaster theme={'system'} closeButton />
   </div>
 </ProvidersWrapper>
 </SidebarProvider>

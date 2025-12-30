@@ -100,7 +100,11 @@ const proposalCreationLimiter= rateLimit({
       const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress');
       const redisStoredIsAdmin = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'isAdmin');
 
-      if(!redisStoredWalletAddr && !redisStoredIsAdmin){
+      console.log(redisStoredWalletAddr, 'redisStoredWalletAddr');
+      console.log(redisStoredIsAdmin, 'redisStoredIsAdmin');
+
+
+      if(!redisStoredWalletAddr || !redisStoredIsAdmin){
         const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(discordId)).single();
 
         if(!memberData || !memberData.userWalletAddress){
@@ -124,7 +128,7 @@ const proposalCreationLimiter= rateLimit({
                return 100; // Admins can create 100 proposals per week
         }
         if(percentagePower >= 0.01){
-            return 10 // Non-members can create up to 5 proposals
+            return 20 // Non-members can create up to 20 proposals
         }
 
         if(percentagePower < 0.01 && percentagePower >= 0.005){
@@ -154,7 +158,7 @@ const proposalCreationLimiter= rateLimit({
         
           if(percentagePower >= 0.01){
             
-            return 10 // Non-members can create up to 5 proposals
+            return 20 // Non-members can create up to 20 proposals
         }
 
                 if(redisStoredIsAdmin === 'true'  && percentagePower >= 0.005){

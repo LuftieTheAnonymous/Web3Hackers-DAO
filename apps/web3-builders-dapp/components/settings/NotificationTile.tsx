@@ -100,7 +100,7 @@ await upsertWebPushSubscription(address as `0x${string}`, {...defaultNotificatio
                        <WebPushNotificationComponent/>
     
               </div>
-       <Button onClick={handleUpdateNotificationSettings} className='hover:bg-zinc-700 cursor-pointer hover:text-white bg-(--hacker-green-4) text-zinc-800 hover:scale-105 self-end'>Approve</Button>
+       <Button onClick={handleUpdateNotificationSettings} className='hover:bg-(--hacker-green-5) cursor-pointer hover:text-white bg-(--hacker-green-4) text-zinc-800 hover:scale-105 self-end'>Approve</Button>
     
             </div>
   )

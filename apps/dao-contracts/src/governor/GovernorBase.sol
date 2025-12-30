@@ -360,6 +360,10 @@ function cancelProposal(bytes32 proposalId) external onlyActionsManagerOrProposa
  _cancelProposal(proposalId);
 }
 
+function getUserVotes(address user) external view returns (Vote[] memory) {
+    return userVotes[user];
+}
+
 // Queues succeded proposal to be passed
 function queueProposal(bytes32 proposalId) external isElligibleToVoteOrUpdateState  {
 // If the state is not equal to succeeded then revert with an error

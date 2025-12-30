@@ -20,6 +20,8 @@ const { data, error } = await supabase
   .single();
 
   if(error && !data){
+    console.log('Error fetching profile data:', error);
+    console.log('Profile:', data);
 notFound();
   }
 

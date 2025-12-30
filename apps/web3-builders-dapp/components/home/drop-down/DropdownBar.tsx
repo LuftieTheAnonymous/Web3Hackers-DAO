@@ -43,7 +43,7 @@ const setFilterParam = useCallback((param: { filterProperty: string, filterValue
   </DropdownMenuTrigger>
   <DropdownMenuContent
   className='
-  bg-zinc-800 text-white border border-green-400
+  bg-zinc-800 text-white border border-(--hacker-green-4)
   '
   >
   <DropdownMenuItem onClick={()=>setFilterParam({filterProperty:'state', filterValue:0})} className='cursor-pointer'>
@@ -90,7 +90,7 @@ const setFilterParam = useCallback((param: { filterProperty: string, filterValue
     Sorting <ArrowDownWideNarrowIcon/>
   </DropdownMenuTrigger>
   <DropdownMenuContent
-className=' bg-zinc-800 text-white border border-green-400'
+className=' bg-zinc-800 text-white border border-(--hacker-green-4)'
   >
 
     <DropdownMenuItem onClick={()=>setSortingParam({sortingProperty:'proposal_title', sortingOrder:'ascending'})} className='cursor-pointer'>
