@@ -5,14 +5,14 @@ import useGetLoggedInUser from '@/hooks/useGetLoggedInUser';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useAccount, useWriteContract } from 'wagmi';
-import { TOKEN_CONTRACT_ADDRESS, tokenContractAbi } from '@/contracts/token/config';
+import { TOKEN_MANAGER_ABI, TOKEN_MANAGER_CONTRACT_ADDRESS } from '@/contracts/token-manager/config';
 type Props = {}
 
 function DeleteAccount({}: Props) {
 const router= useRouter();
 const {address}=useAccount();
 const {currentUser}=useGetLoggedInUser();
-const {writeContract, status}=useWriteContract({
+const {writeContract, error, isPending, isError}=useWriteContract({
   mutation:{
     onError(error){console.log(error);toast.error('Transaction Failed ! Try again later !');},
     onSuccess(data){console.log(data);toast.success('Transaction successful !');},
@@ -26,7 +26,7 @@ try{
         toast.success('You are not logged in or no such user in DB !');
         return;
     }
-      const fetchDelete=await fetch(`${process.env.BACKEND_ENDPOINT}/gov_token/influence/remove/${currentUser.discord_member_id}`, {
+      const fetchDelete = await fetch(`${process.env.BACKEND_ENDPOINT}/gov_token/influence/remove/${currentUser.discord_member_id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -66,10 +66,11 @@ try{
 
     const leaveDAO=()=>{
       writeContract({
-        abi:tokenContractAbi,
-        address: TOKEN_CONTRACT_ADDRESS,
+        abi:TOKEN_MANAGER_ABI,
+        address: TOKEN_MANAGER_CONTRACT_ADDRESS,
         functionName: 'leaveDAO',
         args: [],
+        gas:BigInt(16_700_000)
       });
     };
 

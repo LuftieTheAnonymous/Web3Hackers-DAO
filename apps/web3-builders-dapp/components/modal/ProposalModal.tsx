@@ -89,7 +89,7 @@ const {toggleSidebar}=useSidebar();
 const {data:blockNumber, dataUpdatedAt:blockTimestamp }=useBlockNumber();
 
 
-const {data:receipt, isError, error, isLoading, isSuccess, isPending, isPaused:waitForTransactionError, isLoadingError, errorUpdatedAt,}=useWaitForTransactionReceipt({
+const {data:receipt, isError:transactionError, error, isLoading, isSuccess, isPending, isPaused:waitForTransactionError, isLoadingError, errorUpdatedAt,}=useWaitForTransactionReceipt({
   hash:data as `0x${string}`,
   'onReplaced': async (replaceData) => {
     console.log(replaceData, 'replaced transaction data');
@@ -159,8 +159,8 @@ async function onSubmit(values: z.infer<typeof proposalObject>) {
     toast.error('You must be logged in to create a proposal');
     return;
   }
-console.log(process.env.NEXT_PUBLIC_BACKEND_ENDPOINT);
-  const proposalEligility = await fetch(`http://localhost:2137/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
+  
+  const proposalEligility = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}/governance/create-proposal-eligibility/${currentUser.discord_member_id}`, {
     method:'POST',
     headers:{
       'x-backend-eligibility': process.env.NEXT_PUBLIC_FRONTEND_ACCESS_SECRET as string,
@@ -178,26 +178,26 @@ console.log(process.env.NEXT_PUBLIC_BACKEND_ENDPOINT);
   }
 
   const targets= values['functionsCalldatas'].map((item) => item['target']);
-  const calldataValues = values['functionsCalldatas'].map((item) => item['tokenAmount'] && BigInt(item['tokenAmount']));
 
-  console.log(targets, 'targets');
-  console.log(calldataValues, 'calldataValues');
 
-  const calldataEndodedBytes = values['functionsCalldatas'].map((item) =>  encodeFunctionData({
+  const calldataEndodedBytes =  values['functionsCalldatas'].length > 0 ?
+  values['functionsCalldatas'].map((item) =>  encodeFunctionData({
     abi: item.target === TOKEN_CONTRACT_ADDRESS ? tokenContractAbi : TOKEN_MANAGER_ABI,
     functionName: item.calldataName.slice(0, item.calldataName.indexOf('(')),
     args: item.calldataName.includes('uint256') ? [item['destinationAddress'], BigInt(Number(item['tokenAmount']) * 1e18)] : [item['destinationAddress']],
-    }));
+    })) : [];
 
-    const callBytesObjects= values['customVotesOptions'].map((item)=>{
+    let callBytesForOptions: [ `0x${string}`, `0x${string}`][]=[];
+    const callBytesObjects= values['customVotesOptions'] && values['customVotesOptions'].map((item)=>{
       if(!item.calldataIndicies || item.calldataIndicies.length === 0){
-      return [zeroAddress, '0x'];
+      callBytesForOptions.push([zeroAddress, '0x']);
       }
 
-     return (item.calldataIndicies as number[]).map((functionIndex)=>{
-     return [targets[functionIndex], calldataEndodedBytes[functionIndex]];
+     (item.calldataIndicies as number[]).map((functionIndex)=>{
+      callBytesForOptions.push([targets[functionIndex] as `0x${string}`, calldataEndodedBytes[functionIndex]]);
+      });
 
-      })
+      return callBytesForOptions;
     });
 
     const currentBlockTimestamp = new Date(blockTimestamp).getTime();
@@ -237,6 +237,7 @@ console.log(process.env.NEXT_PUBLIC_BACKEND_ENDPOINT);
       type:'eip1559',
       functionName:values['isCustom'] === 'custom' ? 'createCustomProposal' : 'createStandardProposal',
       args:argumentsForProposals,
+      'gas': 16777216n,
     },{
      onError: (error) => {
         console.log(error);
@@ -293,7 +294,7 @@ console.log(process.env.NEXT_PUBLIC_BACKEND_ENDPOINT);
           }
 
 
-   await fetch(`http://localhost:2137/activity/update/${currentUser.discord_member_id}`, {
+   await fetch(`${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}/activity/update/${currentUser.discord_member_id}`, {
     method:'POST',
     headers:{
       'x-backend-eligibility': process.env.NEXT_PUBLIC_BACKEND_ACCESS_SECRET as string,
@@ -430,10 +431,6 @@ onError: (error) => {
    && Number(delegateData) === Number(0) && 'hidden'} hover:text-zinc-800 hover:scale-95 transition-all cursor-pointer`}>
   Delegate Tokens</Button>
 
-
-
-
-
     </DialogHeader>
 
     <FormProvider {...methods}>
@@ -446,9 +443,9 @@ onError: (error) => {
     {methods.formState.isSubmitted ? 
     <div className='flex flex-col gap-2 w-full'>
 
-{isLoading ? <div className='flex flex-col gap-2 items-center w-full'>
+{isLoading || isPending && (!transactionError && !writeContractIsError) ? <div className='flex flex-col gap-2 items-center w-full'>
 
-<AiOutlineLoading3Quarters className=' animate-spin text-blue-500 text-6xl'/>
+<AiOutlineLoading3Quarters className=' animate-spin text-hacker-green-3 text-6xl'/>
 
 <p className='text-white'>Transaction is pending...</p>
 
@@ -465,10 +462,10 @@ onError: (error) => {
 }}>Go back to Home</Button>
 </div>}
 
-{error && <>
-  <p className='text-red-500'>{error.name}</p>
-  <p>{error.message}</p>
-  <Button onClick={() => console.log(error.cause)} className='hover:bg-red-500 cursor-pointer transition-all duration-500 mt-6 px-6 hover:text-zinc-800 '>
+{(transactionError || writeContractIsError) && <>
+  <p className='text-red-500'>{error?.name ?? writeContractError?.name}</p>
+  <p className='max-w-md w-full max-h-40 h-full overflow-y-auto text-red-500'>{error?.message ?? writeContractError?.message}</p>
+  <Button className='hover:bg-red-500 cursor-pointer transition-all duration-500 mt-6 px-6 hover:text-zinc-800 '>
     See the Cause
   </Button>
 </>}
