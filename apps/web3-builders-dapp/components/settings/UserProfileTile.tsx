@@ -13,7 +13,6 @@ import Image from 'next/image';
 import DeleteAccount from './DeleteAccount';
 import { TokenState, useStore } from '@/lib/zustandConfig';
 import { createSupabaseClient } from '@/lib/db/supabaseConfigClient';
-import { description } from '../profile/container/charts/VotingsParticipatedChart';
 
 
 type Props = {intialDocument:any}
@@ -119,7 +118,7 @@ try{
 
 
 <div className='self-end'>
-  <Button onClick={handleSave}  className='bg-(--hacker-green-4) px-6 text-zinc-800 cursor-pointer hover:bg-(--hacker-green-5) hover:text-white hover:scale-90'>
+  <Button onClick={handleSave}  className='bg-(--hacker-green-4) px-6 text-zinc-800 cursor-pointer hover:bg-(--hacker-green-5) hover:text-white hover:scale-105'>
     Save
   </Button>
 </div>

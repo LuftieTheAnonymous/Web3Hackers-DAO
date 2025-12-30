@@ -19,8 +19,6 @@ type Props = {
 function ProfilePageContainer({profileData,  walletAddress
 }: Props) {
 
-
-
     const {objectData}=useRealtimeDocument({initialObj:profileData,tableName:'dao_members'});
 
     if(!profileData){
@@ -52,8 +50,7 @@ function ProfilePageContainer({profileData,  walletAddress
    </div>
         {isProposalsOpen && objectData.dao_proposals.length > 0 && <MemberProposalsCreated proposals={objectData.dao_proposals as any[]} /> }
 
-        {!isProposalsOpen && profileData.dao_month_activity.length > 0 &&  <MemberStats
-    
+        {!isProposalsOpen &&  <MemberStats
           monthActivities={profileData.dao_month_activity as any[]}
           walletAddress={walletAddress as `0x${string}`}/>}
           </div>

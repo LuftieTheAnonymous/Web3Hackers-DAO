@@ -91,7 +91,7 @@ text-(--hacker-green-4)
 />
 
 <span className='text-2xl lg:text-3xl font-bold'> 
-{data && data[2] && data[3] && (Number(data[2]) + Number(data[3]))}
+{data && data[2] && data[3] && (Number(data[2].result) + Number(data[3].result))}
 </span>
 
 <span

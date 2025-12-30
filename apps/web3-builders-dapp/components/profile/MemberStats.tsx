@@ -6,9 +6,7 @@ import VotesTypesCastedChart from './container/charts/VotesTypesCastedChart';
 import { Button } from '../ui/button';
 import  format  from 'date-fns/format';
 import { FaCoins } from 'react-icons/fa';
-import Lottie from 'lottie-react';
-
-import notFound from '@/public/gifs/Not-found-Lottie.json';
+import { PiMagnifyingGlass } from 'react-icons/pi';
 
 type Props = {walletAddress:`0x${string}`, monthActivities:any[]
 
@@ -22,14 +20,14 @@ const [isCustom, setIsCustom] = React.useState(false);
     address: CUSTOM_GOVERNOR_ADDRESS,
     functionName: 'getUserVotedCount',
     args:[walletAddress]
-  });
+  }) as { data: bigint | undefined };
 
   const {data:userCustomVotes} = useReadContract({
     abi: CUSTOM_GOVERNOR_ABI,
     address: CUSTOM_GOVERNOR_ADDRESS,
     functionName: 'getUserVotes',
     args:[walletAddress]
-  });
+  }) as { data: any[] | undefined };
 
 
     const {data:userStandardVotedProposalsCount} = useReadContract({
@@ -37,14 +35,14 @@ const [isCustom, setIsCustom] = React.useState(false);
     address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
     functionName: 'getUserVotedCount',
     args:[walletAddress]
-  });
+  }) as { data: bigint | undefined };
 
   const {data:userStandardVotes} = useReadContract({
     abi: STANDARD_GOVERNOR_CONTRACT_ABI,
     address: STANDARD_GOVERNOR_CONTRACT_ADDRESS,
     functionName: 'getUserVotes',
     args:[walletAddress]
-  });
+  }) as { data: any[] | undefined };
 
 
   return (
@@ -62,13 +60,13 @@ gap-3 py-4`}>
   <Button onClick={()=>{setIsCustom(false)}} className={`cursor-pointer ${!isCustom ? `bg-(--hacker-green-3)` : `bg-zinc-800`}`}>Standard</Button>
 </div>
 
-{userStandardVotes && userStandardVotedProposalsCount  && (userStandardVotedProposalsCount as any) && Number((userStandardVotedProposalsCount as any)) !== 0 &&   Number((userStandardVotedProposalsCount as BigInt)) !== 0 &&
+{userStandardVotes && userCustomVotes && userStandardVotedProposalsCount && userCustomVotedProposalsCount &&
 <div className=
 {`flex  gap-6 w-full max-w-6xl mx-auto
  flex-col sm:flex-row
 items-center  justify-center py-2`}>
 
- <VotingsParticipatedChart proposals={(userStandardVotes as any[])}/>
+ <VotingsParticipatedChart proposals={[...userCustomVotes, ...userStandardVotes]}/>
 
 
  <VotesTypesCastedChart isCustom={isCustom} proposals={(userStandardVotes as any[])}  />
@@ -78,12 +76,13 @@ items-center  justify-center py-2`}>
 
 <div className="max-w-4xl mt-2 w-full flex-col mx-auto gap-2 flex">
 <p className='text-white text-2xl flex items-center gap-2 font-semibold'> <FaCoins className='text-(--hacker-green-4)'/> Monthly Token Distribution</p>
-<div className="h-80 w-full bg-zinc-800 rounded-lg flex flex-col gap-2 items-center border-2 border-(--hacker-green-4) p-2 max-w-3xl">
+<div className="h-80 w-full bg-zinc-800 rounded-lg flex flex-col justify-around items-center border-2 border-(--hacker-green-4) p-2 max-w-3xl">
   {monthActivities.length === 0 && <>
-  <p className='text-white text-lg font-semibold'>No monthly activities found</p>
+  <p className='text-white text-xl font-semibold'>No monthly activities found</p>
 
-  <Lottie loop animationData={notFound}/>
-  
+  <PiMagnifyingGlass className='text-(--hacker-green-4) text-6xl'/>
+
+<p className='text-white'>Be patient and withstand the pressure</p>
   </>}
   {monthActivities.length > 0 && monthActivities.map((activity, index)=>(<div key={index} className='flex justify-between items-center gap-2 bg-zinc-600 p-4 rounded-lg max-w-9/10 w-full'>
    <div className="flex flex-col gap-1">
