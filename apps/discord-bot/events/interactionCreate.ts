@@ -15,6 +15,14 @@ module.exports={
             console.log(interaction.user);
             console.log(walletAddress);
             const member = interaction.guild.members.cache.get(interaction.user.id);
+            
+         const daoMemberObject={
+            walletAddress,
+            discordId: Number(interaction.user.id),
+            nickname: interaction.user.globalName,
+            photoURL: interaction.user.displayAvatarURL(),
+            isAdmin:member.roles.cache.some((role:any) => role.name.includes('Co-Founder') || role.name.includes('CTO'))
+         };
         
           
             const userRegister=await fetch(`${process.env.BACKEND_ENDPOINT}/members/add-member`, {
@@ -23,13 +31,7 @@ module.exports={
                   'Content-Type': 'application/json',
                 'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string
                 },
-                body: JSON.stringify({ 
-                    walletAddress, 
-                    discordId: Number(interaction.user.id),
-                    nickname: interaction.user.globalName, 
-                    photoURL: interaction.user.displayAvatarURL(),
-                    isAdmin:member.roles.cache.some((role:any) => role.name.includes('Co-Founder') || role.name.includes('CTO'))
-                }),
+                body: JSON.stringify(daoMemberObject),
             });
 
             const response = await userRegister.json();

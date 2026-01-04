@@ -11,7 +11,6 @@ import express from 'express';
 import http from "http";
 import helmet from 'helmet';
 import redisClient  from "./redis/set-up.js";
-import { createHandler } from 'graphql-http/lib/use/http';
 import logger from "./config/winstonConfig.js";
 import './redis/bullmq/main.js';
 import './redis/bullmq/worker.js';
@@ -72,6 +71,10 @@ if (!redisClient.isOpen) await redisClient.connect();
 await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
 redisClient.on('error', (err:any) => console.log('Redis Client Error', err));
+
+await redisClient.GETDEL('activity');
+
+
 
 export const runningPort = 2137;
 

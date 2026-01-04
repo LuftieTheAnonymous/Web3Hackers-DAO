@@ -51,7 +51,7 @@ module.exports = {
     const callbackData= proposalEmbedDetails.data.db_data && proposalEmbedDetails.data.db_data.calldata_objects && proposalEmbedDetails.data.db_data.calldata_objects.length > 0 ? proposalEmbedDetails.data.db_data.calldata_objects.map((callback:any)=>({name:callback.functionDisplayName, value:`${callback.amountParameter} Tokens`, inline:false})) : [{name:'No Functions !', 'value':'This proposal is only a general proposal, whose execution doesnt execute any functions !'}];
 
 const exampleEmbed= new EmbedBuilder()
-   .setColor(0x05F29B)
+   .setColor(0x6a5acd)
     .setTitle(`${proposalEmbedDetails.data.db_data.proposal_title}`)
     .setDescription(`${proposalEmbedDetails.data.sm_data.description}`).setAuthor({'name':`Web3 Hackers DAO`,'iconURL':interaction.guild.iconURL() as string});
 

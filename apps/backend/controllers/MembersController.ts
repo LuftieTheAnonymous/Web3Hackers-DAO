@@ -38,7 +38,7 @@ export const addMember= async (req:Request, res:Response) => {
         nickname,
         isAdmin,
         photoURL
-    }=req.body;
+    } = req.body;
 
     try{
 const memberDiscordId = await redisClient.hGet(`dao_members:${discordId}`, `discordId`);
@@ -68,12 +68,12 @@ if(memberDiscordId){
         console.log(data, error, 'Supabase Error');
 
         if(error){
-            res.status(500).json({message:"error", data:null, error:`ERROR: ${error}`, status:500 });
+            res.status(500).json({message:"error", data:null, error:`ERROR: ${error.includes("duplicate key value violates unique") ? `Member already exists with this wallet address` : error}`, status:500 });
             return;
         }
 
     await redisClient.hSet(`dao_members:${discordId}`, 'userWalletAddress', walletAddress);
-    await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', `${isAdmin}`);
+    await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', `${isAdmin === true ? 'true' : 'false'}`);
     await redisClient.hSet(`dao_members:${discordId}`, 'nickname', `${nickname}`);
     await redisClient.hSet(`dao_members:${discordId}`, 'discordId', `${discordId}`);
     await redisClient.hSet(`dao_members:${discordId}`, 'photoURL', `${photoURL}`);
