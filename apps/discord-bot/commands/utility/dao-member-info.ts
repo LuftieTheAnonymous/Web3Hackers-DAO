@@ -11,9 +11,9 @@ GlobalFonts.registerFromPath(path.join(__dirname,'../fonts/Poppins/Poppins-Thin.
 
 const convertValueToMln=(value:number):string=>{
 if(value < 1_000_000){
-   return `${Math.floor(value/1_000).toFixed(2)} K`;
+   return `${(value/1_000).toFixed(2)} K`;
 }else{
-    return `${Math.floor(value/1_000_000).toFixed(2)} M`;
+    return `${(value/1_000_000).toFixed(2)} M`;
 }
 };
 
