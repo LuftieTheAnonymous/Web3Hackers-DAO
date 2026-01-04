@@ -68,6 +68,8 @@ const voucher = {
 
 const signedTypeTx = await wallet.signTypedData(domain,types, voucher);
 
+console.log(signedTypeTx);
+
 const tx = await tokenManagerContract.handInUserInitialTokens(voucher,
         signedTypeTx
     );

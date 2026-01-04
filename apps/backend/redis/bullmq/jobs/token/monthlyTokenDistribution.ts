@@ -1,4 +1,4 @@
-import { governorTokenContract, tokenManagerContract } from "../../../../config/ethersConfig.js";
+import { tokenManagerContract } from "../../../../config/ethersConfig.js";
 import { supabaseConfig } from "../../../../config/supabase.js";
 import retry from "async-retry";
 import pLimit from 'p-limit';
@@ -42,13 +42,13 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
     activity.votings_participated,
     activity.proposals_accepted,
     activity.problems_solved,
-    activity.crypto_discussion_messages,
+    activity.crypto_discussion_messages + activity.general_chat_messages,
     activity.resource_share, 
     activity.dao_members.userWalletAddress);
 
     const txReceipt = await tx.wait();
     console.log(txReceipt);
-
+    
     if(txReceipt){
         await supabaseConfig.from('dao_month_activity').update({is_rewarded: true}).eq('id', activity.id);
     }
