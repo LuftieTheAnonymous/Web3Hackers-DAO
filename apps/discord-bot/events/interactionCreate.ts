@@ -39,9 +39,8 @@ module.exports={
             console.log(response);
 
 
-            if(!response || response.error){ 
-                return await interaction.editReply
-                ({content:response.error});
+            if(response.status !== 200 || response.error){ 
+                return await interaction.editReply({content:response.error});
             }
             await interaction.editReply({content:'Check your DM for more info 😅'});
             await interaction.user.send({content:`Congratulations! You have setup your wallet correctly in the DAO-members register ! Now go back to the server run command ${inlineCode('/initial-token-distribution')} `, flags:MessageFlags.Ephemeral});

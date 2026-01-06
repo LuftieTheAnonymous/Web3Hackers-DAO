@@ -70,16 +70,19 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
     uint256 private constant INITIAL_TOKEN_USER_AMOUNT = 1e21;
     uint256 private constant MALICIOUS_ACTIONS_LIMIT = 3;
     uint256 private constant DSR_ADMIN_MULTIPLIER = 35;
-    uint256 private constant DSR_USER_MULTIPLIER = 5 ;
+    uint256 private constant DSR_USER_MULTIPLIER = 25 ;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E2=1e2;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E3=1e3;
     uint256 private constant MULTIPLICATION_NORMALIZATION_1E4=1e4;
     uint256 private constant ONE_MONTH_IN_BLOCKS = 84600; 
     uint256 private constant DAILY_REPORT_MULTIPLIER = 125e14;
-    uint256 private constant VOTING_PARTICIPATION_MULTIPLIER=3e17;
+    uint256 private constant VOTING_PARTICIPATION_MULTIPLIER= 175e15;
     uint256 private constant PROBLEMS_SOLVED_MULTIPLIER = 2e17;
-    uint256 private constant ISSUES_REPORTED_MULTIPLIER = 145e16;
+    uint256 private constant RESOURCE_SHARED_MULTIPLIER = 145e15;
     uint256 private constant ALL_MONTH_MESSAGES_MULTIPLIER = 1e14;
+
+    uint256 private constant ACTIVE_VOICE_CHAT_PARTICIPATION_MULTIPLIER = 5e14;
+
     bytes32 public constant VOUCHER_TYPEHASH = keccak256(
         "Voucher(address receiver,uint256 expiryBlock,bool isAdmin,uint8 psrLevel,uint8 jexsLevel,uint8 tklLevel,uint8 web3Level,uint8 kvtrLevel)"
     );
@@ -97,12 +100,50 @@ contract TokenManager is EIP712, AccessControl, ReentrancyGuard {
     mapping(KnowledgeVerificationTestRate => uint256) private kvtrOptions;
 
 
+
+
     constructor(address governmentTokenAddr, address standardGovernorContractAddr, address customGovernorContractAddress, address botAddress) EIP712("Web3HackersDAO", "1") {
       govToken = GovernmentToken(governmentTokenAddr);
       botSigner = botAddress;
       _grantRole(controller, standardGovernorContractAddr);
       _grantRole(controller, customGovernorContractAddress);
       _grantRole(controller, botAddress);
+
+       // Programming Seniority Level (PSR) options
+          psrOptions[TokenReceiveLevel.LOW] = 0;
+          psrOptions[TokenReceiveLevel.MEDIUM_LOW] = 40;
+          psrOptions[TokenReceiveLevel.MEDIUM] = 75;
+          psrOptions[TokenReceiveLevel.HIGH] = 130;
+
+    // Job Experience Seniority Level (JEXS) options
+          jexsOptions[TokenReceiveLevel.LOW] = 0;
+          jexsOptions[TokenReceiveLevel.MEDIUM_LOW] = 50;
+          jexsOptions[TokenReceiveLevel.MEDIUM] = 65;
+          jexsOptions[TokenReceiveLevel.HIGH] = 90;
+
+        // TKL options
+        tklOptions[TechnologyKnowledgeLevel.LOW_KNOWLEDGE] = 0;
+        tklOptions[TechnologyKnowledgeLevel.HIGHER_LOW_KNOWLEDGE] = 45;
+        tklOptions[TechnologyKnowledgeLevel.MEDIUM_KNOWLEDGE] = 200;
+        tklOptions[TechnologyKnowledgeLevel.HIGH_KNOWLEDGE] = 500;
+        tklOptions[TechnologyKnowledgeLevel.EXPERT_KNOWLEDGE] = 1000;
+
+        // WI - Web3 Interest options
+        web3IntrestOptions[TokenReceiveLevel.LOW] = 0;
+        web3IntrestOptions[TokenReceiveLevel.MEDIUM_LOW] = 100;
+        web3IntrestOptions[TokenReceiveLevel.MEDIUM] = 500;
+        web3IntrestOptions[TokenReceiveLevel.HIGH] = 1500;
+
+        // Knowledge Verification Test Rate (KVTR) options
+        kvtrOptions[KnowledgeVerificationTestRate.LOW] = 0;
+        kvtrOptions[KnowledgeVerificationTestRate.MEDIUM_LOW] = 25;
+        kvtrOptions[KnowledgeVerificationTestRate.MEDIUM] = 50;
+        kvtrOptions[KnowledgeVerificationTestRate.MEDIUM_HIGH] = 100;
+        kvtrOptions[KnowledgeVerificationTestRate.HIGH] = 500;
+        kvtrOptions[KnowledgeVerificationTestRate.VERY_HIGH] = 650;
+        kvtrOptions[KnowledgeVerificationTestRate.EXPERT] = 750;
+        kvtrOptions[KnowledgeVerificationTestRate.EXPERT_PLUS] = 1000;
+
     }
 
 
@@ -188,13 +229,13 @@ bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
     }
 
 
-      // IMPLEMENT CONSTANT VARIABLE FOR 1E2, 1E3 AND 1E4
-    uint256 amountOfTokens = 
-    INITIAL_TOKEN_USER_AMOUNT + (((INITIAL_TOKEN_USER_AMOUNT * psrOptions[TokenReceiveLevel(voucherData.psrLevel)]) / MULTIPLICATION_NORMALIZATION_1E2) + 
-    ((INITIAL_TOKEN_USER_AMOUNT * jexsOptions[TokenReceiveLevel(voucherData.jexsLevel)]) /  MULTIPLICATION_NORMALIZATION_1E3) + 
-    ((INITIAL_TOKEN_USER_AMOUNT * tklOptions[TechnologyKnowledgeLevel(voucherData.tklLevel)]) / MULTIPLICATION_NORMALIZATION_1E4)
-     + ((INITIAL_TOKEN_USER_AMOUNT * web3IntrestOptions[TokenReceiveLevel(voucherData.web3Level)]) / MULTIPLICATION_NORMALIZATION_1E4) + 
-    ((INITIAL_TOKEN_USER_AMOUNT * kvtrOptions[KnowledgeVerificationTestRate(voucherData.kvtrLevel)]) / MULTIPLICATION_NORMALIZATION_1E4 ));
+    uint256 psrBonus = (INITIAL_TOKEN_USER_AMOUNT * psrOptions[TokenReceiveLevel(voucherData.psrLevel)]) / MULTIPLICATION_NORMALIZATION_1E2;
+    uint256 jexsBonus = (INITIAL_TOKEN_USER_AMOUNT * jexsOptions[TokenReceiveLevel(voucherData.jexsLevel)]) / MULTIPLICATION_NORMALIZATION_1E3;
+    uint256 tklBonus = (INITIAL_TOKEN_USER_AMOUNT * tklOptions[TechnologyKnowledgeLevel(voucherData.tklLevel)]) / MULTIPLICATION_NORMALIZATION_1E4;
+    uint256 web3Bonus = (INITIAL_TOKEN_USER_AMOUNT * web3IntrestOptions[TokenReceiveLevel(voucherData.web3Level)]) / MULTIPLICATION_NORMALIZATION_1E4;
+    uint256 kvtrBonus = (INITIAL_TOKEN_USER_AMOUNT * kvtrOptions[KnowledgeVerificationTestRate(voucherData.kvtrLevel)]) / MULTIPLICATION_NORMALIZATION_1E4;
+    
+    uint256 amountOfTokens = INITIAL_TOKEN_USER_AMOUNT + psrBonus + jexsBonus + tklBonus + web3Bonus + kvtrBonus;
 
 
 
@@ -202,7 +243,7 @@ bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
         amountOfTokens += (INITIAL_TOKEN_USER_AMOUNT * DSR_ADMIN_MULTIPLIER) /  MULTIPLICATION_NORMALIZATION_1E2;
         } 
           else {
-        amountOfTokens += (INITIAL_TOKEN_USER_AMOUNT * DSR_USER_MULTIPLIER) / MULTIPLICATION_NORMALIZATION_1E2;
+        amountOfTokens += (INITIAL_TOKEN_USER_AMOUNT * DSR_USER_MULTIPLIER) / MULTIPLICATION_NORMALIZATION_1E3;
         }
 
 
@@ -229,21 +270,26 @@ function leaveDAO() external {
  govToken.removeFromWhitelist(msg.sender);
 }
 
-function getAnticipatedReward(uint256 dailyReports, uint256 DAOVotingPartcipation, 
-  uint256 DAOProposalsSucceeded, uint256 problemsSolved, uint256 issuesReported,
- uint256 allMonthMessages) public pure returns (uint256){
-  uint256 amount = (dailyReports * DAILY_REPORT_MULTIPLIER) + (DAOVotingPartcipation * VOTING_PARTICIPATION_MULTIPLIER) + (DAOProposalsSucceeded * 175e15) + (problemsSolved * PROBLEMS_SOLVED_MULTIPLIER) + (issuesReported * ISSUES_REPORTED_MULTIPLIER) + (allMonthMessages * ALL_MONTH_MESSAGES_MULTIPLIER);
+function getAnticipatedReward(uint256 dailyReports, uint256 daoVotingPartcipation, 
+  uint256 daoProposalsSucceeded, uint256 problemsSolved, uint256 resourceShareAmount,
+ uint256 allMonthMessages, uint256 activeVoiceChatParticipation) public pure returns (uint256){
+  uint256 amount = (dailyReports * DAILY_REPORT_MULTIPLIER) + (daoVotingPartcipation * VOTING_PARTICIPATION_MULTIPLIER) +
+  (daoProposalsSucceeded * VOTING_PARTICIPATION_MULTIPLIER) + 
+  (problemsSolved * PROBLEMS_SOLVED_MULTIPLIER) +
+  (resourceShareAmount * RESOURCE_SHARED_MULTIPLIER) + 
+  (allMonthMessages * ALL_MONTH_MESSAGES_MULTIPLIER) + 
+  (activeVoiceChatParticipation * ACTIVE_VOICE_CHAT_PARTICIPATION_MULTIPLIER);
 return amount;
 }
 
 
 // Called in BullMQ recurring monthly token distributions
   function rewardMonthlyTokenDistribution(uint256 dailyReports, 
-  uint256 DAOVotingPartcipation, 
-  uint256 DAOProposalsSucceeded,
-   uint256 problemsSolved, uint256 issuesReported,
- uint256 allMonthMessages, address user) external onlyBotSigner(msg.sender) onlyForInitialTokensReceivers(user) isMonthlyDistributionTime(user) {
-    uint256 amount = getAnticipatedReward(dailyReports, DAOVotingPartcipation, DAOProposalsSucceeded, problemsSolved, issuesReported, allMonthMessages);
+  uint256 daoVotingPartcipation, 
+  uint256 daoProposalsSucceeded,
+   uint256 problemsSolved, uint256 resourceShareAmount,
+ uint256 allMonthMessages, uint256 activeVoiceChatParticipation, address user) external onlyBotSigner(msg.sender) onlyForInitialTokensReceivers(user) isMonthlyDistributionTime(user) {
+    uint256 amount = getAnticipatedReward(dailyReports, daoVotingPartcipation, daoProposalsSucceeded, problemsSolved, resourceShareAmount, allMonthMessages, activeVoiceChatParticipation);
 
   govToken.mint(user, amount);
 

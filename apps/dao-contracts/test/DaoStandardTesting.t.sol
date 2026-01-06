@@ -170,16 +170,16 @@ tokenManager.handInUserInitialTokens(voucherCorrect, signature);
 vm.stopPrank();
 
 
-(bytes memory signature2, uint256 expiryBlock2) = getVoucherSignature(msg.sender, "true", 0, 0, 0, 0, 0);
+(bytes memory signature2, uint256 expiryBlock2) = getVoucherSignature(msg.sender, "true", 2, 0, 2, 2, 4);
 TokenManager.Voucher memory voucherCorrect2 = TokenManager.Voucher(
         msg.sender,
         expiryBlock2,
         true,
+        2,
         0,
-        0,
-        0,
-        0,
-        0
+        2,
+        2,
+        4
     );
 
 vm.prank(validBotAddress);
@@ -550,19 +550,17 @@ tokenManager.handInUserInitialTokens(voucherCorrect, signature);
 
 vm.prank(validBotAddress);
 vm.expectRevert();
-tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user2);
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, 13, user2);
 
 vm.prank(user2);
 vm.expectRevert();
-tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user2);
-
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, 13, user2);
+    
 vm.prank(validBotAddress);
-tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user);
-
-
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, 13, user);
 vm.prank(validBotAddress);
 vm.expectRevert();
-tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5, user);
+tokenManager.rewardMonthlyTokenDistribution(25, 145, 12, 1, 5, 5,13, user);
 
 vm.prank(user);
 vm.expectRevert();

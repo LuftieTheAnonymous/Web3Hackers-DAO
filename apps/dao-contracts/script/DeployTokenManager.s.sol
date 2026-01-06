@@ -17,13 +17,13 @@ is Script {
     GovernmentToken govToken;
 
     function run() public returns(TokenManager){
-govToken = GovernmentToken(0x4A739c8710Feb7c4Db9b964661b7e7D415d0cA79);
-standardGovernor = StandardGovernor(0xb21D9b279e9aE5F971A0c020Cb0E4bCe54059283);
-customGovernor = CustomBuilderGovernor(0x3cd3744C296Cc93CD981b4EFF5891aA391E36C4d);
+govToken = GovernmentToken(0xED2e40049d809fFaC24b66B613d0F15BCf1146D1);
+standardGovernor = StandardGovernor(0xE682A456ea074772f00Fa094a10C159101294e51);
+customGovernor = CustomBuilderGovernor(0xD3107b0bAA0AF3eDB00d58e85276a79e1C337B47);
 vm.startBroadcast();
-govTokenManager = new TokenManager(0x4A739c8710Feb7c4Db9b964661b7e7D415d0cA79
-     ,0xb21D9b279e9aE5F971A0c020Cb0E4bCe54059283,
-   0x3cd3744C296Cc93CD981b4EFF5891aA391E36C4d,
+govTokenManager = new TokenManager(0xED2e40049d809fFaC24b66B613d0F15BCf1146D1
+     ,0xE682A456ea074772f00Fa094a10C159101294e51,
+   0xD3107b0bAA0AF3eDB00d58e85276a79e1C337B47,
 0x7789884c5c88AE84775F266045b96fD6Cb5C734b);
  
 

@@ -349,7 +349,7 @@ const message = await interaction.reply({
                   
             
 
-                  if(!response || response.error){ 
+                  if(response.status !== 200 || response.error){ 
                     return await i.followUp({content:`Something went wrong, please try again. ${response.error}`, components: []});
                   }
                   await i.editReply({content:`Great ! Congratulations, you have gone through the initial token distribution process ! Now check your DMs, Bot has sent you a message 💘`, components: []})
