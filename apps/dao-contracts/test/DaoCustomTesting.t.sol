@@ -78,7 +78,7 @@ return (signature, expiryTime);
 
 function testCreateCustomProposalAndVotingWorkflow() public {
 // Get the amount to
-uint256 amountAnticipatedToBeReceived = tokenManager.getAnticipatedReward(12,42,26,23,346,35);
+uint256 amountAnticipatedToBeReceived = tokenManager.getAnticipatedReward(12,42,26,23,346,35, 21);
 
 (bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
 
@@ -171,7 +171,7 @@ bytes32 proposalId4 = customGovernor.createCustomProposal("This proposal is to f
 
 function testCreateCustomProposalAndVotingWorkflowWithoutCallback() public {
 // Get the amount to
-uint256 amountAnticipatedToBeReceived = tokenManager.getAnticipatedReward(12,42,26,23,346,35);
+uint256 amountAnticipatedToBeReceived = tokenManager.getAnticipatedReward(12,42,26,23,346,35, 21);
 
 (bytes memory signature, uint256 expiryBlock) = getVoucherSignature(user, "false", 0, 0, 0, 0, 0);
 

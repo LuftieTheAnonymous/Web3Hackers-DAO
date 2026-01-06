@@ -1,5 +1,4 @@
 import { ChatInputCommandInteraction, LabelBuilder, MessageFlags, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
-import { ActionRowBuilder } from "discord.js";
 
 module.exports = {
 data: new SlashCommandBuilder().setName('register-wallet').setDescription('This command registers you with your wallet to DB for future use !'),
@@ -18,7 +17,7 @@ const modal = new ModalBuilder().setCustomId('wallet-modal').setTitle('Please en
         
     } catch (error) {
         console.error(error);
-        await interaction.editReply({ content: 'There was an error while executing this command !', });
+        await interaction.editReply({ content: 'There was an error while executing this command !' });
     }
 
 

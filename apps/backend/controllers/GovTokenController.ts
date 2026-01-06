@@ -22,8 +22,6 @@ try {
 
     const redisStoredUserWallet = await redisClient.hGet(`dao_members:${memberDiscordId}`,'userWalletAddress');
     const redisStoredUserAdminState= await redisClient.hGet(`dao_members:${memberDiscordId}`,'isAdmin');
-    
-    console.log(redisStoredUserAdminState, redisStoredUserWallet);
 
     if(!redisStoredUserWallet){
         res.status(404).json({message:'error', data:null, error: `Could not retrieve wallet address or admin state`, status:404})
@@ -77,11 +75,16 @@ const tx = await tokenManagerContract.handInUserInitialTokens(voucher,
     const txReceipt = await tx.wait();
     
     console.log(txReceipt);
+
+if(txReceipt.message === 'error'){
+res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
+return;
+}
     
-    res.status(200).json({data:txReceipt, error:null, message:"success", status:200});
+    res.status(200).json({error:null, message:"success", status:200});
 } catch (error) {
     console.log(error);
-    res.status(500).json({data:null, error:(error as any).shortMessage, message:"error", status:500});
+    res.status(500).json({ error:(error as any).shortMessage, message:"error", status:500});
 }
 }
 
@@ -96,12 +99,17 @@ const rewardMember = async (req: Request, res: Response) => {
         const txReceipt = await tx.wait();
         
         console.log(txReceipt);
+
+        if(txReceipt.message === 'error'){
+res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
+return;
+}
         
-        res.status(200).json({data:txReceipt,error:null, message:"success", status:200});
+        res.status(200).json({error:null, message:"success", status:200});
        
     } catch (error) {
-            console.log(error);
-    res.status(500).json({data:null, error, message:"error", status:500});
+    console.log(error);
+    res.status(500).json({error, message:"error", status:500});
     }
 }
 
@@ -134,7 +142,12 @@ if(!redisStoredNickname && !redisStoredWalletAddress){
 
         console.log(txReceipt);
 
-        res.status(200).json({data:txReceipt,error:null, message:"success", status:200});
+if(txReceipt.message === 'error'){
+res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
+return;
+}
+
+        res.status(200).json({error:null, message:"success", status:200});
 
         return;
 }
@@ -145,7 +158,12 @@ const txReceipt = await tx.wait();
 
 console.log(txReceipt);
 
-res.status(200).json({data:txReceipt,error:null, message:"success", status:200});
+if(txReceipt.message === 'error'){
+res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
+return;
+}
+
+res.status(200).json({error:null, message:"success", status:200});
 
     } catch (error) {
             console.log(error);
@@ -157,12 +175,13 @@ const  getUserTokenBalance = async (req: Request, res: Response) => {
 try {
     const {discordMemberId} = req.params;
 
-    console.log(discordMemberId);
-
     const redisStoredNickname= await redisClient.hGet(`dao_members:${discordMemberId}`, 'nickname');
     const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${discordMemberId}`, 'userWalletAddress');
     const redisStoredAdminState = await redisClient.hGet(`dao_members:${discordMemberId}`, 'isAdmin');
     console.log(redisStoredNickname, redisStoredWalletAddress, redisStoredAdminState);
+
+    console.log(await redisClient.hGetAll(`dao_members:${discordMemberId}`), 'dao_members entire object');
+
 
     if(!redisStoredNickname && !redisStoredWalletAddress){
     const userDBObject= await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(discordMemberId));
@@ -186,14 +205,14 @@ try {
         .userWalletAddress);
 
 
-    res.status(200).json({userDBObject, tokenAmount:(Number(userTokens)/1e18), message:`${
+    res.status(200).json({ userWalletAddress:redisStoredWalletAddress, message:`${
         (userDBObject.data as any).nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     return;
 }
 
 const userTokens = await governorTokenContract.balanceOf(redisStoredWalletAddress);
 
-res.status(200).json({userDBObject:{nickname:redisStoredNickname, userWalletAddress:redisStoredWalletAddress}, tokenAmount:(Number(userTokens)/1e18), message:`${
+res.status(200).json({ userWalletAddress:redisStoredWalletAddress, message:`${
     redisStoredNickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     
 } catch (error) {

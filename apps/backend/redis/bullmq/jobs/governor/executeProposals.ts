@@ -4,7 +4,7 @@ import retry from 'async-retry';
 import { ProposalEventArgs } from "../../../../controllers/GovernanceController.js";
 import { ethers } from 'ethers';
 
- export   const executeProposals = async () => {
+ export const executeProposals = async () => {
         try{
     const lastBlock = await provider.getBlockNumber();
     const filters = standardGovernorContract.filters.ProposalQueued();
@@ -19,6 +19,7 @@ const receipts =events.map(async (event) => {
      return await limit(async () => {
        return  await retry(async ()=>{
 try{
+
   const proposal = await standardGovernorContract.getProposal((event as ProposalEventArgs).args[0]); 
                 if(Number(proposal.state) === 5){
                     const tx = await standardGovernorContract.executeProposal((event as ProposalEventArgs).args[0], {

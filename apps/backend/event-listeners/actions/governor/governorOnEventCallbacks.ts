@@ -42,6 +42,8 @@ const onCreateProposal= async (proposalId:string, targetContract:Contract)=>{
     
                               const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`)
     
+                              console.log("Redis Stored Proposal:", redisStoredProposal);
+
     if(redisStoredProposal){
         const parsedProposal = JSON.parse(redisStoredProposal);
     await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposal.sm_data.dao_members.discord_member_id}`,`proposal_succeeded`, 1);
