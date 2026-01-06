@@ -1,4 +1,4 @@
-import {  APIApplicationCommandOptionChoice, ChannelType, ChatInputCommandInteraction, MessageFlags, RestOrArray, SlashCommandBuilder } from 'discord.js';
+import {  ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -24,14 +24,12 @@ try{
     const request = await fetch(`${process.env.BACKEND_ENDPOINT}/gov_token/influence/${member.id}`);
 
    const response = await request.json();
-   
-   console.log(response);
 
    if(!response || response.error){
  await interaction.reply({content:response.error, flags:MessageFlags.Ephemeral });
 return;
 }
-await interaction.reply({content:response.message, flags:MessageFlags.Ephemeral });
+await interaction.reply({content:`${response.message} (address: ${response.userWalletAddress})`, flags:MessageFlags.Ephemeral });
 }
 catch(error) {
     console.error(`Error executing ${interaction}:`, error);

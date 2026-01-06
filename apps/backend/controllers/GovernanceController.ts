@@ -22,9 +22,11 @@ const getProposalVotes = async (req: Request, res: Response) => {
             const {isCustom} = req.body;
             if(isCustom){
                 const votes = await customGovernorContract.getCustomProposalVotes(proposalId);
+               console.log(votes);
                 res.status(200).send({message:"success", status:200, data:votes, error:null});
             }else{
                 const standardVotes = await standardGovernorContract.getStandardProposalVotes(proposalId);
+                console.log(standardVotes);
                 res.status(200).send({message:"success", status:200, data:standardVotes, error:null});
             }
         }

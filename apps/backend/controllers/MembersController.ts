@@ -52,35 +52,35 @@ if(memberDiscordId){
                 
                 const txReceipt = await tx.wait();
                 
-                console.log(txReceipt);    
+                console.log(txReceipt, 'Transaction Receipt of adding member to whitelist');    
             if(txReceipt.message === 'error'){
                     res.status(500).json({message:'error', data:null, error:txReceipt.shortMessage, status:500});
                     return;
                 }
 
-        const {data, error} = await insertDatabaseElement('dao_members', {
+        const {error} = await insertDatabaseElement('dao_members', {
             userWalletAddress:walletAddress,
             discord_member_id:discordId, 
             nickname, 
             isAdmin, 
             photoURL});  
-        
-        console.log(data, error, 'Supabase Error');
+    
 
         if(error){
             res.status(500).json({message:"error", data:null, error:`ERROR: ${error.includes("duplicate key value violates unique") ? `Member already exists with this wallet address` : error}`, status:500 });
             return;
         }
 
+    
     await redisClient.hSet(`dao_members:${discordId}`, 'userWalletAddress', walletAddress);
-    await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', `${isAdmin === true ? 'true' : 'false'}`);
+    await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', JSON.stringify(isAdmin));
     await redisClient.hSet(`dao_members:${discordId}`, 'nickname', `${nickname}`);
-    await redisClient.hSet(`dao_members:${discordId}`, 'discordId', `${discordId}`);
-    await redisClient.hSet(`dao_members:${discordId}`, 'photoURL', `${photoURL}`);
+    await redisClient.hSet(`dao_members:${discordId}`, 'discordId', discordId);
+    await redisClient.hSet(`dao_members:${discordId}`, 'photoURL', JSON.stringify(photoURL));
 
-res.status(200).json({message:"success", data:{discord_member_id:discordId, userWalletAddress:walletAddress, nickname, isAdmin}, error:null, status:200 });
+res.status(200).json({message:"success", error:null, status:200 });
 }catch(err){
-res.status(500).json({message:"error", data:null, error:(err as any).shortMessage, status:500 });
+res.status(500).json({message:"error", error:(err as any).shortMessage, status:500 });
 }
 }
 
@@ -95,6 +95,9 @@ export const getMember= async (req:Request, res:Response) => {
     const redisStoredDiscordId = await redisClient.hGet(`dao_members:${discordId}`, 'discordId');
     const redisStoredPhotoURL = await redisClient.hGet(`dao_members:${discordId}`, 'photoURL');
 
+    console.log('redis values:');
+  const allFields =  await redisClient.hGetAll(`dao_members:${discordId}`);
+  console.log(allFields);
     console.log(redisStoredWalletAddr, redisStoredIsAdmin, redisStoredNickname, redisStoredPhotoURL);
 
     try{
