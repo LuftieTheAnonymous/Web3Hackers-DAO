@@ -204,7 +204,7 @@ try {
             photoURL: (userDBObject.data as any).photoURL
         }
 
-        await redisClient.hSet(`dao_members:${discordMemberId}`, redisObject);
+        await redisClient.hSet(`dao_members`,`${discordMemberId}`, JSON.stringify(redisObject));
 
     const userTokens = await governorTokenContract.getVotes((userDBObject.data as any)
         .userWalletAddress);
