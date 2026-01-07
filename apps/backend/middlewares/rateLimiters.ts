@@ -97,23 +97,22 @@ const proposalCreationLimiter= rateLimit({
 
       const discordId = authorizationHeader.split(" ")[1];
 
-      const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress');
-      const redisStoredIsAdmin = await redisClient.hGet(`proposalCreationLimiter:${discordId}`, 'isAdmin');
+      const redisStoredWalletAddr = await redisClient.hGet(`proposalCreationLimiter`, `${discordId}`);
+      const {isAdmin, userWalletAddress}= JSON.parse(redisStoredWalletAddr || '{}');
 
-      console.log(redisStoredWalletAddr, 'redisStoredWalletAddr');
-      console.log(redisStoredIsAdmin, 'redisStoredIsAdmin');
-
-
-      if(!redisStoredWalletAddr || !redisStoredIsAdmin){
+      if(!userWalletAddress || !isAdmin){
         const {data:memberData}= await supabaseConfig.from('dao_members').select('userWalletAddress, isAdmin').eq('discord_member_id', Number(discordId)).single();
 
         if(!memberData || !memberData.userWalletAddress){
           return 0;
         }
-        
-        await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'userWalletAddress', memberData.userWalletAddress);
-        await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'isAdmin', `${memberData.isAdmin}`);
-        await redisClient.hSet(`proposalCreationLimiter:${discordId}`, 'calledTimes', 1);
+        const redisObject={
+            userWalletAddress:memberData.userWalletAddress,
+            isAdmin: `${memberData.isAdmin}`,
+            calledTimes: 1
+        }
+
+        await redisClient.hSet(`proposalCreationLimiter`,`${discordId}`, JSON.stringify(redisObject));
 
            const userTokens = await governorTokenContract.getVotes(memberData.userWalletAddress);
 
