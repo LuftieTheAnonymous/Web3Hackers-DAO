@@ -180,8 +180,6 @@ try {
     const redisStoredAdminState = await redisClient.hGet(`dao_members:${discordMemberId}`, 'isAdmin');
     console.log(redisStoredNickname, redisStoredWalletAddress, redisStoredAdminState);
 
-    console.log(await redisClient.hGetAll(`dao_members:${discordMemberId}`), 'dao_members entire object');
-
 
     if(!redisStoredNickname && !redisStoredWalletAddress){
     const userDBObject= await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(discordMemberId));
@@ -198,13 +196,20 @@ try {
    return;
     }
     
-        await redisClient.hSet(`dao_members:${discordMemberId}`, 'nickname', (userDBObject.data as any).nickname);
-        await redisClient.hSet(`dao_members:${discordMemberId}`, 'userWalletAddress', (userDBObject.data as any).userWalletAddress);
+      const redisObject={
+            userWalletAddress: (userDBObject.data as any).userWalletAddress,
+            discordId:`${discordMemberId}`,
+            nickname: (userDBObject.data as any).nickname,
+            isAdmin: `${(userDBObject.data as any).isAdmin}`,
+            photoURL: (userDBObject.data as any).photoURL
+        }
+
+        await redisClient.hSet(`dao_members:${discordMemberId}`, redisObject);
 
     const userTokens = await governorTokenContract.getVotes((userDBObject.data as any)
         .userWalletAddress);
 
-
+                
     res.status(200).json({ userWalletAddress:redisStoredWalletAddress, message:`${
         (userDBObject.data as any).nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     return;

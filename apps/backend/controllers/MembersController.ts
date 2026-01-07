@@ -71,12 +71,16 @@ if(memberDiscordId){
             return;
         }
 
-    
-    await redisClient.hSet(`dao_members:${discordId}`, 'userWalletAddress', walletAddress);
-    await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', JSON.stringify(isAdmin));
-    await redisClient.hSet(`dao_members:${discordId}`, 'nickname', `${nickname}`);
-    await redisClient.hSet(`dao_members:${discordId}`, 'discordId', discordId);
-    await redisClient.hSet(`dao_members:${discordId}`, 'photoURL', JSON.stringify(photoURL));
+        const redisObject={
+            userWalletAddress:walletAddress,
+            discordId:`${discordId}`,
+            nickname,
+            isAdmin: `${isAdmin}`,
+            photoURL
+        }
+ await redisClient.hSet(`dao_members`,discordId, JSON.stringify(redisObject));
+
+        console.log('redis stored object:', await redisClient.hGetAll(`dao_members:${discordId}`));
 
 res.status(200).json({message:"success", error:null, status:200 });
 }catch(err){
@@ -117,11 +121,17 @@ export const getMember= async (req:Request, res:Response) => {
                   return;
             }
 
-            await redisClient.hSet(`dao_members:${discordId}`, 'userWalletAddress', data.userWalletAddress);
-            await redisClient.hSet(`dao_members:${discordId}`, 'isAdmin', `${data.isAdmin}`);
-            await redisClient.hSet(`dao_members:${discordId}`, 'nickname', `${data.nickname}`);
-            await redisClient.hSet(`dao_members:${discordId}`, 'discordId', `${data.discord_member_id}`);
-            await redisClient.hSet(`dao_members:${discordId}`, 'photoURL', `${data.photoURL}`);
+
+        const redisObject={
+            userWalletAddress:data.userWalletAddress,
+            discordId:`${discordId}`,
+            nickname:data.nickname,
+            isAdmin: `${data.isAdmin}`,
+            photoURL:data.photoURL
+        };
+
+            await redisClient.hSet(`dao_members`,discordId, JSON.stringify(redisObject));
+        
     
             if(!data){
                 res.status(404).json({message:"error", data:null, error:"Sorry, you're not elligible to take part in the initial token dstribution. Please register your wallet first !", status:404 });

@@ -131,11 +131,12 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
 const createProposalEligible = async(req:Request, res:Response) =>{
         const {memberDiscordId} = req.params;
 
-        const daoMember = await  redisClient.hGetAll(`proposalCreationLimiter:${memberDiscordId}`);
+        const daoMember = await  redisClient.hGet(`proposalCreationLimiter`, `${memberDiscordId}`);
+        const {userWalletAddress}= JSON.parse(daoMember || '{}');
+        
+        console.log(daoMember, 'daoMember');
 
-        console.log(daoMember);
-
-        if(!daoMember){
+        if(!userWalletAddress){
             res.status(404).send({message:"error", status:404, data:null, error:"The user with provided nickname was not found"});
             return;
         }
