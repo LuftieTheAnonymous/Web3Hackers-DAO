@@ -88,3 +88,16 @@ export interface NotificationSettings {
   notifyOnCancel: boolean;
   notifyOnSuccess: boolean;
 }
+
+
+export interface VoiceChatActivity {
+  id: string;
+  created_at: string;
+  message: string;
+  member_id: number;
+  voice_chat_id: string;
+  minutes_spent: number;
+  minutes_mic_on: number;
+  is_stage: boolean;
+  chat_timestamp: string;
+}

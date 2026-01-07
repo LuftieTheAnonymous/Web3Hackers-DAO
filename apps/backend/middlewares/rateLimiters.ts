@@ -160,7 +160,7 @@ const proposalCreationLimiter= rateLimit({
             return 20 // Non-members can create up to 20 proposals
         }
 
-                if(redisStoredIsAdmin === 'true'  && percentagePower >= 0.005){
+                if(isAdmin === true  && percentagePower >= 0.005){
           return 100; // Admins can create 100 proposals per week
         }
 
