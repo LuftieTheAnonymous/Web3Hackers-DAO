@@ -40,14 +40,6 @@ const onCreateProposal= async (proposalId:string, targetContract:Contract)=>{
                     await notifyDAOMembersOnEvent(`A new proposal has been created ! Now the voting period starts within ${formatDistanceStrict(new Date(Number(proposal.startBlockTimestamp) * 1000), new Date())} (${format(new Date(Number(proposal.startBlockTimestamp) * 1000),'dd/MM/yyyy')}) !`, 'notifyOnNewProposals');
     
     
-                              const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`)
-    
-                              console.log("Redis Stored Proposal:", redisStoredProposal);
-
-    if(redisStoredProposal){
-        const parsedProposal = JSON.parse(redisStoredProposal);
-    await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposal.sm_data.dao_members.discord_member_id}`,`proposal_succeeded`, 1);
-      }
     
             }catch(err){
                 console.error(err);
@@ -122,12 +114,7 @@ try{
         }),
                 });
 
-                const redisStoredProposal = await redisClient.get(`dao_proposals:${id}:data`)
-
-if(redisStoredProposal){
-    const parsedProposal = JSON.parse(redisStoredProposal);
-await redisClient.hIncrBy(`activity:${parsedProposal.sm_data.id}:${parsedProposal.sm_data.dao_members.discord_member_id}`,`proposal_succeeded`, 1);
-  }
+      
 
 await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been Succeeded ! Now wait until it is queued to be executed !`, 'notifyOnSuccess');
 }catch(err){
@@ -247,12 +234,20 @@ const onProposalQueued= async (args:any, targetContract:Contract) => {
           ]
         }),
                 });
-
+                
+                
+    const redisStoredProposal = await redisClient.get(`dao_proposals:${id}`)
+    
+    if(redisStoredProposal){
+    const parsedProposal = JSON.parse(redisStoredProposal);
+await redisClient.hIncrBy(`activity:${parsedProposal.id}`,'proposals_accepted', 1);
+await redisClient.del(`dao_proposals:${id}`);  
+}
 
 
             console.log("Execution event triggered");
             await notifyDAOMembersOnEvent(`The Proposal (id: ${id}) has been executed. The proposal is not going to be voted !`, 'notifyOnExecution');
-        }catch(err){
+          }catch(err){
             console.error(err);
         }
 

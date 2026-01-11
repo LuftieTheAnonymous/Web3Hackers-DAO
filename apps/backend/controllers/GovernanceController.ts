@@ -72,7 +72,7 @@ const getProposalDetails = async (req: Request, res: Response) => {
 const getEmbededProposalDetails = async (req: Request, res: Response) => {
     const {proposalId, isCustom} = req.params;
 
-    const redisStoredProposal = await redisClient.get(`dao_proposals:${proposalId}:data`);
+    const redisStoredProposal = JSON.parse(await redisClient.get(`dao_proposals:${proposalId}`) || 'null');
   
         try{
             if(!redisStoredProposal){
@@ -98,15 +98,14 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
             const proposalDetails = await retrievalContract.getProposal(proposalId);
             logger.info(proposalDetails, 'proposalDetails');
 
-            // Sets data that will expire within 2 hours
-            await redisClient.setEx(`dao_proposals:${proposalId}:data`, 7200, JSON.stringify({sm_data:{
+            await redisClient.set(`dao_proposals:${proposalId}`, JSON.stringify({
                 id:proposalDetails.id,
                 description:proposalDetails.description,
                 proposer:proposalDetails.proposer,
                 state:Number(proposalDetails.state),
                 startBlockNumber:Number(proposalDetails.startBlockNumber),
                 endBlockNumber:Number(proposalDetails.endBlockNumber),
-            },db_data:data}));
+            }));
 
             res.status(200).send({status:200, data:{sm_data:{
                 id:proposalDetails.id,
@@ -119,9 +118,9 @@ const getEmbededProposalDetails = async (req: Request, res: Response) => {
             return;
             }
 
-                console.log(JSON.parse(redisStoredProposal));
+                console.log(redisStoredProposal);
 
-                res.status(200).send({message:"success", status:200, data:JSON.parse(redisStoredProposal), error:null});
+                res.status(200).send({message:"success", status:200, data:redisStoredProposal, error:null});
             
     }catch(err){
         res.status(500).send({message:"error", status:500, data:null, error:err});

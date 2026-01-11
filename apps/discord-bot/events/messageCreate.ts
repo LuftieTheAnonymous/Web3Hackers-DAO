@@ -22,18 +22,30 @@ module.exports={
 
             const channelMessages= message.channel.messages.cache  
             .filter(msg=> msg.author.id === message.author.id);
-            
-            console.log(activityMap.get(message.channelId));
 
-            if(activityMap.get(message.channelId) && member && !message.member.user.bot
+            const reportFormat = /^\[DATE: (\d{4})-(\d{2})-(\d{2})\]\nWHAT_I_DID:\n((?:- Task \d+: .+\n)+)WHAT_COULD_BE_BETTER:\n((?:- Point \d+: .+(?:\n|$))+)/;
+            const activity = activityMap.get(message.channelId);
+
+            if(activity && member && !message.member.user.bot
             ){
-                const activity = activityMap.get(message.channelId);
             
-                if(activity === 'daily_sent_reports' && !message.content.match(/^\[DATE: (\d{4})-(\d{2})-(\d{2})\]\nWHAT_I_DID:\n((?:- Task \d+: .+\n)+)WHAT_COULD_BE_BETTER:\n((?:- Point \d+: .+(?:\n|$))+)/)) {
-
+                console.log(channelMessages, 'channelMessages');
+            
+                if(activity === 'daily_sent_reports' && !message.content.match(reportFormat)){ 
                     await message.reply({content:`Please enter the report in the following format:\n[DATE: YYYY-MM-DD]\nWHAT_I_DID:\n- Task 1: ...\n- Task 2: ...\nWHAT_COULD_BE_BETTER:\n- Point 1: ...\n- Point 2: ...`});
                     return;
                 };
+
+  const recentReports = channelMessages.filter(msg => 
+                    (new Date().getTime() - msg.createdAt.getTime()) <= 86400000 &&
+                    msg.content.match(reportFormat)
+                );
+
+
+                if (recentReports.size > 0) {
+                    await message.reply({content:`You have already submitted a report in this channel. Please create a new channel for your next daily report.`});
+                    return;
+                }
         
               
              await fetch(`${process.env.BACKEND_ENDPOINT}/activity/update/${member.id}`,{
