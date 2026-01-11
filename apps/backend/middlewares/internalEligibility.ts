@@ -52,30 +52,42 @@ export async function Membership_ProposalCancel_Middleware(req:Request, res:Resp
         return;
     }
 
-    const useriscordId = (headers as string).split(" ")[1];
+    const userDiscordId = (headers as string).split(" ")[1];
 
-    const rediStoredElement= await redisClient.get(`dao_members:${useriscordId}:userWalletAddress`);
+    const redisStoredMember = await redisClient.hGet(`dao_members`, userDiscordId);
 
-    console.log(rediStoredElement);
+    console.log('redis stored member:', redisStoredMember);
 
     const proposal = await daoContract.getProposal(proposalId);
 
-    if(!rediStoredElement) {
-        const {data}=await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(useriscordId)).single();
+    if(!redisStoredMember) {
+        const {data}=await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(userDiscordId)).single();
 
         if(!data) {
             res.status(403).json({error:"Forbidden", message:"There is no user with this discord id given.", status:403});
             return;
         }
 
-        await redisClient.set(`dao_members:${useriscordId}:userWalletAddress`, data.userWalletAddress);
+        const redisObject={
+            userWalletAddress: data.userWalletAddress,
+            discordId: `${userDiscordId}`,
+            nickname: data.nickname,
+            isAdmin: `${data.isAdmin}`,
+            photoURL: data.photoURL
+        };
 
-        next();
-    }
+        await redisClient.hSet(`dao_members`, userDiscordId, JSON.stringify(redisObject));
 
-    if(proposal.proposer !== rediStoredElement) {
-        res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
-        return;
+        if(proposal.proposer !== data.userWalletAddress) {
+            res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
+            return;
+        }
+    } else {
+        const memberData = JSON.parse(redisStoredMember);
+        if(proposal.proposer !== memberData.userWalletAddress) {
+            res.status(403).json({error:"Forbidden", message:"You are not allowed to fire this endpoint.", status:403});
+            return;
+        }
     }
 
     if(proposal.state !== 0) {
@@ -92,11 +104,11 @@ export async function MembershipMiddleware(req:Request, res:Response, next:NextF
     try{
           const memberId = req.params.memberDiscordId;
 
-           const rediStoredElement= await redisClient.get(`dao_members:${memberId}:userWalletAddress`);
+           const redisStoredMember = await redisClient.hGet(`dao_members`, memberId);
 
-    console.log(rediStoredElement);
+    console.log('redis stored member:', redisStoredMember);
 
-    if(!rediStoredElement) {
+    if(!redisStoredMember) {
         const {data, error}=await supabaseConfig.from('dao_members').select('*').eq('discord_member_id', Number(memberId)).single();
 
         if(!data) {
@@ -109,7 +121,15 @@ export async function MembershipMiddleware(req:Request, res:Response, next:NextF
             return;
         }
 
-        await redisClient.set(`dao_members:${memberId}:userWalletAddress`, data.userWalletAddress);
+        const redisObject={
+            userWalletAddress: data.userWalletAddress,
+            discordId: `${memberId}`,
+            nickname: data.nickname,
+            isAdmin: `${data.isAdmin}`,
+            photoURL: data.photoURL
+        };
+
+        await redisClient.hSet(`dao_members`, memberId, JSON.stringify(redisObject));
 
         next();
         return;

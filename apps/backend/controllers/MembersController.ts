@@ -41,9 +41,9 @@ export const addMember= async (req:Request, res:Response) => {
     } = req.body;
 
     try{
-const memberDiscordId = await redisClient.hGet(`dao_members:${discordId}`, `discordId`);
+const redisStoredMember = await redisClient.hGet(`dao_members`, discordId);
 
-if(memberDiscordId){
+if(redisStoredMember){
     res.status(400).json({message:'error', error:'The user is already added to the database.', data:null, status:400});
     return;
 }
@@ -80,7 +80,7 @@ if(memberDiscordId){
         }
  await redisClient.hSet(`dao_members`,discordId, JSON.stringify(redisObject));
 
-        console.log('redis stored object:', await redisClient.hGetAll(`dao_members:${discordId}`));
+        console.log('redis stored object:', await redisClient.hGet(`dao_members`, discordId));
 
 res.status(200).json({message:"success", error:null, status:200 });
 }catch(err){
@@ -93,20 +93,13 @@ export const getMember= async (req:Request, res:Response) => {
 
     const {discordId} = req.params;
     
-    const redisStoredWalletAddr = await redisClient.hGet(`dao_members:${discordId}`, 'userWalletAddress');
-    const redisStoredIsAdmin = await redisClient.hGet(`dao_members:${discordId}`, 'isAdmin');
-    const redisStoredNickname = await redisClient.hGet(`dao_members:${discordId}`, 'nickname');
-    const redisStoredDiscordId = await redisClient.hGet(`dao_members:${discordId}`, 'discordId');
-    const redisStoredPhotoURL = await redisClient.hGet(`dao_members:${discordId}`, 'photoURL');
+    const redisStoredMember = await redisClient.hGet(`dao_members`, discordId);
 
-    console.log('redis values:');
-  const allFields =  await redisClient.hGetAll(`dao_members:${discordId}`);
-  console.log(allFields);
-    console.log(redisStoredWalletAddr, redisStoredIsAdmin, redisStoredNickname, redisStoredPhotoURL);
+    console.log('redis stored member:', redisStoredMember);
 
     try{
         
-        if(!redisStoredWalletAddr || !redisStoredIsAdmin || !redisStoredNickname || !redisStoredDiscordId){
+        if(!redisStoredMember){
             console.log('getting member from supabase');
           
             const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', discordId);
@@ -115,10 +108,9 @@ export const getMember= async (req:Request, res:Response) => {
                 res.status(404).json({message:"error", data:null, error:"Member not found", status:404 });
                 return;
             }
-            if(!error){
-                console.log('setting member to redis');
-                  res.status(404).json({message:"error", data:null, error:"Member not found", status:404 });
-                  return;
+            if(error){
+                res.status(500).json({message:"error", data:null, error:error, status:500 });
+                return;
             }
 
 
@@ -133,22 +125,13 @@ export const getMember= async (req:Request, res:Response) => {
             await redisClient.hSet(`dao_members`,discordId, JSON.stringify(redisObject));
         
     
-            if(!data){
-                res.status(404).json({message:"error", data:null, error:"Sorry, you're not elligible to take part in the initial token dstribution. Please register your wallet first !", status:404 });
-            }
-    
-    
-            if(error){
-                res.status(500).json({message:"error", data:null, error:error, status:500 });
-            }
-    
-    
          res.status(200).json({message:"success", data, error:null, status:200 });
          return;
         }
 
-        res.status(200).json({message:"success", data:{discord_member_id:Number(discordId), userWalletAddress:redisStoredWalletAddr, nickname:redisStoredNickname, isAdmin:redisStoredIsAdmin,
-            photoURL:redisStoredPhotoURL
+        const parsedMember = JSON.parse(redisStoredMember);
+        res.status(200).json({message:"success", data:{discord_member_id:Number(discordId), userWalletAddress:parsedMember.userWalletAddress, nickname:parsedMember.nickname, isAdmin:parsedMember.isAdmin,
+            photoURL:parsedMember.photoURL
         }, error:null, status:200 });
     }catch(err){
     res.status(500).json({message:"error", data:null, error:err, status:500 });

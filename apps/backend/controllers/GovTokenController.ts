@@ -20,13 +20,16 @@ try {
         return;
     }
 
-    const redisStoredUserWallet = await redisClient.hGet(`dao_members:${memberDiscordId}`,'userWalletAddress');
-    const redisStoredUserAdminState= await redisClient.hGet(`dao_members:${memberDiscordId}`,'isAdmin');
+    const redisStoredMember = await redisClient.hGet(`dao_members`, memberDiscordId);
 
-    if(!redisStoredUserWallet){
-        res.status(404).json({message:'error', data:null, error: `Could not retrieve wallet address or admin state`, status:404})
+    if(!redisStoredMember){
+        res.status(404).json({message:'error', data:null, error: `Could not retrieve member data`, status:404})
     return;
     }
+
+    const memberData = JSON.parse(redisStoredMember);
+    const redisStoredUserWallet = memberData.userWalletAddress;
+    const redisStoredUserAdminState = memberData.isAdmin;
 
 const currentBlock = await provider.getBlockNumber();
 const chainId = provider._network.chainId;
@@ -90,84 +93,98 @@ return;
 
 const rewardMember = async (req: Request, res: Response) => {
     try {
-        const {userAddress} = req.params;
+        const {discordMemberId} = req.params;
 
         const {amount} = req.body;
+
+        const redisStoredMember = await redisClient.hGet(`dao_members`, discordMemberId);
+
+        let userWalletAddress: string;
+
+        if(!redisStoredMember){
+            const userDBObject = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(discordMemberId));
+
+            if(!userDBObject.data){
+                res.status(404).json({message:"error", data:null, error:"The user with provided discord member id was not found", discord_member_id:discordMemberId, status:404 });
+                return;
+            }
+
+            if(userDBObject.error){
+                res.status(500).json({message:"error", data:null, error:userDBObject.error, discord_member_id:discordMemberId, status:500 });
+                return;
+            }
+
+            userWalletAddress = (userDBObject.data as any).userWalletAddress;
+        } else {
+            const memberData = JSON.parse(redisStoredMember);
+            userWalletAddress = memberData.userWalletAddress;
+        }
         
-        const tx = await governorTokenContract.rewardUser(userAddress, BigInt(Number(amount)*1e18));
+        const tx = await governorTokenContract.rewardUser(userWalletAddress, BigInt(Number(amount)*1e18));
         
         const txReceipt = await tx.wait();
         
         console.log(txReceipt);
 
         if(txReceipt.message === 'error'){
-res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
-return;
-}
+            res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
+            return;
+        }
         
         res.status(200).json({error:null, message:"success", status:200});
        
     } catch (error) {
-    console.log(error);
-    res.status(500).json({error, message:"error", status:500});
+        console.log(error);
+        res.status(500).json({error, message:"error", status:500});
     }
 }
 
 
 const punishMember = async (req: Request, res: Response) => {
     try {
-        const {userAddress} = req.params;
+        const {discordMemberId} = req.params;
 
         const {amount} = req.body;
 
+        const redisStoredMember = await redisClient.hGet(`dao_members`, discordMemberId);
 
-    const redisStoredNickname= await redisClient.hGet(`dao_members:${userAddress}`, 'nickname');
-    const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${userAddress}`, 'userWalletAddress');
+        let userWalletAddress: string;
 
-if(!redisStoredNickname && !redisStoredWalletAddress){
-    const userDBObject= await getDatabaseElement<DaoMember>('dao_members', 'userWalletAddress', userAddress);
+        if(!redisStoredMember){
+            const userDBObject = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(discordMemberId));
 
-    if(!userDBObject.data){
-        res.status(404).json({message:"error", data:null, tokenAmount:null,
-        error:"The user with provided nickname was not found", userAddress, status:404 });
-    }
+            if(!userDBObject.data){
+                res.status(404).json({message:"error", data:null, error:"The user with provided discord member id was not found", discord_member_id:discordMemberId, status:404 });
+                return;
+            }
 
-    if(userDBObject.error){
-        res.status(500).json({message:"error",tokenAmount:null, data:null, error:userDBObject.error,userAddress, status:500 });
-    }
+            if(userDBObject.error){
+                res.status(500).json({message:"error", data:null, error:userDBObject.error, discord_member_id:discordMemberId, status:500 });
+                return;
+            }
 
-        const tx = await governorTokenContract.punishMember(userAddress, BigInt(Number(amount)*1e18));
+            userWalletAddress = (userDBObject.data as any).userWalletAddress;
+        } else {
+            const memberData = JSON.parse(redisStoredMember);
+            userWalletAddress = memberData.userWalletAddress;
+        }
+
+        const tx = await governorTokenContract.punishMember(userWalletAddress, BigInt(Number(amount)*1e18));
 
         const txReceipt = await tx.wait();
 
         console.log(txReceipt);
 
-if(txReceipt.message === 'error'){
-res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
-return;
-}
+        if(txReceipt.message === 'error'){
+            res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
+            return;
+        }
 
         res.status(200).json({error:null, message:"success", status:200});
 
-        return;
-}
-
-const tx = await governorTokenContract.punishMember(redisStoredWalletAddress, amount);
-
-const txReceipt = await tx.wait();
-
-console.log(txReceipt);
-
-if(txReceipt.message === 'error'){
-res.status(500).json({message:'error', error:txReceipt.shortMessage, status:500});
-return;
-}
-
-res.status(200).json({error:null, message:"success", status:200});
-
     } catch (error) {
-            console.log(error);
-    res.status(500).json({data:null, error, message:"error", status:500});
+        console.log(error);
+        res.status(500).json({data:null, error, message:"error", status:500});
     }
 }
 
@@ -175,13 +192,11 @@ const  getUserTokenBalance = async (req: Request, res: Response) => {
 try {
     const {discordMemberId} = req.params;
 
-    const redisStoredNickname= await redisClient.hGet(`dao_members:${discordMemberId}`, 'nickname');
-    const redisStoredWalletAddress= await redisClient.hGet(`dao_members:${discordMemberId}`, 'userWalletAddress');
-    const redisStoredAdminState = await redisClient.hGet(`dao_members:${discordMemberId}`, 'isAdmin');
-    console.log(redisStoredNickname, redisStoredWalletAddress, redisStoredAdminState);
+    const redisStoredMember = await redisClient.hGet(`dao_members`, discordMemberId);
+    console.log('redis stored member:', redisStoredMember);
 
 
-    if(!redisStoredNickname && !redisStoredWalletAddress){
+    if(!redisStoredMember){
     const userDBObject= await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(discordMemberId));
     
     
@@ -210,10 +225,14 @@ try {
         .userWalletAddress);
 
                 
-    res.status(200).json({ userWalletAddress:redisStoredWalletAddress, message:`${
+    res.status(200).json({ userWalletAddress:redisObject.userWalletAddress, message:`${
         (userDBObject.data as any).nickname} possesses ${(Number(userTokens)/1e18).toFixed(2)} BUILD Tokens`, error:null, status:200});
     return;
 }
+
+const memberData = JSON.parse(redisStoredMember);
+const redisStoredWalletAddress = memberData.userWalletAddress;
+const redisStoredNickname = memberData.nickname;
 
 const userTokens = await governorTokenContract.balanceOf(redisStoredWalletAddress);
 
@@ -238,9 +257,9 @@ const farewellMember = async (req: Request, res: Response) => {
             return;
         }
 
-        const userWalletAddress= await redisClient.hGet(`dao_members:${memberDiscordId}`, 'userWalletAddress');
+        const redisStoredMember = await redisClient.hGet(`dao_members`, memberDiscordId);
 
-        if(!userWalletAddress){
+        if(!redisStoredMember){
            const {data, error} = await getDatabaseElement<DaoMember>('dao_members', 'discord_member_id', Number(memberDiscordId));
 
            console.log(data, error);
@@ -262,9 +281,7 @@ const farewellMember = async (req: Request, res: Response) => {
 
            console.log(txReceipt);
            
-           await redisClient.DEL(`dao_members:${memberDiscordId}`);
-           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
-           await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
+           await redisClient.hDel(`dao_members`, memberDiscordId);
 
            const {data:removedData,error:removedError}=await deleteDatabaseElement<DaoMember>('dao_members',  Number(memberDiscordId), 'discord_member_id');
 
@@ -285,15 +302,16 @@ const farewellMember = async (req: Request, res: Response) => {
            return;
         }
 
+        const memberData = JSON.parse(redisStoredMember);
+        const userWalletAddress = memberData.userWalletAddress;
+
         const tx= await tokenManagerContract.kickOutFromDao(userWalletAddress);
 
         const txReceipt = await tx.wait();
 
         console.log(txReceipt);
 
-        await redisClient.DEL(`dao_members:${memberDiscordId}`);
-        await redisClient.hDel(`dao_members:${memberDiscordId}`, 'nickname');
-        await redisClient.hDel(`dao_members:${memberDiscordId}`, 'userWalletAddress');
+        await redisClient.hDel(`dao_members`, memberDiscordId);
 
         const {data:removedData,error}=await supabaseConfig.from('dao_members').delete().eq('discord_member_id', Number(memberDiscordId));
 
