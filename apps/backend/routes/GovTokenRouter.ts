@@ -7,9 +7,9 @@ const govTokenRouter = Router();
 
 govTokenRouter.get('/influence/:discordMemberId', getUserTokenBalance);
 
-govTokenRouter.post('/reward_member/:userAddress', rewardPunishEndpointEligibilityMiddleware, rewardUserLimiter, rewardMember);
+govTokenRouter.post('/reward_member/:discordMemberId', rewardPunishEndpointEligibilityMiddleware, rewardUserLimiter, rewardMember);
 
-govTokenRouter.post('/punish_member/:userAddress', rewardPunishEndpointEligibilityMiddleware, punishUserLimiter, punishMember);
+govTokenRouter.post('/punish_member/:discordMemberId', rewardPunishEndpointEligibilityMiddleware, punishUserLimiter, punishMember);
 
 govTokenRouter.post('/intial_token_distribution/:memberDiscordId', DAO_Discord_elligibilityMiddleware, intialTokenDistribution);
 
