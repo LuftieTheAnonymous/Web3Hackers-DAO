@@ -3,7 +3,6 @@ import {   createProposalEligible, getEmbededProposalDetails, getProposalDetails
 import { DAO_Discord_elligibilityMiddleware, MembershipMiddleware } from "../middlewares/internalEligibility.js";
 import { proposalCreationLimiter } from "../middlewares/rateLimiters.js";
 
-
 const governanceRouter = Router();
 
 governanceRouter.get('/get_proposal_votes/:proposalId', getProposalVotes);
