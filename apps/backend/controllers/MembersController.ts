@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { supabaseConfig } from "../config/supabase.js";
-import { governorTokenContract } from "../config/ethersConfig.js";
+import { governorTokenContract, wallet } from "../config/ethersConfig.js";
 import redisClient from "../redis/set-up.js";
 import { getDatabaseElement, insertDatabaseElement } from "../db-actions.js";
 import { DaoMember } from "../types/TypeScriptTypes.js";
@@ -39,9 +39,10 @@ export const addMember= async (req:Request, res:Response) => {
         isAdmin,
         photoURL
     } = req.body;
-
     try{
-const redisStoredMember = await redisClient.hGet(`dao_members`, discordId);
+const redisStoredMember = await redisClient.hGet(`dao_members`, `${discordId}`);
+
+
 
 if(redisStoredMember){
     res.status(400).json({message:'error', error:'The user is already added to the database.', data:null, status:400});
@@ -52,7 +53,8 @@ if(redisStoredMember){
                 
                 const txReceipt = await tx.wait();
                 
-                console.log(txReceipt, 'Transaction Receipt of adding member to whitelist');    
+                console.log(txReceipt, 'Transaction Receipt of adding member to whitelist');   
+
             if(txReceipt.message === 'error'){
                     res.status(500).json({message:'error', data:null, error:txReceipt.shortMessage, status:500});
                     return;
@@ -60,11 +62,11 @@ if(redisStoredMember){
 
         const {error} = await insertDatabaseElement('dao_members', {
             userWalletAddress:walletAddress,
-            discord_member_id:discordId, 
+            discord_member_id:Number(discordId), 
             nickname, 
             isAdmin, 
-            photoURL});  
-    
+            photoURL
+        });  
 
         if(error){
             res.status(500).json({message:"error", data:null, error:`ERROR: ${error.includes("duplicate key value violates unique") ? `Member already exists with this wallet address` : error}`, status:500 });
@@ -73,17 +75,18 @@ if(redisStoredMember){
 
         const redisObject={
             userWalletAddress:walletAddress,
-            discordId:`${discordId}`,
+            discordId: Number(discordId),
             nickname,
-            isAdmin: `${isAdmin}`,
+            isAdmin: isAdmin,
             photoURL
         }
- await redisClient.hSet(`dao_members`,discordId, JSON.stringify(redisObject));
 
-        console.log('redis stored object:', await redisClient.hGet(`dao_members`, discordId));
+ await redisClient.hSet(`dao_members`,`${discordId}`, JSON.stringify(redisObject));
 
 res.status(200).json({message:"success", error:null, status:200 });
-}catch(err){
+}
+catch(err){
+console.log(err);
 res.status(500).json({message:"error", error:(err as any).shortMessage, status:500 });
 }
 }

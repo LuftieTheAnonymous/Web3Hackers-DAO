@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { standardGovernorContract, customGovernorContract, proposalStates } from "../config/ethersConfig.js";
 import redisClient from "../redis/set-up.js";
 import { supabaseConfig } from "../config/supabase.js";
+import logger from "../config/winstonConfig.js";
 dotenv.config();
 
 export function DAO_Discord_elligibilityMiddleware(req:Request, res:Response, next:NextFunction) {
@@ -10,6 +11,8 @@ export function DAO_Discord_elligibilityMiddleware(req:Request, res:Response, ne
         console.log('error');
         res.status(403).json({error:"Forbidden", message:"You are not allowed to access this resource.", status:403});
     }
+
+    logger.warn('Internal Eligibility Middleware Passed');
 
 next();
 }

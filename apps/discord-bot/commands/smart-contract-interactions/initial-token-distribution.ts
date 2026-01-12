@@ -1,8 +1,6 @@
 import { ButtonStyle, ComponentType, MessageFlags, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder } from "discord.js";
 
-
-
 module.exports = {
 cooldown:25,
 data: new SlashCommandBuilder().setName('initial-token-distribution').setDescription('This command allows you as the member of the discord server to receive your initial tokens !'),

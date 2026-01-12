@@ -5,7 +5,7 @@ dotenv.config();
 
 export const redisConnection = {
   host: process.env.REDIS_DB_HOST as string,
-  port: Number(process.env.REDIS_DB_PORT) || 17405,
+  port: Number(process.env.REDIS_DB_PORT),
   password: process.env.REDIS_DB_PASSWORD,
   username: 'default' // if needed
 };

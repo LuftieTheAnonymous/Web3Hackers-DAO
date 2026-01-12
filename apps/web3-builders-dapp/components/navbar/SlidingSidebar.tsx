@@ -59,7 +59,7 @@ function SlidingSidebar({}: Props) {
   <SheetTrigger className='hover:bg-(--hacker-green-4) transition-all cursor-pointer text-xs bg-zinc-700 p-2 rounded-lg text-white'>
         <PanelLeftIcon size={16} className='text-xs' />
   </SheetTrigger>
-  <SheetContent side='left' style={{zIndex:9999999}} className='bg-zinc-800 text-white rounded-r-lg shadow-green-300  border-(--hacker-green-4)  border-r-4  max-w-64 w-full p-2 '>
+  <SheetContent side='left' style={{zIndex:9999999}} className='bg-zinc-800 text-white rounded-r-lg shadow-[#6a5acd]  border-(--hacker-green-4)  border-r-2  max-w-64 w-full p-2 '>
     
     <SheetHeader className='flex items-center justify-between gap-2 p-2'>
                   <Image src={'/Web3Hackers.png'} alt='logo' width={32} height={32} className='w-8 h-8 rounded-lg'/>

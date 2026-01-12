@@ -16,8 +16,7 @@ module.exports={
          headers: {
              'Content-Type': 'application/json',
            'x-backend-eligibility': process.env.DISCORD_BOT_INTERNAL_SECRET as string
-         },
-         body: JSON.stringify({memberId:member.id})
+         }
      });
 
      

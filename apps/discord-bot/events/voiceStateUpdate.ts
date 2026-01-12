@@ -82,7 +82,7 @@ module.exports = {
             const durationMs = session.timestampEnd.getTime() - session.timestampStart.getTime();
             const minutes = Math.floor(durationMs / 60000);
 
-            if (session.maxAmountOfUsers > 1) {
+            if (session.maxAmountOfUsers > 0) {
               const chatActivityFetch =  await fetch(`${process.env.BACKEND_ENDPOINT}/activity/insert/voice-activity/${oldState.member.id}`, {
                     method: 'POST',
                       headers: {

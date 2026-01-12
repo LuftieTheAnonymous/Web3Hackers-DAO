@@ -13,6 +13,7 @@ import { Skeleton } from '../ui/skeleton';
 import Link from 'next/link';
 import { FaDiscord } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
 
 const ProposalModal = dynamic(()=>import('../modal/ProposalModal'), {
   ssr:false
@@ -45,7 +46,6 @@ function ProposalCard({}: Props) {
         <p className={`text-sm ${currentUser ? 'text-(--hacker-green-4)' : 'text-zinc-600'}`}>@{currentUser ? currentUser.nickname : 'Connect your wallet to see your username'}</p>
       </div>
 
-      <p></p>
     </div>
      <div className="px-3 w-full h-full">
 
@@ -53,7 +53,7 @@ function ProposalCard({}: Props) {
      </div>
     <div className="flex justify-between items-center pt-2 border-t border-(--hacker-green-4) py-2 w-full gap-2">
       <div className="flex gap-4 items-center ml-4">
-<button className='cursor-pointer'>
+<button onClick={()=>toast.success('Hello !')} className='cursor-pointer'>
   <EllipsisIcon className='text-(--hacker-green-4)'/>
 </button>
 <button className='cursor-pointer'>

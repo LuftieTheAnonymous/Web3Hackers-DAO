@@ -8,7 +8,6 @@ module.exports={
     async execute(interaction:any) {
 
         if(interaction.isModalSubmit() && interaction.customId === 'wallet-modal'){
-       
             await interaction.deferReply();
        
             const walletAddress = interaction.fields.getTextInputValue('walletAddress');
@@ -39,8 +38,8 @@ module.exports={
             console.log(response);
 
 
-            if(response.status !== 200 || response.error){ 
-                return await interaction.editReply({content:response.error});
+            if(response.status !== 200){ 
+                return await interaction.editReply({content:`${response.error} 😢 Please try again or contact an admin.`, flags:MessageFlags.Ephemeral});
             }
             await interaction.editReply({content:'Check your DM for more info 😅'});
             await interaction.user.send({content:`Congratulations! You have setup your wallet correctly in the DAO-members register ! Now go back to the server run command ${inlineCode('/initial-token-distribution')} `, flags:MessageFlags.Ephemeral});

@@ -42,8 +42,9 @@ const promisesArray = (monthActivities.data).map(async (activity: any) => {
     activity.votings_participated,
     activity.proposals_accepted,
     activity.problems_solved,
-    activity.crypto_discussion_messages + activity.general_chat_messages,
     activity.resource_share, 
+    activity.crypto_discussion_messages + activity.general_chat_messages,
+    activity.active_voice_meeting_participation,
     activity.dao_members.userWalletAddress);
 
     const txReceipt = await tx.wait();

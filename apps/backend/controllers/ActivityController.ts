@@ -63,6 +63,10 @@ const insertVoiceChatActivity=async(req:Request, res:Response)=>{
 
         const {data,error}= await supabaseConfig.from('voice_chat_participation').insert([activityData]);
 
+        const redisKey = `activity:${activityData.memberId}-${new Date().getFullYear()}-${new Date().getMonth()}`;
+
+        await redisClient.hIncrBy(redisKey, 'active_voice_meeting_participation', activityData.minutes_spent);
+
         if(!data || error){
             res.status(500).json({
                 message: "error",

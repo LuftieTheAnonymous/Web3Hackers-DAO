@@ -13,7 +13,7 @@ contract DeployCustomGovernor is Script {
     function run() public returns(CustomBuilderGovernor){
 vm.startBroadcast();
 
-customGovernor = new CustomBuilderGovernor(0xED2e40049d809fFaC24b66B613d0F15BCf1146D1);
+customGovernor = new CustomBuilderGovernor(0xfa02019e4eeD6a41CbbE52C5C7e6904C18633B85);
 
 vm.stopBroadcast();
 

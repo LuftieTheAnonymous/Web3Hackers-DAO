@@ -15,6 +15,7 @@ import logger from "./config/winstonConfig.js";
 import './redis/bullmq/main.js';
 import './redis/bullmq/worker.js';
 import './redis/bullmq/queueEvents.js';
+import { supabaseConfig } from "./config/supabase.js";
 const app = express();
 dotenv.config();
 
@@ -63,18 +64,14 @@ app.use('/members', membersRouter);
 app.use('/activity', activityRouter);
 
 
-
-
 const server = http.createServer(app);
 
 if (!redisClient.isOpen) await redisClient.connect();
 await redisClient.auth({password:process.env.REDIS_DB_PASSWORD as string});
 
-redisClient.on('error', (err:any) => console.log('Redis Client Error', err));
-
-await redisClient.GETDEL('activity');
-
-
+redisClient.on('error', (err:any) => logger.info('Redis Client Error', err));
+redisClient.on('connect', () => logger.info('Redis Client Connected'));
+redisClient.on('disconnect', async () => await redisClient.connect());
 
 export const runningPort = 2137;
 

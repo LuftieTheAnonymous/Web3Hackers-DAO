@@ -262,7 +262,7 @@ callDataIndex === index && <div key={field.id}>
 {isLoading && <p className='text-white'>Loading...</p>}
 
 {!isLoading && members.map((member) => (
-  <SelectItem className='text-white' value={member.userWalletAddress}>
+  <SelectItem key={member.id} className='text-white' value={member.userWalletAddress}>
     <Image src={member.photoURL} alt={member.nickname} className='w-6 h-6 rounded-full' width={50} height={50}/>
 
     <p>{member.nickname}</p>

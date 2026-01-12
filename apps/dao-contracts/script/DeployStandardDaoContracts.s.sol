@@ -10,7 +10,7 @@ is Script {
 
     function run() public returns(StandardGovernor){
 vm.startBroadcast();
-standardGovernor = new StandardGovernor(0xED2e40049d809fFaC24b66B613d0F15BCf1146D1);
+standardGovernor = new StandardGovernor(0xfa02019e4eeD6a41CbbE52C5C7e6904C18633B85);
 vm.stopBroadcast();
 
 return(standardGovernor);

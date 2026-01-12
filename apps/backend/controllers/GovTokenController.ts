@@ -275,7 +275,7 @@ const farewellMember = async (req: Request, res: Response) => {
            }
 
 
-           const tx= await governorTokenContract.kickOutFromDAO((data as any).userWalletAddress);
+           const tx= await governorTokenContract.kickOutFromDAO(data.userWalletAddress);
 
            const txReceipt = await tx.wait();
 
@@ -295,8 +295,6 @@ const farewellMember = async (req: Request, res: Response) => {
             return;
            }
 
-         
-         
            res.status(200).json({data:txReceipt, message:"success", error:null, discord_member_id:memberDiscordId, status:200});
        
            return;
